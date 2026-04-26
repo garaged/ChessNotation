@@ -13,15 +13,14 @@ final class ChessNotationUITests: XCTestCase {
         XCTAssertTrue(operaGameButton.waitForExistence(timeout: 5))
         operaGameButton.tap()
 
-        let answerField = app.textFields["game.answerField"]
+        let answerField = app.staticTexts["game.answerField"]
         XCTAssertTrue(answerField.waitForExistence(timeout: 5))
-        answerField.tap()
-        answerField.typeText("e4")
+        enterMove("e4", in: app)
 
-        app.buttons["game.submitButton"].tap()
+        app.buttons["ChessNotationKeyboard.Submit"].tap()
 
         XCTAssertTrue(app.staticTexts["game.progressText"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.staticTexts["game.progressText"].label, "Move 2 of 23")
+        XCTAssertEqual(app.staticTexts["game.progressText"].label, "Move 2 of 23 (attempt 1/3)")
     }
 
     @MainActor
@@ -47,12 +46,11 @@ final class ChessNotationUITests: XCTestCase {
         XCTAssertTrue(beginnerGame.waitForExistence(timeout: 5))
         beginnerGame.tap()
 
-        let answerField = app.textFields["game.answerField"]
+        let answerField = app.staticTexts["game.answerField"]
         XCTAssertTrue(answerField.waitForExistence(timeout: 5))
-        answerField.tap()
-        answerField.typeText("e4")
+        enterMove("e4", in: app)
 
-        app.buttons["game.submitButton"].tap()
+        app.buttons["ChessNotationKeyboard.Submit"].tap()
 
         let restartButton = app.buttons["results.restartButton"]
         XCTAssertTrue(restartButton.waitForExistence(timeout: 5))
@@ -60,7 +58,7 @@ final class ChessNotationUITests: XCTestCase {
 
         let progressText = app.staticTexts["game.progressText"]
         XCTAssertTrue(progressText.waitForExistence(timeout: 5))
-        XCTAssertEqual(progressText.label, "Move 1 of 1")
+        XCTAssertEqual(progressText.label, "Move 1 of 1 (attempt 1/3)")
     }
 
     @MainActor
@@ -69,5 +67,27 @@ final class ChessNotationUITests: XCTestCase {
         app.launchArguments = arguments
         app.launch()
         return app
+    }
+
+    @MainActor
+    private func enterMove(_ move: String, in app: XCUIApplication) {
+        for character in move {
+            app.buttons[keyIdentifier(for: character)].tap()
+        }
+    }
+
+    private func keyIdentifier(for character: Character) -> String {
+        switch character {
+        case "+":
+            return "ChessNotationKeyboard.Key.+"
+        case "#":
+            return "ChessNotationKeyboard.Key.#"
+        case "=":
+            return "ChessNotationKeyboard.Key.="
+        case "x":
+            return "ChessNotationKeyboard.Key.x"
+        default:
+            return "ChessNotationKeyboard.Key.\(character)"
+        }
     }
 }

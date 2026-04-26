@@ -3,27 +3,16 @@ import SwiftUI
 struct GameTrainingView: View {
     @Environment(AppSettings.self) private var appSettings
     @State var viewModel: GameViewModel
-    @FocusState private var isAnswerFieldFocused: Bool
 
     var body: some View {
         Group {
             if viewModel.isFinished {
                 ResultsView(summary: viewModel.summary) {
                     viewModel.reset()
-                    refocusAnswerFieldIfNeeded()
                 }
             } else {
                 trainingContent
             }
-        }
-        .onAppear {
-            refocusAnswerFieldIfNeeded()
-        }
-        .onChange(of: viewModel.currentMoveIndex) { _, _ in
-            refocusAnswerFieldIfNeeded()
-        }
-        .onChange(of: viewModel.isFinished) { _, _ in
-            refocusAnswerFieldIfNeeded()
         }
         .navigationTitle(viewModel.game.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -31,9 +20,9 @@ struct GameTrainingView: View {
 
     private var trainingContent: some View {
         ScrollView {
-            VStack(spacing: 12) {
-                header
+            VStack(spacing: 10) {
                 statsCard
+                header
 
                 if let move = viewModel.currentMove {
                     ChessBoardView(
@@ -43,39 +32,25 @@ struct GameTrainingView: View {
                     )
                         .padding(.horizontal)
 
-                    VStack(spacing: 8) {
-                        Text("\(move.side.displayName) to move")
-                            .font(.headline)
+                    VStack(spacing: 6) {
+                        notationAnswerField
 
-                        TextField("Enter SAN, e.g. Nf3", text: $viewModel.answerText)
-                            .focused($isAnswerFieldFocused)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .submitLabel(.done)
-                            .accessibilityIdentifier("game.answerField")
-                            .padding(12)
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .onSubmit {
-                                viewModel.submitAnswer()
-                                refocusAnswerFieldIfNeeded()
-                            }
+                        ChessNotationKeyboard(
+                            onKey: viewModel.appendToAnswer,
+                            onBackspace: viewModel.removeLastAnswerCharacter,
+                            onClear: viewModel.clearAnswer,
+                            onSubmit: viewModel.submitAnswer,
+                            enabledKeys: ChessNotationKeyAvailability.availableKeys(for: viewModel.answerText)
+                        )
 
                         HStack {
-                            Button("Submit") {
-                                viewModel.submitAnswer()
-                                refocusAnswerFieldIfNeeded()
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .accessibilityIdentifier("game.submitButton")
-
                             Button("Reveal") {
                                 viewModel.skipMove()
-                                refocusAnswerFieldIfNeeded()
                             }
                             .buttonStyle(.bordered)
                             .accessibilityIdentifier("game.revealButton")
                         }
+                        .frame(maxWidth: .infinity, alignment: .trailing)
                     }
                     .padding(.horizontal)
                 }
@@ -86,17 +61,59 @@ struct GameTrainingView: View {
         }
     }
 
+    private var notationAnswerField: some View {
+        HStack(spacing: 8) {
+            Text(viewModel.answerText.isEmpty ? "Enter SAN, e.g. Nf3" : viewModel.answerText)
+                .font(.title3.monospaced())
+                .foregroundStyle(viewModel.answerText.isEmpty ? .secondary : .primary)
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .accessibilityIdentifier("game.answerField")
+                .accessibilityLabel("Move answer")
+                .accessibilityValue(viewModel.answerText.isEmpty ? "Empty" : viewModel.answerText)
+
+            Divider()
+                .frame(height: 24)
+
+            Button {
+                viewModel.removeLastAnswerCharacter()
+            } label: {
+                Image(systemName: "delete.left")
+                    .font(.body.weight(.semibold))
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.plain)
+            .disabled(viewModel.answerText.isEmpty)
+            .accessibilityIdentifier("game.answerBackspaceButton")
+            .accessibilityLabel("Backspace")
+
+            Button {
+                viewModel.submitAnswer()
+            } label: {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.title3)
+                    .symbolRenderingMode(.hierarchical)
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.plain)
+            .disabled(viewModel.answerText.isEmpty)
+            .accessibilityIdentifier("game.answerSubmitButton")
+            .accessibilityLabel("Submit move")
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 4)
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
     private var header: some View {
-        VStack(spacing: 6) {
-            Text(viewModel.progressText)
+        VStack(spacing: 4) {
+            ProgressView(value: Double(viewModel.currentMoveIndex), total: Double(max(viewModel.game.moves.count, 1)))
+                .padding(.horizontal)
+
+            Text(viewModel.progressAttemptsText)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .accessibilityIdentifier("game.progressText")
-            ProgressView(value: Double(viewModel.currentMoveIndex), total: Double(max(viewModel.game.moves.count, 1)))
-                .padding(.horizontal)
-            Text(viewModel.attemptsText)
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
     }
 
@@ -140,9 +157,5 @@ struct GameTrainingView: View {
         .padding(.vertical, 8)
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 14))
-    }
-
-    private func refocusAnswerFieldIfNeeded() {
-        isAnswerFieldFocused = !viewModel.isFinished && viewModel.currentMove != nil
     }
 }

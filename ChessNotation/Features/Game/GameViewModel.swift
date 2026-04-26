@@ -34,6 +34,11 @@ final class GameViewModel {
         "Attempts remaining: \(attemptsRemaining)"
     }
 
+    var progressAttemptsText: String {
+        let attemptNumber = 4 - attemptsRemaining
+        return "Move \(min(currentMoveIndex + 1, game.moves.count)) of \(game.moves.count) (attempt \(attemptNumber)/3)"
+    }
+
     var summary: TrainingSessionSummary {
         TrainingSessionSummary(game: game, records: records)
     }
@@ -50,6 +55,19 @@ final class GameViewModel {
         guard !records.isEmpty else { return "0%" }
         let accuracy = Double(summary.correctMoves) / Double(records.count)
         return "\(Int((accuracy * 100).rounded()))%"
+    }
+
+    func appendToAnswer(_ value: String) {
+        answerText.append(value)
+    }
+
+    func removeLastAnswerCharacter() {
+        guard !answerText.isEmpty else { return }
+        answerText.removeLast()
+    }
+
+    func clearAnswer() {
+        answerText.removeAll(keepingCapacity: true)
     }
 
     func submitAnswer() {

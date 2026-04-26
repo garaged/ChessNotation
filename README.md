@@ -65,3 +65,7 @@ Before publishing publicly or shipping to the App Store, review:
 - [PRIVACY.md](PRIVACY.md)
 - [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)
 - [CHANGELOG.md](CHANGELOG.md)
+
+## Sponsor
+
+If you like the project and want to support maintenance and new features you can do it at https://github.com/sponsors/garaged
