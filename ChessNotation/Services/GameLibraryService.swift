@@ -22,7 +22,7 @@ struct BundledGameLibraryService: GameLibraryProviding {
     private let resourceNames: [String]
     private let bundle: Bundle
 
-    init(resourceNames: [String] = ["opera_game", "ChessNotationStarterGames", "ChessNotationMasterGames"], bundle: Bundle = .main) {
+    init(resourceNames: [String] = ["opera_game", "ChessNotationStarterGames", "ChessNotationMasterGames", "ChessNotationModernGames"], bundle: Bundle = .main) {
         self.resourceNames = resourceNames
         self.bundle = bundle
     }

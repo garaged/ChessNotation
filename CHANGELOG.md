@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-04-27
+
+### Added
+- Added a custom chess notation keyboard for SAN move entry, with dedicated piece, file, rank, capture, castling, check, checkmate, promotion, clear, delete, and submit controls.
+- Added context-aware keyboard availability so promotion, castling, check, and checkmate inputs guide the learner toward valid notation patterns.
+- Added an inline answer display with backspace and submit actions, replacing reliance on the system keyboard during training.
+- Added unit coverage for chess notation key availability rules.
+- Added updated phone and iPad screenshots under `docs/screenshots`.
+
+### Changed
+- Updated the training screen layout to place session stats first, followed by progress, the board, answer entry, and the custom notation keyboard.
+- Combined move progress and attempt state into a single compact training label, such as `Move 2 of 23 (attempt 1/3)`.
+- Updated UI tests to interact with the custom notation keyboard instead of typing into a system text field.
+- Aligned app and test target deployment settings to iOS `17.6`.
+
+### Fixed
+- Removed focus-management logic that repeatedly forced the system text field to become active during move progression.
+- Reduced accidental input friction by keeping all chess notation keys visible in the training flow.
+- Fixed test target deployment configuration that was set to an invalid future iOS target.
+
 ## [1.0.0] - 2025-02-14
 
 ### Added
@@ -30,4 +50,3 @@ All notable changes to this project will be documented in this file.
 - Fixed year formatting in library cards to avoid localized thousands separators.
 - Fixed board sizing and evaluation-bar layout issues that could cause overflow on smaller screens.
 - Preserved compatibility with older game JSON files that do not include engine evaluation data.
-
