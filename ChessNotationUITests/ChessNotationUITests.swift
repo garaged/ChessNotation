@@ -20,6 +20,22 @@ final class ChessNotationUITests: XCTestCase {
     }
 
     @MainActor
+    func testSettingsShowsAppVersion() throws {
+        let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
+
+        let settingsButton = app.buttons["home.appearanceButton"]
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 5))
+        settingsButton.tap()
+
+        let versionText = app.staticTexts["settings.versionText"]
+        if !versionText.exists {
+            app.swipeUp()
+        }
+        XCTAssertTrue(versionText.waitForExistence(timeout: 5))
+        XCTAssertTrue(versionText.label.hasPrefix("Version "))
+    }
+
+    @MainActor
     func testInstructionsTileOpensInstructions() throws {
         let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
 

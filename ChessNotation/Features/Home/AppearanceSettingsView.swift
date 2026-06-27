@@ -51,6 +51,8 @@ struct AppearanceSettingsView: View {
                             }
                         }
                     }
+
+                    AppVersionFooter()
                 }
                 .padding()
             }
@@ -88,6 +90,29 @@ struct AppearanceSettingsView: View {
         case .advanced:
             return "On by default for full training context."
         }
+    }
+}
+
+private struct AppVersionFooter: View {
+    var body: some View {
+        Text(versionText)
+            .font(.footnote.monospacedDigit())
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 2)
+            .accessibilityIdentifier("settings.versionText")
+    }
+
+    private var versionText: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = info?["CFBundleVersion"] as? String
+
+        if let build, !build.isEmpty, build != version {
+            return "Version \(version) (\(build))"
+        }
+
+        return "Version \(version)"
     }
 }
 
