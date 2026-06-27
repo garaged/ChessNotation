@@ -4,6 +4,7 @@ import Observation
 @Observable
 final class GameViewModel {
     let game: NotationGame
+    let mode: GameSessionMode
 
     private(set) var currentMoveIndex = 0
     private(set) var attemptsRemaining = 3
@@ -12,18 +13,41 @@ final class GameViewModel {
     private(set) var records: [MoveAttemptRecord] = []
     private(set) var isFinished = false
     private(set) var revealedAnswer: String?
+    private(set) var remainingSeconds: Int?
+    private(set) var finishReason: TimedSessionFinishReason = .completed
 
     var answerText = ""
 
     private var moveStartedAt = Date()
 
-    init(game: NotationGame) {
+    init(game: NotationGame, mode: GameSessionMode = .untimed) {
         self.game = game
+        self.mode = mode
+        self.remainingSeconds = mode.durationSeconds
     }
 
     var currentMove: NotationMove? {
         guard currentMoveIndex < game.moves.count else { return nil }
         return game.moves[currentMoveIndex]
+    }
+
+    var isTimed: Bool { mode.isTimed }
+
+    var timerText: String? {
+        guard let remainingSeconds else { return nil }
+        let minutes = remainingSeconds / 60
+        let seconds = remainingSeconds % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+
+    var isLowTime: Bool {
+        guard let remainingSeconds else { return false }
+        return remainingSeconds <= 10
+    }
+
+    var selectedDurationText: String? {
+        guard let durationSeconds = mode.durationSeconds else { return nil }
+        return Self.formattedDuration(seconds: durationSeconds)
     }
 
     var progressText: String {
@@ -35,7 +59,13 @@ final class GameViewModel {
     }
 
     var summary: TrainingSessionSummary {
-        TrainingSessionSummary(game: game, records: records)
+        TrainingSessionSummary(
+            game: game,
+            records: records,
+            mode: mode,
+            remainingSeconds: remainingSeconds,
+            finishReason: finishReason
+        )
     }
 
     var completedMoves: Int {
@@ -89,6 +119,16 @@ final class GameViewModel {
         advanceToNextMove()
     }
 
+    func tickTimer() {
+        guard !isFinished, var remainingSeconds else { return }
+        remainingSeconds = max(remainingSeconds - 1, 0)
+        self.remainingSeconds = remainingSeconds
+
+        if remainingSeconds == 0 {
+            finish(reason: .timedOut)
+        }
+    }
+
     func reset() {
         currentMoveIndex = 0
         attemptsRemaining = 3
@@ -98,6 +138,8 @@ final class GameViewModel {
         isFinished = false
         revealedAnswer = nil
         answerText = ""
+        remainingSeconds = mode.durationSeconds
+        finishReason = .completed
         moveStartedAt = Date()
     }
 
@@ -122,13 +164,19 @@ final class GameViewModel {
         moveStartedAt = Date()
 
         if currentMoveIndex >= game.moves.count {
-            isFinished = true
-            feedback = "Session complete."
+            finish(reason: .completed)
         } else if revealedAnswer == nil {
             feedback = "Enter the notation for the highlighted move."
         } else {
             revealedAnswer = nil
         }
+    }
+
+    private func finish(reason: TimedSessionFinishReason) {
+        guard !isFinished else { return }
+        isFinished = true
+        finishReason = reason
+        feedback = reason == .timedOut ? "Time expired." : "Session complete."
     }
 
     private func hint(for move: NotationMove, attemptsRemaining: Int) -> String {
@@ -168,5 +216,10 @@ final class GameViewModel {
         case .king:
             return "the king is moving."
         }
+    }
+
+    private static func formattedDuration(seconds: Int) -> String {
+        let minutes = seconds / 60
+        return minutes == 1 ? "1 minute" : "\(minutes) minutes"
     }
 }

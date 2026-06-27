@@ -2,6 +2,7 @@ import SwiftUI
 
 struct GameTrainingView: View {
     @Environment(AppSettings.self) private var appSettings
+    @Environment(\.dismiss) private var dismiss
     @State var viewModel: GameViewModel
     @FocusState private var isAnswerFieldFocused: Bool
 
@@ -11,10 +12,15 @@ struct GameTrainingView: View {
                 ResultsView(summary: viewModel.summary) {
                     viewModel.reset()
                     refocusAnswerFieldIfNeeded()
+                } startNewGame: {
+                    dismiss()
                 }
             } else {
                 trainingContent
             }
+        }
+        .task(id: viewModel.isFinished) {
+            await runCountdownIfNeeded()
         }
         .onAppear {
             refocusAnswerFieldIfNeeded()
@@ -89,6 +95,19 @@ struct GameTrainingView: View {
 
     private var header: some View {
         VStack(spacing: 6) {
+            if viewModel.isTimed, let timerText = viewModel.timerText {
+                Text(timerText)
+                    .font(.title2.monospacedDigit().weight(.bold))
+                    .foregroundStyle(viewModel.isLowTime ? .red : .primary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(timerBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .accessibilityIdentifier("game.timerText")
+                    .accessibilityLabel("Timed mode, \(timerText) remaining")
+                    .accessibilityValue(viewModel.selectedDurationText.map { "Selected duration \($0)" } ?? "Timed game")
+            }
+
             Text(viewModel.progressText)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -99,6 +118,10 @@ struct GameTrainingView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    private var timerBackground: some ShapeStyle {
+        viewModel.isLowTime ? Color.red.opacity(0.12) : Color(.secondarySystemBackground)
     }
 
     private var statsCard: some View {
@@ -145,5 +168,17 @@ struct GameTrainingView: View {
 
     private func refocusAnswerFieldIfNeeded() {
         isAnswerFieldFocused = !viewModel.isFinished && viewModel.currentMove != nil
+    }
+
+    private func runCountdownIfNeeded() async {
+        guard viewModel.isTimed, !viewModel.isFinished else { return }
+
+        while !Task.isCancelled && !viewModel.isFinished {
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                viewModel.tickTimer()
+            }
+        }
     }
 }

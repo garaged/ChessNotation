@@ -1,8 +1,11 @@
 import SwiftUI
 
 struct ResultsView: View {
+    @Environment(\.dismiss) private var dismiss
+
     let summary: TrainingSessionSummary
     let restart: () -> Void
+    var startNewGame: (() -> Void)?
 
     var body: some View {
         List {
@@ -12,6 +15,18 @@ struct ResultsView: View {
                 metricRow("Accuracy", summary.accuracy.formatted(.percent.precision(.fractionLength(0))))
                 metricRow("Average move time", summary.averageMoveTime.formattedMoveTime)
                 metricRow("First-try correct", "\(summary.firstTryCorrect)")
+            }
+
+            if summary.mode.isTimed {
+                Section("Timed game") {
+                    metricRow("Finish reason", summary.finishReason.displayName)
+                    metricRow("Selected duration", summary.selectedDurationSeconds?.formattedClockDuration ?? "-")
+                    metricRow("Time used", summary.timeUsedSeconds?.formattedClockDuration ?? "-")
+                    metricRow("Moves attempted", "\(summary.completedMoves)")
+                    metricRow("Correct moves", "\(summary.correctMoves)")
+                    metricRow("Incorrect moves", "\(summary.incorrectMoves)")
+                    metricRow("Accuracy", summary.accuracy.formatted(.percent.precision(.fractionLength(0))))
+                }
             }
 
             Section("Weak areas") {
@@ -26,8 +41,19 @@ struct ResultsView: View {
             }
 
             Section {
-                Button("Train this game again", action: restart)
+                Button(summary.mode.isTimed ? "Restart timed game" : "Train this game again", action: restart)
                     .accessibilityIdentifier("results.restartButton")
+
+                if summary.mode.isTimed {
+                    Button("Choose another game") {
+                        if let startNewGame {
+                            startNewGame()
+                        } else {
+                            dismiss()
+                        }
+                    }
+                    .accessibilityIdentifier("results.newGameButton")
+                }
             }
         }
         .navigationTitle("Results")
@@ -43,8 +69,16 @@ struct ResultsView: View {
     }
 }
 
-private extension TimeInterval {
+extension TimeInterval {
     var formattedMoveTime: String {
         String(format: "%.1fs", self)
+    }
+}
+
+extension Int {
+    var formattedClockDuration: String {
+        let minutes = self / 60
+        let seconds = self % 60
+        return String(format: "%d:%02d", minutes, seconds)
     }
 }

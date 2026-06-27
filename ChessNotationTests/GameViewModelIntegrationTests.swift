@@ -70,4 +70,61 @@ struct GameViewModelIntegrationTests {
         #expect(!viewModel.feedback.contains("starts with"))
         #expect(viewModel.feedback.contains("pawn"))
     }
+
+    @Test
+    func timedSessionStartsWithSelectedDurationAndTicksDown() {
+        let viewModel = GameViewModel(game: TestFixtures.operaGame, mode: .timed(durationSeconds: 180))
+
+        #expect(viewModel.remainingSeconds == 180)
+        #expect(viewModel.currentMoveIndex == 0)
+        #expect(viewModel.timerText == "3:00")
+
+        viewModel.tickTimer()
+
+        #expect(viewModel.remainingSeconds == 179)
+        #expect(!viewModel.isFinished)
+    }
+
+    @Test
+    func timedSessionFinishesOnTimeoutAndIgnoresFurtherSubmissions() {
+        let viewModel = GameViewModel(game: TestFixtures.operaGame, mode: .timed(durationSeconds: 1))
+
+        viewModel.tickTimer()
+        #expect(viewModel.isFinished)
+        #expect(viewModel.summary.finishReason == .timedOut)
+
+        viewModel.answerText = "e4"
+        viewModel.submitAnswer()
+        viewModel.tickTimer()
+
+        #expect(viewModel.records.isEmpty)
+        #expect(viewModel.currentMoveIndex == 0)
+        #expect(viewModel.summary.finishReason == .timedOut)
+    }
+
+    @Test
+    func timedSessionResetRestoresOriginalDuration() {
+        let viewModel = GameViewModel(game: TestFixtures.operaGame, mode: .timed(durationSeconds: 60))
+
+        viewModel.answerText = "e4"
+        viewModel.submitAnswer()
+        viewModel.tickTimer()
+        viewModel.reset()
+
+        #expect(viewModel.remainingSeconds == 60)
+        #expect(viewModel.currentMoveIndex == 0)
+        #expect(viewModel.records.isEmpty)
+        #expect(!viewModel.isFinished)
+    }
+
+    @Test
+    func untimedSessionDoesNotFinishFromTimerTick() {
+        let viewModel = GameViewModel(game: TestFixtures.operaGame)
+
+        viewModel.tickTimer()
+
+        #expect(viewModel.remainingSeconds == nil)
+        #expect(!viewModel.isFinished)
+        #expect(viewModel.currentMoveIndex == 0)
+    }
 }
