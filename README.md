@@ -41,6 +41,21 @@ The repository includes three layers of coverage:
 
 Run tests from Xcode or with `Product > Test`.
 
+## Spec-driven development
+
+Feature behavior is documented under [specs/features](specs/features). Start
+user-visible changes by adding or updating a spec, then trace acceptance
+criteria to implementation coverage.
+
+Validate specs from the terminal:
+
+```sh
+make spec-check
+```
+
+See [specs/README.md](specs/README.md) for the workflow, required sections,
+status values, and traceability rules.
+
 ## Bundled game format
 
 Games live in `ChessNotation/ChessNotation/Resources/Games/*.json`.

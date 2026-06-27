@@ -23,6 +23,19 @@ struct AppearanceSettingsView: View {
                         }
                     }
 
+                    settingsSection("Board") {
+                        Toggle(isOn: boardCoordinatesBinding) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Coordinates")
+                                    .font(.headline)
+                                Text("Show classic file and rank labels on the board.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .tint(.accentColor)
+                    }
+
                     settingsSection("Board Style") {
                         VStack(spacing: 16) {
                             ForEach(ChessVisualTheme.allCases) { theme in
@@ -56,6 +69,13 @@ struct AppearanceSettingsView: View {
         Binding(
             get: { appSettings.bindingValue(for: difficulty) },
             set: { appSettings.setEvaluationEnabled($0, for: difficulty) }
+        )
+    }
+
+    private var boardCoordinatesBinding: Binding<Bool> {
+        Binding(
+            get: { appSettings.showBoardCoordinates },
+            set: { appSettings.showBoardCoordinates = $0 }
         )
     }
 

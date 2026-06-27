@@ -39,7 +39,8 @@ struct GameTrainingView: View {
                     ChessBoardView(
                         fen: move.fenBefore,
                         highlightedMove: move,
-                        showsEvaluation: appSettings.isEvaluationEnabled(for: viewModel.game.difficulty)
+                        showsEvaluation: appSettings.isEvaluationEnabled(for: viewModel.game.difficulty),
+                        showsCoordinates: appSettings.showBoardCoordinates
                     )
                         .padding(.horizontal)
 

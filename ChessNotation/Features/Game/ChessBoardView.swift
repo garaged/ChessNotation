@@ -5,6 +5,7 @@ struct ChessBoardView: View {
     let fen: String
     let highlightedMove: NotationMove?
     let showsEvaluation: Bool
+    let showsCoordinates: Bool
 
     private var squares: [BoardSquare] {
         FENParser.squares(from: fen)
@@ -54,6 +55,12 @@ struct ChessBoardView: View {
                             .stroke(palette.arrowColor, style: StrokeStyle(lineWidth: 8, lineCap: .round, lineJoin: .round))
                             .shadow(radius: 2)
                     }
+
+                    if showsCoordinates {
+                        BoardCoordinatesOverlay(squareSize: squareSize, palette: palette)
+                            .allowsHitTesting(false)
+                            .accessibilityHidden(true)
+                    }
                 }
                 .frame(width: boardSize, height: boardSize)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
@@ -84,6 +91,50 @@ struct ChessBoardView: View {
             x: CGFloat(file) * squareSize + squareSize / 2,
             y: CGFloat(boardRank) * squareSize + squareSize / 2
         )
+    }
+}
+
+private struct BoardCoordinatesOverlay: View {
+    let squareSize: CGFloat
+    let palette: ChessVisualPalette
+
+    private let files = ["a", "b", "c", "d", "e", "f", "g", "h"]
+
+    var body: some View {
+        let boardSize = squareSize * 8
+        let inset = max(squareSize * 0.16, 7)
+
+        ZStack(alignment: .topLeading) {
+            ForEach(0..<8, id: \.self) { file in
+                coordinateLabel(files[file], isLightSquare: isLightSquare(file: file, rank: 0))
+                    .position(
+                        x: CGFloat(file + 1) * squareSize - inset,
+                        y: boardSize - inset
+                    )
+            }
+
+            ForEach(0..<8, id: \.self) { rankIndex in
+                let rank = 7 - rankIndex
+                coordinateLabel("\(rank + 1)", isLightSquare: isLightSquare(file: 0, rank: rank))
+                    .position(
+                        x: inset,
+                        y: CGFloat(rankIndex) * squareSize + inset
+                    )
+            }
+        }
+        .frame(width: boardSize, height: boardSize)
+    }
+
+    private func coordinateLabel(_ text: String, isLightSquare: Bool) -> some View {
+        Text(text)
+            .font(.system(size: 11, weight: .bold, design: .serif))
+            .foregroundStyle(palette.coordinateLabelColor(isLightSquare: isLightSquare))
+            .shadow(color: Color.black.opacity(isLightSquare ? 0.0 : 0.18), radius: 0.5, x: 0, y: 0.5)
+            .lineLimit(1)
+    }
+
+    private func isLightSquare(file: Int, rank: Int) -> Bool {
+        (file + rank).isMultiple(of: 2)
     }
 }
 
