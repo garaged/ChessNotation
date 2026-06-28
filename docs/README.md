@@ -13,12 +13,6 @@ thumbnail to open the full-size original image.
 | --- | --- | --- | --- |
 | <a href="screenshots/iphone-square-recognition-setup.png"><img src="screenshots/iphone-square-recognition-setup.png" width="180" alt="iPhone square recognition setup"></a> | <a href="screenshots/iphone-square-recognition-game.png"><img src="screenshots/iphone-square-recognition-game.png" width="180" alt="iPhone square recognition game"></a> | <a href="screenshots/iphone-settings-evaluation.png"><img src="screenshots/iphone-settings-evaluation.png" width="180" alt="iPhone evaluation settings"></a> | <a href="screenshots/iphone-settings-board-styles.png"><img src="screenshots/iphone-settings-board-styles.png" width="180" alt="iPhone board style settings"></a> |
 
-## Additional iPhone Screenshots
-
-| iPhone 1 | iPhone 2 | iPhone 3 | iPhone 4 | iPhone 5 |
-| --- | --- | --- | --- | --- |
-| <a href="screenshots/phone-1.png"><img src="screenshots/phone-1.png" width="160" alt="Additional iPhone screenshot 1"></a> | <a href="screenshots/phone-2.png"><img src="screenshots/phone-2.png" width="160" alt="Additional iPhone screenshot 2"></a> | <a href="screenshots/phone-3.png"><img src="screenshots/phone-3.png" width="160" alt="Additional iPhone screenshot 3"></a> | <a href="screenshots/phone-4.png"><img src="screenshots/phone-4.png" width="160" alt="Additional iPhone screenshot 4"></a> | <a href="screenshots/phone-5.png"><img src="screenshots/phone-5.png" width="160" alt="Additional iPhone screenshot 5"></a> |
-
 ## iPad Screenshot
 
 | iPad |
