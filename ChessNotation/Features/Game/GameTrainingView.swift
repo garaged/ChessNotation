@@ -130,50 +130,6 @@ struct GameTrainingView: View {
         }
     }
 
-    private var notationAnswerField: some View {
-        HStack(spacing: 8) {
-            Text(viewModel.answerText.isEmpty ? "Enter SAN, e.g. Nf3" : viewModel.answerText)
-                .font(.title3.monospaced())
-                .foregroundStyle(viewModel.answerText.isEmpty ? .secondary : .primary)
-                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                .accessibilityIdentifier("game.answerField")
-                .accessibilityLabel("Move answer")
-                .accessibilityValue(viewModel.answerText.isEmpty ? "Empty" : viewModel.answerText)
-
-            Divider()
-                .frame(height: 24)
-
-            Button {
-                viewModel.removeLastAnswerCharacter()
-            } label: {
-                Image(systemName: "delete.left")
-                    .font(.body.weight(.semibold))
-                    .frame(width: 28, height: 28)
-            }
-            .buttonStyle(.plain)
-            .disabled(viewModel.answerText.isEmpty)
-            .accessibilityIdentifier("game.answerBackspaceButton")
-            .accessibilityLabel("Backspace")
-
-            Button {
-                viewModel.submitAnswer()
-            } label: {
-                Image(systemName: "arrow.up.circle.fill")
-                    .font(.title3)
-                    .symbolRenderingMode(.hierarchical)
-                    .frame(width: 28, height: 28)
-            }
-            .buttonStyle(.plain)
-            .disabled(viewModel.answerText.isEmpty)
-            .accessibilityIdentifier("game.answerSubmitButton")
-            .accessibilityLabel("Submit move")
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 4)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-
     private var header: some View {
         VStack(spacing: 6) {
             if viewModel.isTimed, let timerText = viewModel.timerText {

@@ -201,7 +201,7 @@ final class ChessNotationUITests: XCTestCase {
         XCTAssertFalse(app.keyboards.element.exists)
 
         for character in move {
-            let key = app.buttons["ChessNotationKeyboard.Key.\(character)"]
+            let key = app.buttons[keyIdentifier(for: character)]
             XCTAssertTrue(key.waitForExistence(timeout: 5), "Missing notation key \(character)")
             key.tap()
         }
@@ -213,13 +213,6 @@ final class ChessNotationUITests: XCTestCase {
         app.launchArguments = arguments
         app.launch()
         return app
-    }
-
-    @MainActor
-    private func enterMove(_ move: String, in app: XCUIApplication) {
-        for character in move {
-            app.buttons[keyIdentifier(for: character)].tap()
-        }
     }
 
     private func keyIdentifier(for character: Character) -> String {
