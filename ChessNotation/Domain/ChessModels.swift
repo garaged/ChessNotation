@@ -157,6 +157,11 @@ struct ChessPiece: Equatable {
     let kind: Kind
     let side: ChessSide
 
+    init(kind: Kind, side: ChessSide) {
+        self.kind = kind
+        self.side = side
+    }
+
     var symbol: String {
         switch (side, kind) {
         case (.white, .king): return "♔"
@@ -174,14 +179,31 @@ struct ChessPiece: Equatable {
         }
     }
 
+    var imageName: String {
+        switch (side, kind) {
+        case (.white, .king): return "white-king"
+        case (.white, .queen): return "white-queen"
+        case (.white, .rook): return "white-rook"
+        case (.white, .bishop): return "white-bishop"
+        case (.white, .knight): return "white-knight"
+        case (.white, .pawn): return "white-pawn"
+        case (.black, .king): return "black-king"
+        case (.black, .queen): return "black-queen"
+        case (.black, .rook): return "black-rook"
+        case (.black, .bishop): return "black-bishop"
+        case (.black, .knight): return "black-knight"
+        case (.black, .pawn): return "black-pawn"
+        }
+    }
+
     var scale: Double {
         switch kind {
-        case .king: return 0.86
-        case .queen: return 0.84
-        case .rook: return 0.82
-        case .bishop: return 0.82
-        case .knight: return 0.8
-        case .pawn: return 0.64
+        case .king: return 0.94
+        case .queen: return 0.92
+        case .rook: return 0.9
+        case .bishop: return 0.9
+        case .knight: return 0.88
+        case .pawn: return 0.74
         }
     }
 

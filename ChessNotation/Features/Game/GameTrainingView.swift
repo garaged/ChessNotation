@@ -53,6 +53,7 @@ struct GameTrainingView: View {
                     VStack(spacing: 8) {
                         Text("\(move.side.displayName) to move")
                             .font(.headline)
+                            .foregroundStyle(PremiumDesign.primaryText)
 
                         TextField("Enter SAN, e.g. Nf3", text: $viewModel.answerText)
                             .focused($isAnswerFieldFocused)
@@ -61,8 +62,13 @@ struct GameTrainingView: View {
                             .submitLabel(.done)
                             .accessibilityIdentifier("game.answerField")
                             .padding(12)
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .foregroundStyle(PremiumDesign.primaryText)
+                            .background(PremiumDesign.elevatedSurface)
+                            .clipShape(RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium)
+                                    .stroke(PremiumDesign.stroke, lineWidth: 1)
+                            }
                             .onSubmit {
                                 viewModel.submitAnswer()
                                 refocusAnswerFieldIfNeeded()
@@ -74,6 +80,7 @@ struct GameTrainingView: View {
                                 refocusAnswerFieldIfNeeded()
                             }
                             .buttonStyle(.borderedProminent)
+                            .tint(PremiumDesign.Accent.practice.color)
                             .accessibilityIdentifier("game.submitButton")
 
                             Button("Reveal") {
@@ -81,6 +88,7 @@ struct GameTrainingView: View {
                                 refocusAnswerFieldIfNeeded()
                             }
                             .buttonStyle(.bordered)
+                            .tint(PremiumDesign.Accent.learning.color)
                             .accessibilityIdentifier("game.revealButton")
                         }
                     }
@@ -91,6 +99,7 @@ struct GameTrainingView: View {
             }
             .padding(.vertical, 10)
         }
+        .premiumScreenBackground()
     }
 
     private var header: some View {
@@ -98,7 +107,7 @@ struct GameTrainingView: View {
             if viewModel.isTimed, let timerText = viewModel.timerText {
                 Text(timerText)
                     .font(.title2.monospacedDigit().weight(.bold))
-                    .foregroundStyle(viewModel.isLowTime ? .red : .primary)
+                    .foregroundStyle(viewModel.isLowTime ? PremiumDesign.Accent.danger.color : PremiumDesign.primaryText)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(timerBackground)
@@ -110,25 +119,25 @@ struct GameTrainingView: View {
 
             Text(viewModel.progressText)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
                 .accessibilityIdentifier("game.progressText")
             ProgressView(value: Double(viewModel.currentMoveIndex), total: Double(max(viewModel.game.moves.count, 1)))
                 .padding(.horizontal)
             Text(viewModel.attemptsText)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
     }
 
     private var timerBackground: some ShapeStyle {
-        viewModel.isLowTime ? Color.red.opacity(0.12) : Color(.secondarySystemBackground)
+        viewModel.isLowTime ? PremiumDesign.Accent.danger.color.opacity(0.16) : PremiumDesign.elevatedSurface
     }
 
     private var statsCard: some View {
         HStack(spacing: 8) {
-            statPill(title: "Solved", value: "\(viewModel.completedMoves)")
-            statPill(title: "Accuracy", value: viewModel.accuracyText)
-            statPill(title: "1st Try", value: "\(viewModel.firstTryCorrectMoves)")
+            PremiumMetricPill(title: "Solved", value: "\(viewModel.completedMoves)", accent: .practice)
+            PremiumMetricPill(title: "Accuracy", value: viewModel.accuracyText, accent: .brand)
+            PremiumMetricPill(title: "1st Try", value: "\(viewModel.firstTryCorrectMoves)", accent: .timed)
         }
         .padding(.horizontal)
     }
@@ -137,15 +146,15 @@ struct GameTrainingView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Feedback")
                 .font(.headline)
+                .foregroundStyle(PremiumDesign.primaryText)
             Text(viewModel.feedback)
                 .font(.body)
-                .foregroundStyle(.primary)
+                .foregroundStyle(PremiumDesign.primaryText)
                 .accessibilityIdentifier("game.feedbackText")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .premiumPanel(accent: .brand)
         .padding(.horizontal)
     }
 
@@ -158,7 +167,7 @@ struct GameTrainingView: View {
                 .minimumScaleFactor(0.8)
             Text(title)
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)

@@ -43,6 +43,8 @@ struct SquareRecognitionSetupView: View {
                 .accessibilityIdentifier("squareRecognition.historyLink")
             }
         }
+        .listStyle(.insetGrouped)
+        .premiumScreenBackground()
         .navigationTitle("Square Recognition")
         .navigationDestination(item: $activeConfiguration) { configuration in
             SquareRecognitionGameView(
@@ -89,12 +91,13 @@ struct SquareRecognitionGameView: View {
                 VStack(spacing: 6) {
                     Text(viewModel.timerText)
                         .font(.title2.monospacedDigit().weight(.bold))
-                        .foregroundStyle(viewModel.remainingTime <= 3 ? .red : .primary)
+                        .foregroundStyle(viewModel.remainingTime <= 3 ? PremiumDesign.Accent.danger.color : PremiumDesign.primaryText)
                         .accessibilityIdentifier("squareRecognition.timerText")
                         .accessibilityLabel("Square recognition timer")
 
                     Text(viewModel.targetCoordinate)
                         .font(.largeTitle.monospaced().weight(.bold))
+                        .foregroundStyle(PremiumDesign.Accent.square.color)
                         .accessibilityIdentifier("squareRecognition.promptText")
                 }
 
@@ -110,30 +113,30 @@ struct SquareRecognitionGameView: View {
 
                     Label("White side", systemImage: "arrow.down.to.line.compact")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(PremiumDesign.secondaryText)
                         .accessibilityIdentifier("squareRecognition.whiteSideLabel")
                 }
                 .padding(.horizontal)
 
                 HStack(spacing: 8) {
-                    statPill(title: "Score", value: "\(viewModel.score)", identifier: "squareRecognition.scoreValue")
-                    statPill(title: "Correct", value: "\(viewModel.correctCount)", identifier: "squareRecognition.correctValue")
-                    statPill(title: "Accuracy", value: viewModel.accuracyText, identifier: "squareRecognition.accuracyValue")
+                    PremiumMetricPill(title: "Score", value: "\(viewModel.score)", accent: .square, identifier: "squareRecognition.scoreValue")
+                    PremiumMetricPill(title: "Correct", value: "\(viewModel.correctCount)", accent: .practice, identifier: "squareRecognition.correctValue")
+                    PremiumMetricPill(title: "Accuracy", value: viewModel.accuracyText, accent: .brand, identifier: "squareRecognition.accuracyValue")
                 }
                 .padding(.horizontal)
 
                 Text(viewModel.feedback ?? "Tap the prompted square.")
                     .font(.headline)
-                    .foregroundStyle(viewModel.feedback == "Correct" ? .green : .secondary)
+                    .foregroundStyle(viewModel.feedback == "Correct" ? PremiumDesign.Accent.practice.color : PremiumDesign.secondaryText)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(14)
-                    .background(Color(.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .premiumPanel(accent: .square)
                     .padding(.horizontal)
                     .accessibilityIdentifier("squareRecognition.feedbackText")
             }
             .padding(.vertical, 12)
         }
+        .premiumScreenBackground()
     }
 
     private func statPill(title: String, value: String, identifier: String) -> some View {
@@ -307,7 +310,7 @@ struct SquareRecognitionResultsView: View {
             if let saveError {
                 Section("History") {
                     Text("This result could not be saved: \(saveError)")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(PremiumDesign.Accent.danger.color)
                 }
             }
 
@@ -318,15 +321,18 @@ struct SquareRecognitionResultsView: View {
                     .accessibilityIdentifier("squareRecognition.newGameButton")
             }
         }
+        .listStyle(.insetGrouped)
+        .premiumScreenBackground()
         .navigationTitle("Results")
     }
 
     private func metricRow(_ title: String, _ value: String) -> some View {
         HStack {
             Text(title)
+                .foregroundStyle(PremiumDesign.primaryText)
             Spacer()
             Text(value)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
     }
 }
@@ -362,7 +368,7 @@ struct SquareRecognitionHistoryView: View {
 
                     Text(result.variant.displayName)
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(PremiumDesign.secondaryText)
                 }
                 .padding(.vertical, 4)
             }
@@ -372,6 +378,8 @@ struct SquareRecognitionHistoryView: View {
                     .foregroundStyle(.red)
             }
         }
+        .listStyle(.insetGrouped)
+        .premiumScreenBackground()
         .navigationTitle("History")
         .task {
             loadHistory()

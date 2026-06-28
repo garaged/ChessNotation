@@ -106,6 +106,8 @@ struct InstructionsView: View {
                 )
             }
         }
+        .listStyle(.insetGrouped)
+        .premiumScreenBackground()
         .navigationTitle("Instructions")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -116,7 +118,7 @@ struct InstructionsView: View {
                 .font(.headline)
             Text(description)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
         .padding(.vertical, 2)
     }
@@ -128,7 +130,7 @@ struct InstructionsView: View {
                 .foregroundStyle(.primary)
             Text(description)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
             Text(callout)
                 .font(.caption)
                 .foregroundStyle(.blue)
@@ -200,6 +202,8 @@ private struct SANInstructionsView: View {
                 )
             }
         }
+        .listStyle(.insetGrouped)
+        .premiumScreenBackground()
         .navigationTitle("SAN Guide")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -215,7 +219,7 @@ private struct SANInstructionsView: View {
 
             Text(meaning)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
         .padding(.vertical, 4)
     }
@@ -226,7 +230,7 @@ private struct SANInstructionsView: View {
                 .font(.headline)
             Text(description)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
         .padding(.vertical, 2)
     }

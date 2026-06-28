@@ -229,46 +229,20 @@ private struct PieceView: View {
     let palette: ChessVisualPalette
 
     var body: some View {
-        let piecePalette = palette.piecePalette(for: piece.side)
-
-        ChessPieceGraphic(
-            kind: piece.kind,
-            palette: piecePalette
-        )
+        ChessPieceGraphic(piece: piece)
         .frame(width: squareSize * piece.scale, height: squareSize * piece.scale)
-        .shadow(color: piecePalette.shadow, radius: 1.4, x: 0, y: 1)
+        .shadow(color: palette.piecePalette(for: piece.side).shadow, radius: 1.4, x: 0, y: 1)
         .padding(squareSize * 0.03)
     }
 }
 
 struct ChessPieceGraphic: View {
-    let kind: ChessPiece.Kind
-    let palette: ChessPiecePalette
+    let piece: ChessPiece
 
     var body: some View {
-        GeometryReader { proxy in
-            let size = min(proxy.size.width, proxy.size.height)
-            let strokeWidth = max(size * 0.035, 1)
-            let shape = ChessPieceShape(kind: kind)
-
-            shape
-                .fill(palette.fill)
-                .overlay(alignment: .top) {
-                    shape
-                        .fill(
-                            LinearGradient(
-                                colors: [palette.highlight, .clear],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .scaleEffect(x: 0.94, y: 0.46, anchor: .top)
-                        .offset(y: size * 0.02)
-                }
-                .overlay {
-                    shape.stroke(palette.stroke, lineWidth: strokeWidth)
-                }
-        }
+        Image(piece.imageName)
+            .resizable()
+            .scaledToFit()
         .aspectRatio(1, contentMode: .fit)
     }
 }

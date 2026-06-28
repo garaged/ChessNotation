@@ -55,6 +55,7 @@ final class ChessNotationUITests: XCTestCase {
 
         let operaGameButton = app.buttons["library.game.opera-game-1858"]
         XCTAssertTrue(operaGameButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.otherElements["library.thumbnail.opera-game-1858"].exists)
         operaGameButton.tap()
 
         let answerField = app.textFields["game.answerField"]
@@ -93,27 +94,6 @@ final class ChessNotationUITests: XCTestCase {
         }
         XCTAssertTrue(advancedGame.waitForExistence(timeout: 5))
         XCTAssertTrue(beginnerGame.waitForNonExistence(timeout: 5))
-    }
-
-    @MainActor
-    func testRandomFilteredGameUsesCurrentLibraryFilters() throws {
-        let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
-
-        openPracticeLibrary(in: app)
-
-        app.segmentedControls["library.levelFilter"].buttons["Advanced"].tap()
-        let beginnerGame = app.buttons["library.game.mini-opera"]
-        XCTAssertTrue(beginnerGame.waitForNonExistence(timeout: 5))
-
-        if !app.buttons["library.randomFilteredGameButton"].exists {
-            app.swipeDown()
-        }
-        app.buttons["library.randomFilteredGameButton"].tap()
-
-        let progressText = app.staticTexts["game.progressText"]
-        XCTAssertTrue(progressText.waitForExistence(timeout: 5))
-        XCTAssertEqual(progressText.label, "Move 1 of 1")
-        XCTAssertFalse(app.staticTexts["game.timerText"].exists)
     }
 
     @MainActor

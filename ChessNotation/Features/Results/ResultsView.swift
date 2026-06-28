@@ -32,7 +32,7 @@ struct ResultsView: View {
             Section("Weak areas") {
                 if summary.mistakesByTag.isEmpty {
                     Text("No missed move categories. Nice work.")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(PremiumDesign.secondaryText)
                 } else {
                     ForEach(summary.mistakesByTag, id: \.0) { tag, count in
                         metricRow(tag.displayName, "\(count)")
@@ -42,6 +42,7 @@ struct ResultsView: View {
 
             Section {
                 Button(summary.mode.isTimed ? "Restart timed game" : "Train this game again", action: restart)
+                    .tint(PremiumDesign.Accent.practice.color)
                     .accessibilityIdentifier("results.restartButton")
 
                 if summary.mode.isTimed {
@@ -56,15 +57,18 @@ struct ResultsView: View {
                 }
             }
         }
+        .listStyle(.insetGrouped)
+        .premiumScreenBackground()
         .navigationTitle("Results")
     }
 
     private func metricRow(_ title: String, _ value: String) -> some View {
         HStack {
             Text(title)
+                .foregroundStyle(PremiumDesign.primaryText)
             Spacer()
             Text(value)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
     }
 }

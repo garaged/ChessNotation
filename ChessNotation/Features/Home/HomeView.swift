@@ -12,26 +12,36 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 22) {
-                    hero
-                    modeTiles
-                }
-                .padding(.horizontal, 18)
-                .padding(.top, 18)
-                .padding(.bottom, 28)
-            }
-            .background(homeBackground)
-            .navigationTitle("ChessNotation")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        isShowingAppearanceSettings = true
-                    } label: {
-                        Label("Settings", systemImage: "slider.horizontal.3")
+            ZStack(alignment: .topTrailing) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 22) {
+                        hero
+                        modeTiles
                     }
-                    .accessibilityIdentifier("home.appearanceButton")
+                    .padding(.horizontal, 18)
+                    .padding(.top, 18)
+                    .padding(.bottom, 28)
                 }
+                .premiumScreenBackground()
+
+                Button {
+                    isShowingAppearanceSettings = true
+                } label: {
+                    Label("Settings", systemImage: "slider.horizontal.3")
+                        .labelStyle(.iconOnly)
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(PremiumDesign.primaryText)
+                        .frame(width: 42, height: 42)
+                        .background(PremiumDesign.elevatedSurface)
+                        .clipShape(Circle())
+                        .overlay {
+                            Circle()
+                                .stroke(PremiumDesign.stroke, lineWidth: 1)
+                        }
+                }
+                .padding(.top, 30)
+                .padding(.trailing, 30)
+                .accessibilityIdentifier("home.appearanceButton")
             }
             .sheet(isPresented: $isShowingAppearanceSettings) {
                 AppearanceSettingsView()
@@ -41,22 +51,35 @@ struct HomeView: View {
     }
 
     private var hero: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: "crown.fill")
-                .font(.title2)
-                .foregroundStyle(.yellow)
-                .accessibilityHidden(true)
+        ZStack(alignment: .bottomLeading) {
+            PremiumArtworkView(assetName: PremiumAssetName.homeHero, fallbackIdentifier: "premiumAssetFallback.homeHero") {
+                BoardTexture(tint: PremiumDesign.Accent.brand.color)
+                    .overlay {
+                        LinearGradient(
+                            colors: [.clear, PremiumDesign.backgroundBottom.opacity(0.78)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    }
+            }
 
-            Text("ChessNotation")
-                .font(.largeTitle.weight(.bold))
-                .foregroundStyle(.primary)
+            VStack(alignment: .leading, spacing: 10) {
+                Text("ChessNotation")
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(PremiumDesign.primaryText)
 
-            Text("Train faster, read better, play smarter.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                Text("Train faster, read better, play smarter.")
+                    .font(.subheadline)
+                    .foregroundStyle(PremiumDesign.secondaryText)
+            }
+            .padding(18)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 8)
+        .frame(maxWidth: .infinity, minHeight: 210, alignment: .bottomLeading)
+        .clipShape(RoundedRectangle(cornerRadius: PremiumDesign.Radius.large))
+        .overlay {
+            RoundedRectangle(cornerRadius: PremiumDesign.Radius.large)
+                .stroke(PremiumDesign.Accent.brand.color.opacity(0.18), lineWidth: 1)
+        }
         .accessibilityElement(children: .combine)
     }
 
@@ -70,8 +93,9 @@ struct HomeView: View {
                     title: "Notation Training",
                     subtitle: "Sharpen SAN from real games.",
                     systemImage: "pencil.and.list.clipboard",
-                    tint: .green,
-                    texture: .board
+                    tint: PremiumDesign.Accent.practice.color,
+                    texture: .board,
+                    assetName: PremiumAssetName.notationTrainingTile
                 )
             }
             .buttonStyle(.plain)
@@ -85,8 +109,9 @@ struct HomeView: View {
                     title: "Timed Notation",
                     subtitle: "Race the clock and build speed.",
                     systemImage: "timer",
-                    tint: .blue,
-                    texture: .speed
+                    tint: PremiumDesign.Accent.timed.color,
+                    texture: .speed,
+                    assetName: PremiumAssetName.timedNotationTile
                 )
             }
             .buttonStyle(.plain)
@@ -100,8 +125,9 @@ struct HomeView: View {
                     title: "Square Recognition",
                     subtitle: "Tap coordinates by sight.",
                     systemImage: "scope",
-                    tint: .purple,
-                    texture: .target
+                    tint: PremiumDesign.Accent.square.color,
+                    texture: .target,
+                    assetName: PremiumAssetName.squareRecognitionTile
                 )
             }
             .buttonStyle(.plain)
@@ -114,8 +140,9 @@ struct HomeView: View {
                     title: "Instructions",
                     subtitle: "Learn modes, notation, and settings.",
                     systemImage: "book.pages",
-                    tint: .orange,
-                    texture: .book
+                    tint: PremiumDesign.Accent.learning.color,
+                    texture: .book,
+                    assetName: PremiumAssetName.instructionsTile
                 )
             }
             .buttonStyle(.plain)
@@ -127,14 +154,6 @@ struct HomeView: View {
         [GridItem(.adaptive(minimum: 158), spacing: 14)]
     }
 
-    private var homeBackground: some View {
-        LinearGradient(
-            colors: [Color(.systemBackground), Color(.secondarySystemBackground).opacity(0.58)],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-        .ignoresSafeArea()
-    }
 }
 
 struct GameLibraryView: View {
@@ -223,6 +242,8 @@ struct GameLibraryView: View {
                 }
             }
         }
+        .listStyle(.insetGrouped)
+        .premiumScreenBackground()
         .navigationTitle("Game Library")
         .navigationBarTitleDisplayMode(.inline)
         .searchable(text: $filters.searchText, prompt: "Search title, players, opening")
@@ -336,17 +357,31 @@ private struct HomeModeTile: View {
     let systemImage: String
     let tint: Color
     let texture: Texture
+    let assetName: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             ZStack(alignment: .bottomTrailing) {
-                tileTexture
+                PremiumArtworkView(assetName: assetName, fallbackIdentifier: "premiumAssetFallback.\(assetName)") {
+                    tileTexture
+                }
 
-                Image(systemName: systemImage)
-                    .font(.system(size: 44, weight: .semibold))
-                    .foregroundStyle(tint.opacity(0.92))
-                    .shadow(color: tint.opacity(0.22), radius: 8, x: 0, y: 5)
-                    .padding(14)
+                LinearGradient(
+                    colors: [.clear, Color.black.opacity(0.3)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+
+                if !PremiumAssetAvailability.hasImage(named: assetName) {
+                    Image(systemName: systemImage)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.9))
+                        .frame(width: 34, height: 34)
+                        .background(tint.opacity(0.86))
+                        .clipShape(Circle())
+                        .shadow(color: tint.opacity(0.22), radius: 8, x: 0, y: 5)
+                        .padding(10)
+                }
             }
             .frame(maxWidth: .infinity)
             .frame(height: 104)
@@ -355,30 +390,31 @@ private struct HomeModeTile: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(title)
                     .font(.headline.weight(.semibold))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(PremiumDesign.primaryText)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
+                HStack(alignment: .bottom, spacing: 8) {
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(PremiumDesign.secondaryText)
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Spacer(minLength: 8)
+
+                    Image(systemName: "arrow.right")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(tint)
+                        .frame(width: 26, height: 26)
+                        .background(tint.opacity(0.14))
+                        .clipShape(Circle())
+                        .accessibilityHidden(true)
+                }
             }
 
-            Spacer(minLength: 0)
-
-            HStack {
-                Spacer()
-                Image(systemName: "arrow.right")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(tint)
-                    .frame(width: 30, height: 30)
-                    .background(tint.opacity(0.14))
-                    .clipShape(Circle())
-            }
         }
-        .frame(maxWidth: .infinity, minHeight: 230, alignment: .topLeading)
+        .frame(maxWidth: .infinity, minHeight: 178, alignment: .topLeading)
         .padding(14)
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -475,26 +511,34 @@ private struct RandomFilteredGameRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "die.face.5.fill")
-                .font(.title3)
-                .foregroundStyle(.orange)
-                .frame(width: 38, height: 38)
-                .background(Color.orange.opacity(0.12))
+            PremiumArtworkView(assetName: PremiumAssetName.libraryRandomGame, fallbackIdentifier: "premiumAssetFallback.\(PremiumAssetName.libraryRandomGame)") {
+                ZStack {
+                    BoardTexture(tint: PremiumDesign.Accent.brand.color)
+                    Image(systemName: "die.face.5.fill")
+                        .font(.title3)
+                        .foregroundStyle(PremiumDesign.Accent.brand.color)
+                }
+            }
+                .frame(width: 46, height: 46)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(PremiumDesign.Accent.brand.color.opacity(0.2), lineWidth: 1)
+                }
 
             VStack(alignment: .leading, spacing: 3) {
                 Text("Random filtered game")
                     .font(.headline)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(PremiumDesign.primaryText)
                 Text("Start from the games matching current filters.")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(PremiumDesign.secondaryText)
             }
 
             Spacer(minLength: 8)
 
             Image(systemName: launchMode == .timed ? "timer" : "play.fill")
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
         .padding(.vertical, 4)
     }
@@ -516,7 +560,7 @@ private struct LaunchModeSummary: View {
                     .accessibilityIdentifier("library.launchModeText")
                 Text(launchMode.subtitle)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(PremiumDesign.secondaryText)
             }
         }
         .padding(.vertical, 2)
@@ -590,29 +634,22 @@ private struct GameLibraryRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            BoardThumbnail(difficulty: game.difficulty)
-                .frame(width: 54, height: 54)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+            GameThumbnailView(game: game)
+                .frame(width: 64, height: 64)
 
             VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .firstTextBaseline) {
                     Text(game.title)
                         .font(.headline)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(PremiumDesign.primaryText)
                         .lineLimit(2)
                     Spacer(minLength: 8)
-                    Text(game.difficulty.rawValue.capitalized)
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(difficultyColor)
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 3)
-                        .background(difficultyColor.opacity(0.12))
-                        .clipShape(Capsule())
+                    PremiumBadge(text: game.difficulty.rawValue.capitalized, accent: PremiumDesign.difficultyAccent(for: game.difficulty))
                 }
 
                 Text("\(game.white) vs \(game.black)")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(PremiumDesign.secondaryText)
                     .lineLimit(1)
 
                 HStack(spacing: 8) {
@@ -624,44 +661,11 @@ private struct GameLibraryRow: View {
                     }
                 }
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
                 .lineLimit(1)
             }
         }
         .padding(.vertical, 5)
     }
 
-    private var difficultyColor: Color {
-        switch game.difficulty {
-        case .beginner: return .green
-        case .intermediate: return .orange
-        case .advanced: return .red
-        }
-    }
-}
-
-private struct BoardThumbnail: View {
-    let difficulty: Difficulty
-
-    var body: some View {
-        GeometryReader { proxy in
-            let squareSize = proxy.size.width / 4
-            LazyVGrid(columns: Array(repeating: GridItem(.fixed(squareSize), spacing: 0), count: 4), spacing: 0) {
-                ForEach(0..<16, id: \.self) { index in
-                    Rectangle()
-                        .fill((index + index / 4).isMultiple(of: 2) ? tint.opacity(0.25) : Color(.tertiarySystemFill))
-                        .frame(width: squareSize, height: squareSize)
-                }
-            }
-        }
-        .background(tint.opacity(0.08))
-    }
-
-    private var tint: Color {
-        switch difficulty {
-        case .beginner: return .green
-        case .intermediate: return .orange
-        case .advanced: return .red
-        }
-    }
 }
