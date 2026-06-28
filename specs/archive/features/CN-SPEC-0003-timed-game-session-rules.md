@@ -1,8 +1,8 @@
 # CN-SPEC-0003: Timed Game Session Rules
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -56,22 +56,15 @@ Out of scope:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0003-AC001
-- Pending coverage: CN-SPEC-0003-AC002
-- Pending coverage: CN-SPEC-0003-AC003
-- Pending coverage: CN-SPEC-0003-AC004
-- Pending coverage: CN-SPEC-0003-AC005
-- Pending coverage: CN-SPEC-0003-AC006
-- Pending coverage: CN-SPEC-0003-AC007
-- Pending coverage: CN-SPEC-0003-AC008
-- Pending coverage: CN-SPEC-0003-AC009
-- Pending coverage: CN-SPEC-0003-AC010
+- `ChessNotationTests/GameViewModelIntegrationTests.swift`: CN-SPEC-0003-AC001, CN-SPEC-0003-AC002, CN-SPEC-0003-AC003, CN-SPEC-0003-AC004, CN-SPEC-0003-AC005, CN-SPEC-0003-AC006, CN-SPEC-0003-AC007, CN-SPEC-0003-AC008, CN-SPEC-0003-AC009, CN-SPEC-0003-AC010
+- `ChessNotation/Features/Game/GameViewModel.swift`: CN-SPEC-0003-AC001, CN-SPEC-0003-AC006, CN-SPEC-0003-AC007, CN-SPEC-0003-AC008, CN-SPEC-0003-AC009, CN-SPEC-0003-AC010
 
 ## Open Questions
 
-- Should the countdown start immediately on navigation, or after the board first appears?
-- Should an answer submitted on the same instant as timeout be accepted if input handling begins first?
+- Resolved: Countdown starts when the active game screen task runs for a timed session.
+- Resolved: Event ordering follows the view model call order; once timeout finishes the session, later submissions are ignored.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec for timed game session behavior.
+- 2026-06-28: Accepted after implementation and coverage audit.

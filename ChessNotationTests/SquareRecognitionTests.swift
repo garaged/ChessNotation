@@ -4,6 +4,18 @@ import Testing
 
 struct SquareRecognitionTests {
     @Test
+    func defaultConfigurationUsesTenSecondBonusGameWithValidPrompt() {
+        let store = InMemorySquareRecognitionHistoryStore()
+        let viewModel = SquareRecognitionViewModel(historyStore: store, now: Date(timeIntervalSince1970: 100))
+
+        #expect(viewModel.remainingTime == 10)
+        #expect(viewModel.result == nil)
+        #expect(SquareRecognitionViewModel.validCoordinates.count == 64)
+        #expect(SquareRecognitionViewModel.validCoordinates.contains(viewModel.targetCoordinate))
+        #expect(viewModel.targetCoordinate.range(of: #"^[a-h][1-8]$"#, options: .regularExpression) != nil)
+    }
+
+    @Test
     func bonusVariantCorrectAnswerDeductsLatencyAndAddsBonus() throws {
         let store = InMemorySquareRecognitionHistoryStore()
         let start = Date(timeIntervalSince1970: 100)
@@ -63,6 +75,37 @@ struct SquareRecognitionTests {
     }
 
     @Test
+    func customFeedbackDelayDoesNotChangeScoringRules() throws {
+        let store = InMemorySquareRecognitionHistoryStore()
+        let start = Date(timeIntervalSince1970: 100)
+        let viewModel = SquareRecognitionViewModel(
+            variant: .bonus,
+            feedbackDelay: 0.6,
+            historyStore: store,
+            now: start
+        )
+
+        viewModel.selectSquare(viewModel.targetCoordinate, at: start.addingTimeInterval(1.2))
+
+        #expect(abs(viewModel.remainingTime - 9.3) < 0.001)
+        #expect(viewModel.feedbackDelay == 0.6)
+    }
+
+
+    @Test
+    func answerThatConsumesRemainingTimeEndsSession() throws {
+        let store = InMemorySquareRecognitionHistoryStore()
+        let start = Date(timeIntervalSince1970: 100)
+        let viewModel = SquareRecognitionViewModel(initialTime: 1, variant: .strict, historyStore: store, now: start)
+
+        viewModel.selectSquare(viewModel.targetCoordinate, at: start.addingTimeInterval(1.1))
+
+        #expect(viewModel.isFinished)
+        #expect(viewModel.result?.totalPrompts == 1)
+        #expect(store.results.count == 1)
+    }
+
+    @Test
     func timeoutCreatesZeroAnswerResultAndHistoryEntry() throws {
         let store = InMemorySquareRecognitionHistoryStore()
         let start = Date(timeIntervalSince1970: 100)
@@ -96,6 +139,33 @@ struct SquareRecognitionTests {
         #expect(abs(result.averageLatency - 0.766666) < 0.001)
         #expect(result.fastestCorrectLatency == 0.4)
         #expect(result.slowestLatency == 1.1)
+        #expect(result.schemaVersion == 1)
+        #expect(result.gameType == "squareRecognition")
+    }
+
+    @Test
+    @MainActor
+    func resultDecodesExistingHistoryWithoutSchemaVersion() throws {
+        let data = try #require(
+            """
+            {
+              "id": "00000000-0000-0000-0000-000000000001",
+              "initialTime": 10,
+              "variant": "bonus",
+              "answers": [],
+              "finishedAt": "2026-06-28T12:00:00Z",
+              "gameType": "squareRecognition"
+            }
+            """.data(using: .utf8)
+        )
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        let result = try decoder.decode(SquareRecognitionResult.self, from: data)
+
+        #expect(result.schemaVersion == 1)
+        #expect(result.score == 0)
+        #expect(result.gameType == "squareRecognition")
     }
 
     @Test

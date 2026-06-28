@@ -1,8 +1,8 @@
 # CN-SPEC-0013: Premium Rendered Artwork Quality
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -286,29 +286,23 @@ When bitmap artwork includes boards or pieces, it must follow these rules:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0013-AC001
-- Pending coverage: CN-SPEC-0013-AC002
-- Pending coverage: CN-SPEC-0013-AC003
-- Pending coverage: CN-SPEC-0013-AC004
-- Pending coverage: CN-SPEC-0013-AC005
-- Pending coverage: CN-SPEC-0013-AC006
-- Pending coverage: CN-SPEC-0013-AC007
-- Pending coverage: CN-SPEC-0013-AC008
-- Pending coverage: CN-SPEC-0013-AC009
-- Pending coverage: CN-SPEC-0013-AC010
+- `ChessNotationTests/PremiumAssetTests.swift`: CN-SPEC-0013-AC001, CN-SPEC-0013-AC006, CN-SPEC-0013-AC007
+- `ChessNotation/Assets.xcassets`: CN-SPEC-0013-AC001, CN-SPEC-0013-AC002, CN-SPEC-0013-AC004, CN-SPEC-0013-AC005, CN-SPEC-0013-AC006, CN-SPEC-0013-AC007, CN-SPEC-0013-AC008
+- `ChessNotation/Features/Home/HomeView.swift`: CN-SPEC-0013-AC001, CN-SPEC-0013-AC003, CN-SPEC-0013-AC004, CN-SPEC-0013-AC008
+- `ChessNotation/Features/Home/PremiumDesign.swift`: CN-SPEC-0013-AC005, CN-SPEC-0013-AC007
+- `ChessNotation/Features/Game/ChessBoardView.swift`: CN-SPEC-0013-AC006, CN-SPEC-0013-AC010
+- `ChessNotation/Features/Game/GameTrainingView.swift`: CN-SPEC-0013-AC010
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionViews.swift`: CN-SPEC-0013-AC009
 
 ## Open Questions
 
-- Should final assets be generated manually once, or should a repeatable script
-  produce and catalog accepted candidates?
-- Should the live chessboard use custom bitmap piece art, or should piece
-  styling remain native text/SF-compatible until a dedicated piece-set spec is
-  accepted?
-- Should each tile asset be produced in one universal crop, or should separate
-  compact and regular crops be generated for small iPhone and iPad layouts?
+- Resolved: Final assets are generated once and committed for this release.
+- Resolved: The live chessboard uses custom bitmap piece art.
+- Resolved: Tile assets use one universal crop for the first implementation.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec defining premium rendered artwork quality
   for main tiles, boards, pieces, textures, shadows, prompts, and acceptance
   gates.
+- 2026-06-28: Accepted after asset import, live piece rendering, runtime availability tests, and coverage audit.

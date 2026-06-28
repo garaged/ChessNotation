@@ -1,8 +1,8 @@
 # CN-SPEC-0010: Premium Visual Redesign
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -182,47 +182,29 @@ and reused by redesigned screens.
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0010-AC001
-- Pending coverage: CN-SPEC-0010-AC002
-- Pending coverage: CN-SPEC-0010-AC003
-- Pending coverage: CN-SPEC-0010-AC004
-- Pending coverage: CN-SPEC-0010-AC005
-- Pending coverage: CN-SPEC-0010-AC006
-- Pending coverage: CN-SPEC-0010-AC007
-- Pending coverage: CN-SPEC-0010-AC008
-- Pending coverage: CN-SPEC-0010-AC009
-- Pending coverage: CN-SPEC-0010-AC010
-- Pending coverage: CN-SPEC-0010-AC011
-- Pending coverage: CN-SPEC-0010-AC012
-- Pending coverage: CN-SPEC-0010-AC013
-- Pending coverage: CN-SPEC-0010-AC014
-- Pending coverage: CN-SPEC-0010-AC015
-- Pending coverage: CN-SPEC-0010-AC016
-- Pending coverage: CN-SPEC-0010-AC017
-- Pending coverage: CN-SPEC-0010-AC018
-- Pending coverage: CN-SPEC-0010-AC019
-- Pending coverage: CN-SPEC-0010-AC020
-- Pending coverage: CN-SPEC-0010-AC021
-- Pending coverage: CN-SPEC-0010-AC022
-- Pending coverage: CN-SPEC-0010-AC023
-- Pending coverage: CN-SPEC-0010-AC024
-- Pending coverage: CN-SPEC-0010-AC025
-- Pending coverage: CN-SPEC-0010-AC026
-- Pending coverage: CN-SPEC-0010-AC027
-- Pending coverage: CN-SPEC-0010-AC028
-- Pending coverage: CN-SPEC-0010-AC029
-- Pending coverage: CN-SPEC-0010-AC030
+- `ChessNotationUITests/ChessNotationUITests.swift`: CN-SPEC-0010-AC001, CN-SPEC-0010-AC002, CN-SPEC-0010-AC003, CN-SPEC-0010-AC004, CN-SPEC-0010-AC005, CN-SPEC-0010-AC006, CN-SPEC-0010-AC007, CN-SPEC-0010-AC008, CN-SPEC-0010-AC009, CN-SPEC-0010-AC010, CN-SPEC-0010-AC011, CN-SPEC-0010-AC012, CN-SPEC-0010-AC013, CN-SPEC-0010-AC014, CN-SPEC-0010-AC015, CN-SPEC-0010-AC024, CN-SPEC-0010-AC025, CN-SPEC-0010-AC027, CN-SPEC-0010-AC029
+- `ChessNotationTests/PremiumAssetTests.swift`: CN-SPEC-0010-AC002, CN-SPEC-0010-AC008
+- `ChessNotation/Features/Home/PremiumDesign.swift`: CN-SPEC-0010-AC001, CN-SPEC-0010-AC018, CN-SPEC-0010-AC026, CN-SPEC-0010-AC028, CN-SPEC-0010-AC029
+- `ChessNotation/Assets.xcassets`: CN-SPEC-0010-AC001, CN-SPEC-0010-AC002, CN-SPEC-0010-AC008, CN-SPEC-0010-AC029
+- `ChessNotation/Features/Home/HomeView.swift`: CN-SPEC-0010-AC001, CN-SPEC-0010-AC002, CN-SPEC-0010-AC003, CN-SPEC-0010-AC004, CN-SPEC-0010-AC005, CN-SPEC-0010-AC006, CN-SPEC-0010-AC007, CN-SPEC-0010-AC008, CN-SPEC-0010-AC009, CN-SPEC-0010-AC010, CN-SPEC-0010-AC011, CN-SPEC-0010-AC013, CN-SPEC-0010-AC014, CN-SPEC-0010-AC015, CN-SPEC-0010-AC024, CN-SPEC-0010-AC025, CN-SPEC-0010-AC027, CN-SPEC-0010-AC028, CN-SPEC-0010-AC029, CN-SPEC-0010-AC030
+- `ChessNotation/Features/Game/GameTrainingView.swift`: CN-SPEC-0010-AC016, CN-SPEC-0010-AC017, CN-SPEC-0010-AC024, CN-SPEC-0010-AC025, CN-SPEC-0010-AC028
+- `ChessNotation/Features/Game/ChessBoardView.swift`: CN-SPEC-0010-AC016, CN-SPEC-0010-AC017, CN-SPEC-0010-AC028
+- `ChessNotation/Features/Results/ResultsView.swift`: CN-SPEC-0010-AC018, CN-SPEC-0010-AC024, CN-SPEC-0010-AC025, CN-SPEC-0010-AC028
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionViews.swift`: CN-SPEC-0010-AC019, CN-SPEC-0010-AC020, CN-SPEC-0010-AC021, CN-SPEC-0010-AC024, CN-SPEC-0010-AC025, CN-SPEC-0010-AC028
+- `ChessNotation/Features/Home/InstructionsView.swift`: CN-SPEC-0010-AC012, CN-SPEC-0010-AC022, CN-SPEC-0010-AC024, CN-SPEC-0010-AC025, CN-SPEC-0010-AC028
+- `ChessNotation/Features/Home/AppearanceSettingsView.swift`: CN-SPEC-0010-AC004, CN-SPEC-0010-AC023, CN-SPEC-0010-AC024, CN-SPEC-0010-AC025, CN-SPEC-0010-AC028
 
 ## Open Questions
 
-- Should a bottom navigation bar be implemented later, or should the first pass avoid it because Stats, Profile, Favorites, and Review are not implemented?
-- Should the app force dark appearance for these screens, or adapt the premium design to system light and dark modes?
-- Should Settings remain a sheet, become a pushed screen, or be grouped with an About screen if the premium redesign needs a more complete support surface?
-- Should Square Recognition history remain nested inside setup, or become a first-class screen if history becomes visually important?
-- Should iPad be included in the first redesign verification pass, or explicitly deferred until the iPhone visual system is stable?
+- Resolved: Bottom navigation is avoided in the first pass because those destinations are not implemented.
+- Resolved: Premium screens force dark presentation.
+- Resolved: Settings remains a sheet with app version shown in the toolbar area.
+- Resolved: Square Recognition history remains nested inside setup until broader history work changes it.
+- Resolved: iPhone is the first visual target; iPad-specific refinement is deferred.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec for mock-driven premium visual redesign.
 - 2026-06-27: Expanded scope to require the same premium visual system across all app screens and allow screen additions/removals when they improve flow.
 - 2026-06-27: Added final screen map, design tokens, no-fake-navigation rule, Dynamic Type requirements, and visual screenshot verification requirements.
+- 2026-06-28: Accepted after implementation and coverage audit across UI tests, premium source files, and committed assets.

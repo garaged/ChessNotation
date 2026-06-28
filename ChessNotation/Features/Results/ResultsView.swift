@@ -4,6 +4,7 @@ struct ResultsView: View {
     @Environment(\.dismiss) private var dismiss
 
     let summary: TrainingSessionSummary
+    var historySaveError: String?
     let restart: () -> Void
     var startNewGame: (() -> Void)?
 
@@ -26,6 +27,13 @@ struct ResultsView: View {
                     metricRow("Correct moves", "\(summary.correctMoves)")
                     metricRow("Incorrect moves", "\(summary.incorrectMoves)")
                     metricRow("Accuracy", summary.accuracy.formatted(.percent.precision(.fractionLength(0))))
+                }
+            }
+
+            if let historySaveError {
+                Section("History") {
+                    Text("This result could not be saved: \(historySaveError)")
+                        .foregroundStyle(PremiumDesign.Accent.danger.color)
                 }
             }
 

@@ -4,9 +4,9 @@ ChessNotation is an iOS SwiftUI app for practicing standard algebraic chess nota
 
 ## Current release
 
-- Version: `2.0.0`
-- Build: `10`
-- Release focus: premium visual redesign, rendered chess-piece artwork, timed training, square recognition, and richer game-library previews.
+- Version: `2.0.2`
+- Build: `1`
+- Release focus: current-position evaluation, all-mode training history, interactive trend charts, premium visual redesign, timed training, square recognition, and richer game-library previews.
 
 ## Current scope
 
@@ -14,10 +14,11 @@ ChessNotation is an iOS SwiftUI app for practicing standard algebraic chess nota
 - Browse the game library with thumbnail board previews for each game.
 - Filter by level and opening, or search by title, players, opening, or difficulty.
 - Start a random game from the filtered library.
-- Train move-by-move with SAN input, hints, reveal, evaluation context, and results.
+- Train move-by-move with SAN input, hints, reveal, current-position evaluation context, and results.
 - Play timed notation sessions with selectable duration, remaining-time display, timeout handling, and timed results.
 - Practice square recognition by tapping prompted coordinates with bonus or strict timing variants.
-- Review square-recognition results history stored on device.
+- Review notation, timed notation, and square-recognition history stored on device.
+- Filter history by today, last week, last month, or last year with trend charts and tap-to-read values.
 - Customize board coordinates, per-difficulty evaluation visibility, and board style.
 - Render boards with bundled transparent chess-piece artwork and selectable visual themes: Current, Marble, Wood, and Metal.
 
@@ -29,6 +30,8 @@ ChessNotation is an iOS SwiftUI app for practicing standard algebraic chess nota
 - `ChessNotation/ChessNotation/Services`: parsing, validation, and bundled game loading
 - `ChessNotationTests`: unit and integration coverage
 - `ChessNotationUITests`: end-to-end UI coverage
+- `specs/features`: active spec-driven development contracts
+- `specs/archive/features`: completed accepted specs kept for history
 
 ## Requirements
 
@@ -53,9 +56,10 @@ Run tests from Xcode or with `Product > Test`.
 
 ## Spec-driven development
 
-Feature behavior is documented under [specs/features](specs/features). Start
-user-visible changes by adding or updating a spec, then trace acceptance
-criteria to implementation coverage.
+Feature behavior is documented under [specs/features](specs/features). Accepted
+completed specs are retained under [specs/archive/features](specs/archive/features).
+Start user-visible changes by adding or updating an active spec, then trace
+acceptance criteria to implementation coverage.
 
 Validate specs from the terminal:
 
@@ -65,6 +69,12 @@ make spec-check
 
 See [specs/README.md](specs/README.md) for the workflow, required sections,
 status values, and traceability rules.
+
+## AI-assisted development
+
+AI coding agents and AI-assisted contributors should follow [AGENTS.md](AGENTS.md).
+That file defines the repository operating contract for spec-driven work,
+validation, documentation updates, asset rules, and handoff expectations.
 
 ## Bundled game format
 
@@ -95,6 +105,7 @@ This project is licensed under the GNU General Public License v3.0. See [LICENSE
 Before publishing publicly or shipping to the App Store, review:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md)
+- [AGENTS.md](AGENTS.md)
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - [PRIVACY.md](PRIVACY.md)
 - [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)

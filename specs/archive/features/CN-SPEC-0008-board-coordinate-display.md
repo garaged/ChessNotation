@@ -1,8 +1,8 @@
 # CN-SPEC-0008: Board Coordinate Display
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -52,19 +52,18 @@ Out of scope:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0008-AC001
-- Pending coverage: CN-SPEC-0008-AC002
-- Pending coverage: CN-SPEC-0008-AC003
-- Pending coverage: CN-SPEC-0008-AC004
-- Pending coverage: CN-SPEC-0008-AC005
-- Pending coverage: CN-SPEC-0008-AC006
-- Pending coverage: CN-SPEC-0008-AC007
+- `ChessNotationTests/NotationServicesTests.swift`: CN-SPEC-0008-AC004
+- `ChessNotation/App/AppSettings.swift`: CN-SPEC-0008-AC004
+- `ChessNotation/Features/Game/ChessBoardView.swift`: CN-SPEC-0008-AC001, CN-SPEC-0008-AC003, CN-SPEC-0008-AC006, CN-SPEC-0008-AC007
+- `ChessNotation/Features/Game/GameTrainingView.swift`: CN-SPEC-0008-AC001, CN-SPEC-0008-AC003, CN-SPEC-0008-AC006
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionViews.swift`: CN-SPEC-0008-AC002, CN-SPEC-0008-AC003, CN-SPEC-0008-AC005, CN-SPEC-0008-AC006, CN-SPEC-0008-AC007
 
 ## Open Questions
 
-- Should untimed training games expose the same coordinate setting in the first implementation, or should it remain timed-only until timed games ship?
-- Should board orientation changes later reverse coordinate placement with the board?
+- Resolved: Untimed training adopts the same shared coordinate setting.
+- Resolved: Orientation changes are deferred; current coordinate placement follows White's perspective.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec for optional classic board coordinates in timed games.
+- 2026-06-28: Accepted after implementation and coverage audit.

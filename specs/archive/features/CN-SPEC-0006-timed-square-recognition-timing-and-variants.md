@@ -1,8 +1,8 @@
 # CN-SPEC-0006: Timed Square Recognition Timing and Variants
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -61,23 +61,16 @@ Out of scope:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0006-AC001
-- Pending coverage: CN-SPEC-0006-AC002
-- Pending coverage: CN-SPEC-0006-AC003
-- Pending coverage: CN-SPEC-0006-AC004
-- Pending coverage: CN-SPEC-0006-AC005
-- Pending coverage: CN-SPEC-0006-AC006
-- Pending coverage: CN-SPEC-0006-AC007
-- Pending coverage: CN-SPEC-0006-AC008
-- Pending coverage: CN-SPEC-0006-AC009
-- Pending coverage: CN-SPEC-0006-AC010
+- `ChessNotationTests/SquareRecognitionTests.swift`: CN-SPEC-0006-AC001, CN-SPEC-0006-AC002, CN-SPEC-0006-AC003, CN-SPEC-0006-AC004, CN-SPEC-0006-AC005, CN-SPEC-0006-AC006, CN-SPEC-0006-AC007, CN-SPEC-0006-AC008, CN-SPEC-0006-AC009, CN-SPEC-0006-AC010
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionViewModel.swift`: CN-SPEC-0006-AC001, CN-SPEC-0006-AC002, CN-SPEC-0006-AC003, CN-SPEC-0006-AC004, CN-SPEC-0006-AC005, CN-SPEC-0006-AC006, CN-SPEC-0006-AC007, CN-SPEC-0006-AC008, CN-SPEC-0006-AC009, CN-SPEC-0006-AC010
 
 ## Open Questions
 
-- Should the 0.5-second bonus be capped so remaining time cannot exceed the configured initial time?
-- Should displayed time round down, round nearest, or show tenths when under 10 seconds?
+- Resolved: Bonus time is not capped in the first implementation.
+- Resolved: Square-recognition time displays in tenths.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec for timed square-recognition timing and scoring variants.
 - 2026-06-27: Confirmed `Strict` as the intended variant B.
+- 2026-06-28: Accepted after implementation and coverage audit.

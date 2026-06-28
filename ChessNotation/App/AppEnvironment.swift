@@ -15,6 +15,10 @@ enum AppEnvironment {
         SquareRecognitionHistoryStore()
     }
 
+    static func makeNotationTrainingHistoryStore() -> NotationTrainingHistoryStoring {
+        NotationTrainingHistoryStore()
+    }
+
     private static let sampleGames: [NotationGame] = [
         NotationGame(
             id: "mini-opera",

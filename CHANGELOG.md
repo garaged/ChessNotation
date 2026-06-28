@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.2] - 2026-06-28
+
+### Added
+- Current-position evaluation display for evaluated notation games, using stored bundled engine data from the reached board position.
+- Local notation and timed-notation history with accuracy, first-try rate, completion, move timing, pace, finish reason, and weak move-tag metrics.
+- Today, last-week, last-month, and last-year history range filters across notation, timed notation, and square-recognition history.
+- Trend charts with y-axis context, sparse x-axis labels, visible data points, and tap-to-read temporary value overlays.
+- Schema-versioned square-recognition history decoding that preserves existing saved results.
+- Expanded AI-agent operating documentation for spec-driven development workflows.
+
+### Changed
+- Evaluation context now follows the current visible board position instead of the pending prompt.
+- Square-recognition history now includes summary metrics and score/latency trends.
+- Timed notation history now emphasizes pace, completion, finish reason, and selected duration.
+- Result screens now report history-save failures without blocking the result summary or further play.
+
+### Fixed
+- Prevented fabricated neutral evaluations when evaluated data is unavailable for the current position.
+- Prevented duplicate notation history records when results are revisited or restarted.
+
 ## [2.0.0] - 2026-06-28
 
 ### Added

@@ -4,12 +4,26 @@ struct GameTrainingView: View {
     @Environment(AppSettings.self) private var appSettings
     @Environment(\.dismiss) private var dismiss
     @State var viewModel: GameViewModel
+    @State private var savedHistoryRecordID: UUID?
+    @State private var historySaveError: String?
+
+    let historyStore: NotationTrainingHistoryStoring
+
+    init(
+        viewModel: GameViewModel,
+        historyStore: NotationTrainingHistoryStoring = AppEnvironment.makeNotationTrainingHistoryStore()
+    ) {
+        self.viewModel = viewModel
+        self.historyStore = historyStore
+    }
 
     var body: some View {
         Group {
             if viewModel.isFinished {
-                ResultsView(summary: viewModel.summary) {
+                ResultsView(summary: viewModel.summary, historySaveError: historySaveError) {
                     viewModel.reset()
+                    savedHistoryRecordID = nil
+                    historySaveError = nil
                 } startNewGame: {
                     dismiss()
                 }
@@ -19,6 +33,9 @@ struct GameTrainingView: View {
         }
         .task(id: viewModel.isFinished) {
             await runCountdownIfNeeded()
+        }
+        .task(id: viewModel.isFinished) {
+            saveHistoryIfNeeded()
         }
         .navigationTitle(viewModel.game.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -34,7 +51,7 @@ struct GameTrainingView: View {
                     ChessBoardView(
                         fen: move.fenBefore,
                         highlightedMove: move,
-                        showsEvaluation: appSettings.isEvaluationEnabled(for: viewModel.game.difficulty),
+                        evaluation: displayedEvaluation,
                         showsCoordinates: appSettings.showBoardCoordinates
                     )
                         .padding(.horizontal)
@@ -161,6 +178,11 @@ struct GameTrainingView: View {
         viewModel.isLowTime ? PremiumDesign.Accent.danger.color.opacity(0.16) : PremiumDesign.elevatedSurface
     }
 
+    private var displayedEvaluation: EngineEvaluation? {
+        guard appSettings.isEvaluationEnabled(for: viewModel.game.difficulty) else { return nil }
+        return viewModel.currentPositionEvaluation
+    }
+
     private var statsCard: some View {
         HStack(spacing: 8) {
             PremiumMetricPill(title: "Solved", value: "\(viewModel.completedMoves)", accent: .practice)
@@ -212,6 +234,19 @@ struct GameTrainingView: View {
             await MainActor.run {
                 viewModel.tickTimer()
             }
+        }
+    }
+
+    private func saveHistoryIfNeeded() {
+        guard viewModel.isFinished, savedHistoryRecordID == nil else { return }
+        let record = NotationTrainingHistoryRecord(summary: viewModel.summary)
+        savedHistoryRecordID = record.id
+
+        do {
+            try historyStore.saveResult(record)
+            historySaveError = nil
+        } catch {
+            historySaveError = error.localizedDescription
         }
     }
 }

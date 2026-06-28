@@ -1,8 +1,8 @@
 # CN-SPEC-0012: Game Thumbnail Previews
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -124,13 +124,12 @@ and must be replaced by a thumbnail generated from the real game's move data.
 
 ## Open Questions
 
-- Should thumbnails be generated at app launch, lazily per visible row, or
-  precomputed into bundled assets during development?
-- Should thumbnail previews use the selected board theme, or a fixed premium
-  thumbnail palette for visual consistency in the library?
-- Should the preview ply be fixed at 8 for all games, or configurable later?
+- Resolved: Thumbnails are generated at runtime for visible game rows.
+- Resolved: Thumbnail previews use the shared premium board/piece presentation.
+- Resolved: Preview ply is fixed at 8 for the first implementation.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec for game-specific board thumbnail previews.
 - 2026-06-27: Added operational move-application fallback rules and thumbnail source metadata.
+- 2026-06-28: Accepted after implementation and coverage audit.

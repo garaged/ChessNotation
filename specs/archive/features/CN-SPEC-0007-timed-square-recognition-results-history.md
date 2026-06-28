@@ -1,8 +1,8 @@
 # CN-SPEC-0007: Timed Square Recognition Results History
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -56,23 +56,19 @@ Out of scope:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0007-AC001
-- Pending coverage: CN-SPEC-0007-AC002
-- Pending coverage: CN-SPEC-0007-AC003
-- Pending coverage: CN-SPEC-0007-AC004
-- Pending coverage: CN-SPEC-0007-AC005
-- Pending coverage: CN-SPEC-0007-AC006
-- Pending coverage: CN-SPEC-0007-AC007
-- Pending coverage: CN-SPEC-0007-AC008
-- Pending coverage: CN-SPEC-0007-AC009
-- Pending coverage: CN-SPEC-0007-AC010
+- `ChessNotationTests/SquareRecognitionTests.swift`: CN-SPEC-0007-AC002, CN-SPEC-0007-AC003, CN-SPEC-0007-AC004, CN-SPEC-0007-AC005, CN-SPEC-0007-AC010
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionModels.swift`: CN-SPEC-0007-AC001, CN-SPEC-0007-AC002, CN-SPEC-0007-AC003, CN-SPEC-0007-AC006, CN-SPEC-0007-AC007, CN-SPEC-0007-AC010
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionViewModel.swift`: CN-SPEC-0007-AC003, CN-SPEC-0007-AC004, CN-SPEC-0007-AC008, CN-SPEC-0007-AC009
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionHistoryStore.swift`: CN-SPEC-0007-AC004, CN-SPEC-0007-AC005
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionViews.swift`: CN-SPEC-0007-AC001, CN-SPEC-0007-AC006, CN-SPEC-0007-AC007, CN-SPEC-0007-AC008, CN-SPEC-0007-AC009
 
 ## Open Questions
 
-- Should history have a maximum retained count or age?
-- Should users be able to clear square-recognition history?
-- Should the first implementation include a chart, or is a sortable/list view enough?
+- Resolved: The first implementation does not enforce a maximum retained count or age.
+- Resolved: Clear-history controls are deferred.
+- Resolved: The first implementation uses a reverse-chronological list; charts are deferred to broader history work.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec for timed square-recognition results and history.
+- 2026-06-28: Accepted after implementation and coverage audit.

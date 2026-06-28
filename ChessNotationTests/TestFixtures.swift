@@ -58,4 +58,48 @@ enum TestFixtures {
             )
         ]
     )
+
+    static let evaluatedGame = NotationGame(
+        id: "evaluated-game",
+        title: "Evaluated Game",
+        white: "White",
+        black: "Black",
+        year: 2026,
+        opening: "Test Opening",
+        difficulty: .advanced,
+        moves: [
+            NotationMove(
+                moveNumber: 1,
+                side: .white,
+                fenBefore: "startpos",
+                from: "e2",
+                to: "e4",
+                san: "e4",
+                coordinate: "e2e4",
+                tags: [.pawnMove],
+                engineEvaluation: EngineEvaluation(
+                    engine: "Stockfish",
+                    depth: 12,
+                    fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+                    score: EngineScore(kind: .centipawn, whiteCentipawns: 42, mateIn: nil)
+                )
+            ),
+            NotationMove(
+                moveNumber: 1,
+                side: .black,
+                fenBefore: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+                from: "e7",
+                to: "e5",
+                san: "e5",
+                coordinate: "e7e5",
+                tags: [.pawnMove],
+                engineEvaluation: EngineEvaluation(
+                    engine: "Stockfish",
+                    depth: 12,
+                    fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+                    score: EngineScore(kind: .centipawn, whiteCentipawns: 18, mateIn: nil)
+                )
+            )
+        ]
+    )
 }

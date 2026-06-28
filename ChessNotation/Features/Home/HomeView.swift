@@ -167,10 +167,16 @@ struct GameLibraryView: View {
 
     private let libraryService: GameLibraryProviding
     private let launchMode: GameLibraryLaunchMode
+    private let historyStore: NotationTrainingHistoryStoring
 
-    init(libraryService: GameLibraryProviding, launchMode: GameLibraryLaunchMode) {
+    init(
+        libraryService: GameLibraryProviding,
+        launchMode: GameLibraryLaunchMode,
+        historyStore: NotationTrainingHistoryStoring = AppEnvironment.makeNotationTrainingHistoryStore()
+    ) {
         self.libraryService = libraryService
         self.launchMode = launchMode
+        self.historyStore = historyStore
     }
 
     var body: some View {
@@ -187,6 +193,18 @@ struct GameLibraryView: View {
 
             Section("Launch Mode") {
                 LaunchModeSummary(launchMode: launchMode)
+            }
+
+            Section("History") {
+                NavigationLink {
+                    NotationTrainingHistoryView(
+                        launchMode: launchMode,
+                        historyStore: historyStore
+                    )
+                } label: {
+                    Label("\(launchMode.displayName) history", systemImage: "chart.xyaxis.line")
+                }
+                .accessibilityIdentifier("library.notationHistoryLink")
             }
 
             Section("Filters") {
@@ -249,7 +267,10 @@ struct GameLibraryView: View {
         .searchable(text: $filters.searchText, prompt: "Search title, players, opening")
         .accessibilityIdentifier("library.screen")
         .navigationDestination(item: $selectedRoute) { route in
-            GameTrainingView(viewModel: GameViewModel(game: route.game, mode: route.mode))
+            GameTrainingView(
+                viewModel: GameViewModel(game: route.game, mode: route.mode),
+                historyStore: historyStore
+            )
         }
         .sheet(item: $timedGameSelection) { game in
             TimedGameConfigurationView(game: game) { duration in
@@ -340,6 +361,214 @@ private struct GameTrainingRoute: Identifiable, Hashable {
             return "\(game.id)-untimed"
         case .timed(let durationSeconds):
             return "\(game.id)-timed-\(durationSeconds)"
+        }
+    }
+}
+
+struct NotationTrainingHistoryView: View {
+    let launchMode: GameLibraryLaunchMode
+    let historyStore: NotationTrainingHistoryStoring
+
+    @State private var records: [NotationTrainingHistoryRecord] = []
+    @State private var selectedRange: HistoryRange = .lastWeek
+    @State private var loadError: String?
+
+    private var modeGameType: String {
+        launchMode == .timed ? "timedNotation" : "notation"
+    }
+
+    private var modeRecords: [NotationTrainingHistoryRecord] {
+        records.filter { $0.gameType == modeGameType }
+    }
+
+    private var filteredRecords: [NotationTrainingHistoryRecord] {
+        modeRecords.filter { selectedRange.contains($0.finishedAt) }
+    }
+
+    private var chronologicalRecords: [NotationTrainingHistoryRecord] {
+        filteredRecords.sorted { $0.finishedAt < $1.finishedAt }
+    }
+
+    var body: some View {
+        List {
+            Section {
+                Picker("Range", selection: $selectedRange) {
+                    ForEach(HistoryRange.allCases) { range in
+                        Text(range.displayName).tag(range)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("notationHistory.rangePicker")
+            }
+
+            if filteredRecords.isEmpty, loadError == nil {
+                ContentUnavailableView(
+                    "No History",
+                    systemImage: "chart.xyaxis.line",
+                    description: Text("Completed \(launchMode.displayName.lowercased()) sessions will appear here.")
+                )
+            } else {
+                summarySection
+                trendSection
+                weakTagsSection
+                sessionsSection
+            }
+
+            if let loadError {
+                Text(loadError)
+                    .foregroundStyle(PremiumDesign.Accent.danger.color)
+            }
+        }
+        .listStyle(.insetGrouped)
+        .premiumScreenBackground()
+        .navigationTitle("\(launchMode.displayName) History")
+        .task {
+            loadHistory()
+        }
+    }
+
+    private var summarySection: some View {
+        Section("Summary") {
+            metricRow("Sessions", "\(filteredRecords.count)")
+            metricRow("Average accuracy", average(\.accuracy).formatted(.percent.precision(.fractionLength(0))))
+            metricRow("First-try rate", average(\.firstTryRate).formatted(.percent.precision(.fractionLength(0))))
+            metricRow("Completion", average(\.completionPercentage).formatted(.percent.precision(.fractionLength(0))))
+            metricRow("Average move time", average(\.averageMoveTime).formattedMoveTime)
+
+            if launchMode == .timed {
+                metricRow("Moves per minute", averageMovesPerMinuteText)
+                metricRow("Completed", "\(filteredRecords.filter { $0.finishReason == .completed }.count)")
+                metricRow("Timed out", "\(filteredRecords.filter { $0.finishReason == .timedOut }.count)")
+            }
+        }
+    }
+
+    private var trendSection: some View {
+        Section("Trend") {
+            if chronologicalRecords.count >= 2 {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(launchMode == .timed ? "Pace" : "Accuracy")
+                        .font(.headline)
+                    PremiumTrendLine(
+                        values: launchMode == .timed ? timedTrendValues : chronologicalRecords.map(\.accuracy),
+                        xAxisLabels: selectedRange.axisLabels(for: chronologicalRecords.map(\.finishedAt)),
+                        accent: launchMode == .timed ? .timed : .practice,
+                        valueFormatter: launchMode == .timed ? { value in
+                            value.formatted(.number.precision(.fractionLength(1)))
+                        } : { value in
+                            value.formatted(.percent.precision(.fractionLength(0)))
+                        }
+                    )
+                    Text(launchMode == .timed ? "Moves per minute with accuracy in summary." : "Accuracy trend with first-try rate in summary.")
+                        .font(.caption)
+                        .foregroundStyle(PremiumDesign.secondaryText)
+                }
+            } else if let latest = filteredRecords.first {
+                metricRow("Latest accuracy", latest.accuracy.formatted(.percent.precision(.fractionLength(0))))
+                Text("Complete at least two sessions in this range to draw a trend.")
+                    .font(.caption)
+                    .foregroundStyle(PremiumDesign.secondaryText)
+            }
+        }
+    }
+
+    private var weakTagsSection: some View {
+        Section("Weak Move Tags") {
+            let tags = combinedMistakesByTag
+            if tags.isEmpty {
+                Text("No missed move categories in this range.")
+                    .foregroundStyle(PremiumDesign.secondaryText)
+            } else {
+                ForEach(tags, id: \.0) { tag, count in
+                    metricRow(MoveTypeTag(rawValue: tag)?.displayName ?? tag, "\(count)")
+                }
+            }
+        }
+    }
+
+    private var sessionsSection: some View {
+        Section("Sessions") {
+            ForEach(filteredRecords) { record in
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(record.gameTitle)
+                            .font(.headline)
+                        Spacer()
+                        Text(record.accuracy.formatted(.percent.precision(.fractionLength(0))))
+                            .font(.headline.monospacedDigit())
+                    }
+
+                    HStack {
+                        Label("\(record.completedMoves)/\(record.totalMoves)", systemImage: "checklist")
+                        Label(record.averageMoveTime.formattedMoveTime, systemImage: "timer")
+                        if let selectedDurationSeconds = record.selectedDurationSeconds {
+                            Label(selectedDurationSeconds.formattedClockDuration, systemImage: "stopwatch")
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(PremiumDesign.secondaryText)
+
+                    Text(record.finishedAt.formatted(date: .abbreviated, time: .shortened))
+                        .font(.caption2)
+                        .foregroundStyle(PremiumDesign.mutedText)
+                }
+                .padding(.vertical, 4)
+            }
+        }
+    }
+
+    private var averageMovesPerMinuteText: String {
+        let values = filteredRecords.compactMap(\.movesPerMinute)
+        guard !values.isEmpty else { return "-" }
+        let value = values.reduce(0, +) / Double(values.count)
+        return value.formatted(.number.precision(.fractionLength(1)))
+    }
+
+    private var timedTrendValues: [Double] {
+        chronologicalRecords.map { record in
+            record.movesPerMinute ?? Double(record.completedMoves)
+        }
+    }
+
+    private var combinedMistakesByTag: [(String, Int)] {
+        var counts: [String: Int] = [:]
+        for record in filteredRecords {
+            for (tag, count) in record.mistakesByTag {
+                counts[tag, default: 0] += count
+            }
+        }
+        return counts.sorted { $0.value > $1.value }
+    }
+
+    private func average(_ keyPath: KeyPath<NotationTrainingHistoryRecord, Double>) -> Double {
+        guard !filteredRecords.isEmpty else { return 0 }
+        return filteredRecords.map { $0[keyPath: keyPath] }.reduce(0, +) / Double(filteredRecords.count)
+    }
+
+    private func loadHistory() {
+        do {
+            records = try historyStore.loadResults()
+            selectedRange = defaultRange(for: modeRecords.map(\.finishedAt))
+            loadError = nil
+        } catch {
+            records = []
+            loadError = error.localizedDescription
+        }
+    }
+
+    private func defaultRange(for dates: [Date]) -> HistoryRange {
+        HistoryRange.allCases.first { range in
+            dates.contains { range.contains($0) }
+        } ?? .lastWeek
+    }
+
+    private func metricRow(_ title: String, _ value: String) -> some View {
+        HStack {
+            Text(title)
+                .foregroundStyle(PremiumDesign.primaryText)
+            Spacer()
+            Text(value)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
     }
 }
