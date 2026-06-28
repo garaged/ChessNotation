@@ -1,8 +1,8 @@
 # CN-SPEC-0005: Timed Square Recognition Setup
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -59,24 +59,20 @@ Out of scope:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0005-AC001
-- Pending coverage: CN-SPEC-0005-AC002
-- Pending coverage: CN-SPEC-0005-AC003
-- Pending coverage: CN-SPEC-0005-AC004
-- Pending coverage: CN-SPEC-0005-AC005
-- Pending coverage: CN-SPEC-0005-AC006
-- Pending coverage: CN-SPEC-0005-AC007
-- Pending coverage: CN-SPEC-0005-AC008
-- Pending coverage: CN-SPEC-0005-AC009
-- Pending coverage: CN-SPEC-0005-AC010
+- `ChessNotationUITests/ChessNotationUITests.swift`: CN-SPEC-0005-AC003, CN-SPEC-0005-AC004, CN-SPEC-0005-AC005, CN-SPEC-0005-AC009
+- `ChessNotationTests/SquareRecognitionTests.swift`: CN-SPEC-0005-AC001, CN-SPEC-0005-AC002, CN-SPEC-0005-AC004, CN-SPEC-0005-AC005, CN-SPEC-0005-AC006, CN-SPEC-0005-AC007, CN-SPEC-0005-AC008
+- `ChessNotationTests/NotationServicesTests.swift`: CN-SPEC-0005-AC010
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionViews.swift`: CN-SPEC-0005-AC001, CN-SPEC-0005-AC002, CN-SPEC-0005-AC003, CN-SPEC-0005-AC009, CN-SPEC-0005-AC010
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionViewModel.swift`: CN-SPEC-0005-AC004, CN-SPEC-0005-AC005, CN-SPEC-0005-AC006, CN-SPEC-0005-AC007, CN-SPEC-0005-AC008
 
 ## Open Questions
 
-- What configurable time values should be offered besides the 10-second default?
-- Should prompts avoid immediately repeating the same square?
-- Should board orientation be fixed from White's perspective or configurable?
+- Resolved: The first implementation offers 10, 30, and 60 seconds.
+- Resolved: Immediate prompt repeats are allowed in the first implementation.
+- Resolved: Board orientation is fixed from White's perspective.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec for timed square-recognition setup and prompt interaction.
 - 2026-06-27: Added dependency on shared board coordinate display.
+- 2026-06-28: Accepted after implementation and coverage audit.

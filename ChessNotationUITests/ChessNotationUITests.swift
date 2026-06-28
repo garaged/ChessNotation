@@ -113,7 +113,7 @@ final class ChessNotationUITests: XCTestCase {
 
         let progressText = app.staticTexts["game.progressText"]
         XCTAssertTrue(progressText.waitForExistence(timeout: 5))
-        XCTAssertEqual(progressText.label, "Move 1 of 1 (attempt 1/3)")
+        XCTAssertEqual(progressText.label, "Move 1 of 1")
     }
 
     @MainActor

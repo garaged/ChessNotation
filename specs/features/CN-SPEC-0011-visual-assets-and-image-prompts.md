@@ -1,8 +1,8 @@
 # CN-SPEC-0011: Visual Assets and Image Prompts
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -184,21 +184,20 @@ text, no logo, no watermark, suitable for overlaying bright app text.
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0011-AC001
-- Pending coverage: CN-SPEC-0011-AC002
-- Pending coverage: CN-SPEC-0011-AC003
-- Pending coverage: CN-SPEC-0011-AC004
-- Pending coverage: CN-SPEC-0011-AC005
-- Pending coverage: CN-SPEC-0011-AC006
-- Pending coverage: CN-SPEC-0011-AC007
+- `ChessNotationTests/PremiumAssetTests.swift`: CN-SPEC-0011-AC002, CN-SPEC-0011-AC005, CN-SPEC-0011-AC006
+- `ChessNotation/Assets.xcassets`: CN-SPEC-0011-AC002, CN-SPEC-0011-AC003, CN-SPEC-0011-AC005, CN-SPEC-0011-AC006
+- `ChessNotation/Features/Home/PremiumDesign.swift`: CN-SPEC-0011-AC004, CN-SPEC-0011-AC007
+- `ChessNotation/Features/Home/HomeView.swift`: CN-SPEC-0011-AC003, CN-SPEC-0011-AC004, CN-SPEC-0011-AC007
+- `specs/features/CN-SPEC-0011-visual-assets-and-image-prompts.md`: CN-SPEC-0011-AC001
 
 ## Open Questions
 
-- Should these assets be generated once and committed, or generated through a repeatable asset pipeline script?
-- Should image assets support light-mode variants, or should the premium redesign force dark presentation on these screens?
-- Should generated assets be photo-realistic or painterly if the first generation pass varies in quality?
+- Resolved: Assets are generated once and committed as app assets for the first implementation.
+- Resolved: Premium screens force dark presentation.
+- Resolved: The accepted asset set uses a coherent premium rendered/illustrated direction.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec defining premium visual assets and prompts.
 - 2026-06-27: Added asset loading, fallback, and release-readiness policy.
+- 2026-06-28: Accepted after asset import, runtime availability tests, and coverage audit.

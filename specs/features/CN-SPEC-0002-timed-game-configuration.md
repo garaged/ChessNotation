@@ -1,8 +1,8 @@
 # CN-SPEC-0002: Timed Game Configuration
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -52,20 +52,19 @@ Out of scope:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0002-AC001
-- Pending coverage: CN-SPEC-0002-AC002
-- Pending coverage: CN-SPEC-0002-AC003
-- Pending coverage: CN-SPEC-0002-AC004
-- Pending coverage: CN-SPEC-0002-AC005
-- Pending coverage: CN-SPEC-0002-AC006
-- Pending coverage: CN-SPEC-0002-AC007
+- `ChessNotationUITests/ChessNotationUITests.swift`: CN-SPEC-0002-AC001, CN-SPEC-0002-AC002, CN-SPEC-0002-AC003, CN-SPEC-0002-AC005, CN-SPEC-0002-AC006
+- `ChessNotationTests/GameViewModelIntegrationTests.swift`: CN-SPEC-0002-AC004, CN-SPEC-0002-AC005
+- `ChessNotationTests/NotationServicesTests.swift`: CN-SPEC-0002-AC007
+- `ChessNotation/Features/Home/HomeView.swift`: CN-SPEC-0002-AC001, CN-SPEC-0002-AC002, CN-SPEC-0002-AC003
+- `ChessNotation/Features/Game/GameTrainingView.swift`: CN-SPEC-0002-AC006, CN-SPEC-0002-AC007
 
 ## Open Questions
 
-- Should the timed mode entry be a per-game action, a global mode toggle, or both?
-- Should custom time limits be considered after the first implementation?
+- Resolved: Timed mode is entered from the Home Timed Notation tile and uses the shared Game Library in timed launch mode.
+- Resolved: Custom time limits are deferred; the first implementation supports 1, 3, and 5 minutes.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec for timed game configuration.
 - 2026-06-27: Added dependency on shared board coordinate display.
+- 2026-06-28: Accepted after implementation and coverage audit.

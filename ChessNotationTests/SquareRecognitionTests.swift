@@ -4,6 +4,18 @@ import Testing
 
 struct SquareRecognitionTests {
     @Test
+    func defaultConfigurationUsesTenSecondBonusGameWithValidPrompt() {
+        let store = InMemorySquareRecognitionHistoryStore()
+        let viewModel = SquareRecognitionViewModel(historyStore: store, now: Date(timeIntervalSince1970: 100))
+
+        #expect(viewModel.remainingTime == 10)
+        #expect(viewModel.result == nil)
+        #expect(SquareRecognitionViewModel.validCoordinates.count == 64)
+        #expect(SquareRecognitionViewModel.validCoordinates.contains(viewModel.targetCoordinate))
+        #expect(viewModel.targetCoordinate.range(of: #"^[a-h][1-8]$"#, options: .regularExpression) != nil)
+    }
+
+    @Test
     func bonusVariantCorrectAnswerDeductsLatencyAndAddsBonus() throws {
         let store = InMemorySquareRecognitionHistoryStore()
         let start = Date(timeIntervalSince1970: 100)
@@ -60,6 +72,37 @@ struct SquareRecognitionTests {
 
         #expect(viewModel.feedback == nil)
         #expect(viewModel.canAcceptAnswer)
+    }
+
+    @Test
+    func customFeedbackDelayDoesNotChangeScoringRules() throws {
+        let store = InMemorySquareRecognitionHistoryStore()
+        let start = Date(timeIntervalSince1970: 100)
+        let viewModel = SquareRecognitionViewModel(
+            variant: .bonus,
+            feedbackDelay: 0.6,
+            historyStore: store,
+            now: start
+        )
+
+        viewModel.selectSquare(viewModel.targetCoordinate, at: start.addingTimeInterval(1.2))
+
+        #expect(abs(viewModel.remainingTime - 9.3) < 0.001)
+        #expect(viewModel.feedbackDelay == 0.6)
+    }
+
+
+    @Test
+    func answerThatConsumesRemainingTimeEndsSession() throws {
+        let store = InMemorySquareRecognitionHistoryStore()
+        let start = Date(timeIntervalSince1970: 100)
+        let viewModel = SquareRecognitionViewModel(initialTime: 1, variant: .strict, historyStore: store, now: start)
+
+        viewModel.selectSquare(viewModel.targetCoordinate, at: start.addingTimeInterval(1.1))
+
+        #expect(viewModel.isFinished)
+        #expect(viewModel.result?.totalPrompts == 1)
+        #expect(store.results.count == 1)
     }
 
     @Test

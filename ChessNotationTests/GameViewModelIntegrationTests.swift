@@ -94,11 +94,24 @@ struct GameViewModelIntegrationTests {
         #expect(viewModel.remainingSeconds == 180)
         #expect(viewModel.currentMoveIndex == 0)
         #expect(viewModel.timerText == "3:00")
+        #expect(!viewModel.isLowTime)
 
         viewModel.tickTimer()
 
         #expect(viewModel.remainingSeconds == 179)
         #expect(!viewModel.isFinished)
+    }
+
+    @Test
+    func timedSessionEntersLowTimeWarningState() {
+        let viewModel = GameViewModel(game: TestFixtures.operaGame, mode: .timed(durationSeconds: 11))
+
+        #expect(!viewModel.isLowTime)
+
+        viewModel.tickTimer()
+
+        #expect(viewModel.remainingSeconds == 10)
+        #expect(viewModel.isLowTime)
     }
 
     @Test
@@ -116,6 +129,23 @@ struct GameViewModelIntegrationTests {
         #expect(viewModel.records.isEmpty)
         #expect(viewModel.currentMoveIndex == 0)
         #expect(viewModel.summary.finishReason == .timedOut)
+    }
+
+    @Test
+    func timedSessionCompletesFinalMoveBeforeTimeout() {
+        let viewModel = GameViewModel(game: TestFixtures.advancedGame, mode: .timed(durationSeconds: 60))
+
+        viewModel.answerText = "e4"
+        viewModel.submitAnswer()
+
+        #expect(viewModel.isFinished)
+        #expect(viewModel.summary.finishReason == .completed)
+        #expect(viewModel.summary.selectedDurationSeconds == 60)
+        #expect(viewModel.summary.timeUsedSeconds == 0)
+        #expect(viewModel.summary.completedMoves == 1)
+        #expect(viewModel.summary.correctMoves == 1)
+        #expect(viewModel.summary.incorrectMoves == 0)
+        #expect(viewModel.summary.accuracy == 1)
     }
 
     @Test

@@ -258,4 +258,29 @@ struct NotationServicesTests {
         let reloadedSettings = AppSettings(defaults: defaults)
         #expect(reloadedSettings.showBoardCoordinates)
     }
+
+    @Test
+    func appearanceSettingsPersistThemeAndEvaluationVisibility() throws {
+        let suiteName = "ChessNotationTests.appearanceSettings.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let settings = AppSettings(defaults: defaults)
+        #expect(settings.visualTheme == .current)
+        #expect(!settings.isEvaluationEnabled(for: .beginner))
+        #expect(settings.isEvaluationEnabled(for: .intermediate))
+        #expect(settings.isEvaluationEnabled(for: .advanced))
+
+        settings.visualTheme = .wood
+        settings.setEvaluationEnabled(true, for: .beginner)
+        settings.setEvaluationEnabled(false, for: .advanced)
+
+        let reloadedSettings = AppSettings(defaults: defaults)
+        #expect(reloadedSettings.visualTheme == .wood)
+        #expect(reloadedSettings.isEvaluationEnabled(for: .beginner))
+        #expect(reloadedSettings.isEvaluationEnabled(for: .intermediate))
+        #expect(!reloadedSettings.isEvaluationEnabled(for: .advanced))
+    }
 }

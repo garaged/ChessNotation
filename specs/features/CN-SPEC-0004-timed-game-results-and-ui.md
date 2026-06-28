@@ -1,8 +1,8 @@
 # CN-SPEC-0004: Timed Game Results and UI
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -55,22 +55,17 @@ Out of scope:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0004-AC001
-- Pending coverage: CN-SPEC-0004-AC002
-- Pending coverage: CN-SPEC-0004-AC003
-- Pending coverage: CN-SPEC-0004-AC004
-- Pending coverage: CN-SPEC-0004-AC005
-- Pending coverage: CN-SPEC-0004-AC006
-- Pending coverage: CN-SPEC-0004-AC007
-- Pending coverage: CN-SPEC-0004-AC008
-- Pending coverage: CN-SPEC-0004-AC009
-- Pending coverage: CN-SPEC-0004-AC010
+- `ChessNotationUITests/ChessNotationUITests.swift`: CN-SPEC-0004-AC001, CN-SPEC-0004-AC002, CN-SPEC-0004-AC004, CN-SPEC-0004-AC005, CN-SPEC-0004-AC007, CN-SPEC-0004-AC010
+- `ChessNotationTests/GameViewModelIntegrationTests.swift`: CN-SPEC-0004-AC001, CN-SPEC-0004-AC003, CN-SPEC-0004-AC005, CN-SPEC-0004-AC006, CN-SPEC-0004-AC007, CN-SPEC-0004-AC008
+- `ChessNotation/Features/Game/GameTrainingView.swift`: CN-SPEC-0004-AC001, CN-SPEC-0004-AC002, CN-SPEC-0004-AC003, CN-SPEC-0004-AC004, CN-SPEC-0004-AC010
+- `ChessNotation/Features/Results/ResultsView.swift`: CN-SPEC-0004-AC005, CN-SPEC-0004-AC006, CN-SPEC-0004-AC007, CN-SPEC-0004-AC008, CN-SPEC-0004-AC009
 
 ## Open Questions
 
-- Should low-time warning be color-only, animation-free, or include haptics later?
-- Should timed results include moves per minute in the initial release?
+- Resolved: Low-time warning is visual only in the first implementation.
+- Resolved: Moves per minute is deferred to history work; initial timed results show selected duration, time used, attempts, correct, incorrect, and accuracy.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec for timed game results and UI.
+- 2026-06-28: Accepted after implementation and coverage audit.

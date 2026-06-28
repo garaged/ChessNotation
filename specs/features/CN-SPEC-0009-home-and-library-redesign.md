@@ -2,7 +2,7 @@
 
 Status: Accepted
 Owner: Project
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Intent
 
@@ -82,10 +82,11 @@ Out of scope:
 
 ## Open Questions
 
-- Should Home use two-column tiles on all iPhone sizes, or switch to single-column tiles on the narrowest devices if text fit becomes tight?
-- Should the first implementation include decorative chess artwork in tiles, or use SF Symbols and board-texture styling until a dedicated asset spec exists?
-- Should the Game Library launch mode be fixed by the Home tile that opened it, or should players be able to switch between Practice and Timed inside the library?
+- Resolved: Home uses an adaptive tile grid so narrow devices can flow without overlapping content.
+- Resolved: Premium chess artwork is included for Home tiles, with native fallback only when an asset is unavailable.
+- Resolved: Game Library launch mode is fixed by the Home tile that opened it.
 
 ## Revision Notes
 
 - 2026-06-27: Initial proposed spec for mock-driven Home and Game Library redesign.
+- 2026-06-28: Resolved open questions after implementation audit.
