@@ -44,7 +44,9 @@ struct ChessNotationKeyAvailability {
 
         if let promotionMarkerIndex = input.lastIndex(of: "=") {
             let suffix = input[input.index(after: promotionMarkerIndex)...]
-            if suffix.count == 1, let promotedPiece = suffix.first, promotionPieceKeys.contains(String(promotedPiece)) {
+            if suffix.count == 1,
+               let promotedPiece = suffix.first,
+               promotionPieceKeys.contains(String(promotedPiece)) {
                 return Set(["+", "#"]).union(alwaysAvailableActions)
             }
         }

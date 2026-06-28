@@ -28,6 +28,10 @@ struct ChessVisualPalette {
         return AnyShapeStyle(gradient)
     }
 
+    func coordinateLabelColor(isLightSquare: Bool) -> Color {
+        isLightSquare ? darkSquareBottom.opacity(0.72) : lightSquareTop.opacity(0.82)
+    }
+
     func piecePalette(for side: ChessSide) -> ChessPiecePalette {
         switch side {
         case .white:

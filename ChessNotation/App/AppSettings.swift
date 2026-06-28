@@ -32,11 +32,18 @@ enum ChessVisualTheme: String, CaseIterable, Identifiable {
 final class AppSettings {
     private let defaults: UserDefaults
     private static let visualThemeKey = "visualTheme"
+    private static let showBoardCoordinatesKey = "showBoardCoordinates"
     private static let evaluationVisibilityPrefix = "evaluationVisibility."
 
     var visualTheme: ChessVisualTheme {
         didSet {
             defaults.set(visualTheme.rawValue, forKey: Self.visualThemeKey)
+        }
+    }
+
+    var showBoardCoordinates: Bool {
+        didSet {
+            defaults.set(showBoardCoordinates, forKey: Self.showBoardCoordinatesKey)
         }
     }
 
@@ -68,6 +75,7 @@ final class AppSettings {
             visualTheme = .current
         }
 
+        showBoardCoordinates = defaults.bool(forKey: Self.showBoardCoordinatesKey)
         beginnerEvaluationEnabled = defaults.object(forKey: Self.evaluationVisibilityKey(for: .beginner)) as? Bool ?? false
         intermediateEvaluationEnabled = defaults.object(forKey: Self.evaluationVisibilityKey(for: .intermediate)) as? Bool ?? true
         advancedEvaluationEnabled = defaults.object(forKey: Self.evaluationVisibilityKey(for: .advanced)) as? Bool ?? true

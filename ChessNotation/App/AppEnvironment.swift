@@ -11,6 +11,10 @@ enum AppEnvironment {
         return BundledGameLibraryService()
     }
 
+    static func makeSquareRecognitionHistoryStore() -> SquareRecognitionHistoryStoring {
+        SquareRecognitionHistoryStore()
+    }
+
     private static let sampleGames: [NotationGame] = [
         NotationGame(
             id: "mini-opera",

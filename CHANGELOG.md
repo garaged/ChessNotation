@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2026-06-28
+
+### Added
+- Premium home experience with rendered hero artwork, mode tiles, and reusable premium design styling.
+- Timed notation mode with selectable durations, countdown display, timeout finish state, and timed results metrics.
+- Square recognition trainer with time-limit selection, bonus and strict variants, immediate board feedback, results, and local history.
+- Game thumbnail previews that render board positions from bundled game data in the library.
+- Transparent rendered chess-piece artwork for both sides, replacing Unicode/vector piece rendering in board previews and gameplay.
+- Premium visual assets for the home hero, mode tiles, dark board texture, and chess pieces.
+- Spec coverage for the premium visual redesign, visual asset prompts, thumbnail previews, and rendered artwork quality.
+
+### Changed
+- Updated the game board renderer to use bundled image assets through `ChessPieceGraphic`.
+- Enlarged chess-piece rendering while preserving square padding.
+- Refined board style settings previews to use a compact square king/queen reference board.
+- Expanded the home screen from a library-first view into a mode launcher for notation, timed notation, square recognition, and instructions.
+- Updated instructions to cover current training modes and settings.
+- Modernized result, settings, home, and square-recognition surfaces with premium panel and background treatments.
+- Bumped the app release version to `2.0.0` with build `10`.
+
+### Fixed
+- Corrected settings board-style previews that previously appeared as rectangular strips instead of square boards.
+- Ensured piece assets use alpha-capable image sets so board square colors remain visible behind pieces.
+
 ## [1.1.0] - 2026-04-27
 
 ### Added

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct GameTrainingView: View {
     @Environment(AppSettings.self) private var appSettings
+    @Environment(\.dismiss) private var dismiss
     @State var viewModel: GameViewModel
 
     var body: some View {
@@ -9,10 +10,15 @@ struct GameTrainingView: View {
             if viewModel.isFinished {
                 ResultsView(summary: viewModel.summary) {
                     viewModel.reset()
+                } startNewGame: {
+                    dismiss()
                 }
             } else {
                 trainingContent
             }
+        }
+        .task(id: viewModel.isFinished) {
+            await runCountdownIfNeeded()
         }
         .navigationTitle(viewModel.game.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -28,11 +34,16 @@ struct GameTrainingView: View {
                     ChessBoardView(
                         fen: move.fenBefore,
                         highlightedMove: move,
-                        showsEvaluation: appSettings.isEvaluationEnabled(for: viewModel.game.difficulty)
+                        showsEvaluation: appSettings.isEvaluationEnabled(for: viewModel.game.difficulty),
+                        showsCoordinates: appSettings.showBoardCoordinates
                     )
                         .padding(.horizontal)
 
-                    VStack(spacing: 6) {
+                    VStack(spacing: 8) {
+                        Text("\(move.side.displayName) to move")
+                            .font(.headline)
+                            .foregroundStyle(PremiumDesign.primaryText)
+
                         notationAnswerField
 
                         ChessNotationKeyboard(
@@ -44,10 +55,18 @@ struct GameTrainingView: View {
                         )
 
                         HStack {
+                            Button("Submit") {
+                                viewModel.submitAnswer()
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(PremiumDesign.Accent.practice.color)
+                            .accessibilityIdentifier("game.submitButton")
+
                             Button("Reveal") {
                                 viewModel.skipMove()
                             }
                             .buttonStyle(.bordered)
+                            .tint(PremiumDesign.Accent.learning.color)
                             .accessibilityIdentifier("game.revealButton")
                         }
                         .frame(maxWidth: .infinity, alignment: .trailing)
@@ -58,6 +77,56 @@ struct GameTrainingView: View {
                 feedbackCard
             }
             .padding(.vertical, 10)
+        }
+        .premiumScreenBackground()
+    }
+
+    private var notationAnswerField: some View {
+        HStack(spacing: 8) {
+            Text(viewModel.answerText.isEmpty ? "Enter SAN, e.g. Nf3" : viewModel.answerText)
+                .font(.title3.monospaced())
+                .foregroundStyle(viewModel.answerText.isEmpty ? PremiumDesign.secondaryText : PremiumDesign.primaryText)
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .accessibilityIdentifier("game.answerField")
+                .accessibilityLabel("Move answer")
+                .accessibilityValue(viewModel.answerText.isEmpty ? "Empty" : viewModel.answerText)
+
+            Divider()
+                .frame(height: 24)
+
+            Button {
+                viewModel.removeLastAnswerCharacter()
+            } label: {
+                Image(systemName: "delete.left")
+                    .font(.body.weight(.semibold))
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.plain)
+            .disabled(viewModel.answerText.isEmpty)
+            .accessibilityIdentifier("game.answerBackspaceButton")
+            .accessibilityLabel("Backspace")
+
+            Button {
+                viewModel.submitAnswer()
+            } label: {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.title3)
+                    .symbolRenderingMode(.hierarchical)
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.plain)
+            .disabled(viewModel.answerText.isEmpty)
+            .foregroundStyle(PremiumDesign.Accent.practice.color)
+            .accessibilityIdentifier("game.answerSubmitButton")
+            .accessibilityLabel("Submit move")
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 4)
+        .background(PremiumDesign.elevatedSurface)
+        .clipShape(RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium))
+        .overlay {
+            RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium)
+                .stroke(PremiumDesign.stroke, lineWidth: 1)
         }
     }
 
@@ -106,22 +175,41 @@ struct GameTrainingView: View {
     }
 
     private var header: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 6) {
+            if viewModel.isTimed, let timerText = viewModel.timerText {
+                Text(timerText)
+                    .font(.title2.monospacedDigit().weight(.bold))
+                    .foregroundStyle(viewModel.isLowTime ? PremiumDesign.Accent.danger.color : PremiumDesign.primaryText)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(timerBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .accessibilityIdentifier("game.timerText")
+                    .accessibilityLabel("Timed mode, \(timerText) remaining")
+                    .accessibilityValue(viewModel.selectedDurationText.map { "Selected duration \($0)" } ?? "Timed game")
+            }
+
+            Text(viewModel.progressText)
+                .font(.subheadline)
+                .foregroundStyle(PremiumDesign.secondaryText)
+                .accessibilityIdentifier("game.progressText")
             ProgressView(value: Double(viewModel.currentMoveIndex), total: Double(max(viewModel.game.moves.count, 1)))
                 .padding(.horizontal)
-
-            Text(viewModel.progressAttemptsText)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .accessibilityIdentifier("game.progressText")
+            Text(viewModel.attemptsText)
+                .font(.caption)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
+    }
+
+    private var timerBackground: some ShapeStyle {
+        viewModel.isLowTime ? PremiumDesign.Accent.danger.color.opacity(0.16) : PremiumDesign.elevatedSurface
     }
 
     private var statsCard: some View {
         HStack(spacing: 8) {
-            statPill(title: "Solved", value: "\(viewModel.completedMoves)")
-            statPill(title: "Accuracy", value: viewModel.accuracyText)
-            statPill(title: "1st Try", value: "\(viewModel.firstTryCorrectMoves)")
+            PremiumMetricPill(title: "Solved", value: "\(viewModel.completedMoves)", accent: .practice)
+            PremiumMetricPill(title: "Accuracy", value: viewModel.accuracyText, accent: .brand)
+            PremiumMetricPill(title: "1st Try", value: "\(viewModel.firstTryCorrectMoves)", accent: .timed)
         }
         .padding(.horizontal)
     }
@@ -130,15 +218,15 @@ struct GameTrainingView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Feedback")
                 .font(.headline)
+                .foregroundStyle(PremiumDesign.primaryText)
             Text(viewModel.feedback)
                 .font(.body)
-                .foregroundStyle(.primary)
+                .foregroundStyle(PremiumDesign.primaryText)
                 .accessibilityIdentifier("game.feedbackText")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .premiumPanel(accent: .brand)
         .padding(.horizontal)
     }
 
@@ -151,11 +239,23 @@ struct GameTrainingView: View {
                 .minimumScaleFactor(0.8)
             Text(title)
                 .font(.caption2)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func runCountdownIfNeeded() async {
+        guard viewModel.isTimed, !viewModel.isFinished else { return }
+
+        while !Task.isCancelled && !viewModel.isFinished {
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                viewModel.tickTimer()
+            }
+        }
     }
 }

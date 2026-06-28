@@ -241,4 +241,21 @@ struct NotationServicesTests {
         #expect(whiteMate.whiteAdvantageFraction == 1.0)
         #expect(blackMate.whiteAdvantageFraction == 0.0)
     }
+
+    @Test
+    func boardCoordinatePreferencePersists() throws {
+        let suiteName = "ChessNotationTests.boardCoordinatePreference.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let settings = AppSettings(defaults: defaults)
+        #expect(!settings.showBoardCoordinates)
+
+        settings.showBoardCoordinates = true
+
+        let reloadedSettings = AppSettings(defaults: defaults)
+        #expect(reloadedSettings.showBoardCoordinates)
+    }
 }

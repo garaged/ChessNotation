@@ -1,0 +1,19 @@
+name: Specs
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  spec-check:
+    name: Spec check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate specs
+        run: python3 scripts/spec_check.py

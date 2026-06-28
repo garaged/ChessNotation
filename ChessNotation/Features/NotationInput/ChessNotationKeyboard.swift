@@ -31,14 +31,12 @@ struct ChessNotationKeyboard: View {
             actionRow
         }
         .padding(keyboardPadding)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color(.secondarySystemBackground))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.06))
-        )
+        .background(PremiumDesign.elevatedSurface)
+        .clipShape(RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium))
+        .overlay {
+            RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium)
+                .stroke(PremiumDesign.stroke, lineWidth: 1)
+        }
         .dynamicTypeSize(.medium ... .xxLarge)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("ChessNotationKeyboard.Root")
@@ -236,51 +234,31 @@ struct ChessNotationKeyboard: View {
 
     private func accessibilityLabel(for value: String) -> String {
         switch value {
-        case "K":
-            return "King"
-        case "Q":
-            return "Queen"
-        case "R":
-            return "Rook"
-        case "B":
-            return "Bishop"
-        case "N":
-            return "Knight"
-        case "x":
-            return "Capture"
-        case "+":
-            return "Check"
-        case "#":
-            return "Checkmate"
-        case "=":
-            return "Promotion"
-        case "O-O":
-            return "Kingside castle"
-        case "O-O-O":
-            return "Queenside castle"
-        case "a", "b", "c", "d", "e", "f", "g", "h":
-            return "File \(value)"
-        case "1", "2", "3", "4", "5", "6", "7", "8":
-            return "Rank \(value)"
-        default:
-            return value
+        case "K": return "King"
+        case "Q": return "Queen"
+        case "R": return "Rook"
+        case "B": return "Bishop"
+        case "N": return "Knight"
+        case "x": return "Capture"
+        case "+": return "Check"
+        case "#": return "Checkmate"
+        case "=": return "Promotion"
+        case "O-O": return "Kingside castle"
+        case "O-O-O": return "Queenside castle"
+        case "a", "b", "c", "d", "e", "f", "g", "h": return "File \(value)"
+        case "1", "2", "3", "4", "5", "6", "7", "8": return "Rank \(value)"
+        default: return value
         }
     }
 
     private func keyIdentifier(for value: String) -> String {
         switch value {
-        case "+":
-            return "ChessNotationKeyboard.Key.+"
-        case "#":
-            return "ChessNotationKeyboard.Key.#"
-        case "=":
-            return "ChessNotationKeyboard.Key.="
-        case "x":
-            return "ChessNotationKeyboard.Key.x"
-        case "Delete":
-            return "ChessNotationKeyboard.Backspace"
-        default:
-            return "ChessNotationKeyboard.Key.\(value)"
+        case "+": return "ChessNotationKeyboard.Key.+"
+        case "#": return "ChessNotationKeyboard.Key.#"
+        case "=": return "ChessNotationKeyboard.Key.="
+        case "x": return "ChessNotationKeyboard.Key.x"
+        case "Delete": return "ChessNotationKeyboard.Backspace"
+        default: return "ChessNotationKeyboard.Key.\(value)"
         }
     }
 }
@@ -306,7 +284,7 @@ private struct ChessNotationKeyButtonStyle: ButtonStyle {
     private var foregroundColor: Color {
         switch prominence {
         case .standard:
-            return .primary
+            return PremiumDesign.primaryText
         case .primary:
             return .white
         }
@@ -316,13 +294,13 @@ private struct ChessNotationKeyButtonStyle: ButtonStyle {
         switch prominence {
         case .standard:
             return AnyShapeStyle(
-                Color(.tertiarySystemBackground)
-                    .opacity(configuration.isPressed && isEnabled ? 0.8 : 1)
+                PremiumDesign.surface
+                    .opacity(configuration.isPressed && isEnabled ? 0.72 : 1)
             )
         case .primary:
             return AnyShapeStyle(
-                Color.accentColor
-                    .opacity(configuration.isPressed && isEnabled ? 0.8 : 1)
+                PremiumDesign.Accent.practice.color
+                    .opacity(configuration.isPressed && isEnabled ? 0.78 : 1)
             )
         }
     }
@@ -337,29 +315,5 @@ private struct ChessNotationKeyButtonStyle: ButtonStyle {
         enabledKeys: nil
     )
     .padding()
-    .background(Color(.systemBackground))
-}
-
-#Preview("Promotion e8=") {
-    ChessNotationKeyboard(
-        onKey: { _ in },
-        onBackspace: {},
-        onClear: {},
-        onSubmit: {},
-        enabledKeys: ChessNotationKeyAvailability.availableKeys(for: "e8=")
-    )
-    .padding()
-    .background(Color(.systemBackground))
-}
-
-#Preview("Checkmate Qxf7#") {
-    ChessNotationKeyboard(
-        onKey: { _ in },
-        onBackspace: {},
-        onClear: {},
-        onSubmit: {},
-        enabledKeys: ChessNotationKeyAvailability.availableKeys(for: "Qxf7#")
-    )
-    .padding()
-    .background(Color(.systemBackground))
+    .background(PremiumDesign.backgroundBottom)
 }
