@@ -90,6 +90,7 @@ The app currently trusts bundled chess data rather than deriving SAN from a rule
 ## Visual assets
 
 Premium artwork and chess-piece PNGs live in `ChessNotation/ChessNotation/Assets.xcassets`.
+Screenshot galleries live in [docs](docs/).
 
 - Home and mode tile artwork are referenced through `PremiumAssetName`.
 - Chess pieces are referenced by `ChessPiece.imageName` and rendered through `ChessPieceGraphic`.
