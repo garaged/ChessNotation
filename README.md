@@ -29,6 +29,8 @@ ChessNotation is an iOS SwiftUI app for practicing standard algebraic chess nota
 - `ChessNotation/ChessNotation/Services`: parsing, validation, and bundled game loading
 - `ChessNotationTests`: unit and integration coverage
 - `ChessNotationUITests`: end-to-end UI coverage
+- `specs/features`: active spec-driven development contracts
+- `specs/archive/features`: completed accepted specs kept for history
 
 ## Requirements
 
@@ -53,9 +55,10 @@ Run tests from Xcode or with `Product > Test`.
 
 ## Spec-driven development
 
-Feature behavior is documented under [specs/features](specs/features). Start
-user-visible changes by adding or updating a spec, then trace acceptance
-criteria to implementation coverage.
+Feature behavior is documented under [specs/features](specs/features). Accepted
+completed specs are retained under [specs/archive/features](specs/archive/features).
+Start user-visible changes by adding or updating an active spec, then trace
+acceptance criteria to implementation coverage.
 
 Validate specs from the terminal:
 
@@ -65,6 +68,12 @@ make spec-check
 
 See [specs/README.md](specs/README.md) for the workflow, required sections,
 status values, and traceability rules.
+
+## AI-assisted development
+
+AI coding agents and AI-assisted contributors should follow [AGENTS.md](AGENTS.md).
+That file defines the repository operating contract for spec-driven work,
+validation, documentation updates, asset rules, and handoff expectations.
 
 ## Bundled game format
 
@@ -95,6 +104,7 @@ This project is licensed under the GNU General Public License v3.0. See [LICENSE
 Before publishing publicly or shipping to the App Store, review:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md)
+- [AGENTS.md](AGENTS.md)
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - [PRIVACY.md](PRIVACY.md)
 - [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)
