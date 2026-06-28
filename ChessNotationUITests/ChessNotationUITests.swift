@@ -58,12 +58,9 @@ final class ChessNotationUITests: XCTestCase {
         XCTAssertTrue(app.otherElements["library.thumbnail.opera-game-1858"].exists)
         operaGameButton.tap()
 
-        let answerField = app.textFields["game.answerField"]
-        XCTAssertTrue(answerField.waitForExistence(timeout: 5))
-        answerField.tap()
-        answerField.typeText("e4")
+        enterMove("e4", in: app)
 
-        app.buttons["game.submitButton"].tap()
+        app.buttons["ChessNotationKeyboard.Submit"].tap()
 
         XCTAssertTrue(app.staticTexts["game.progressText"].waitForExistence(timeout: 5))
         XCTAssertEqual(app.staticTexts["game.progressText"].label, "Move 2 of 23")
@@ -106,12 +103,9 @@ final class ChessNotationUITests: XCTestCase {
         XCTAssertTrue(beginnerGame.waitForExistence(timeout: 5))
         beginnerGame.tap()
 
-        let answerField = app.textFields["game.answerField"]
-        XCTAssertTrue(answerField.waitForExistence(timeout: 5))
-        answerField.tap()
-        answerField.typeText("e4")
+        enterMove("e4", in: app)
 
-        app.buttons["game.submitButton"].tap()
+        app.buttons["ChessNotationKeyboard.Submit"].tap()
 
         let restartButton = app.buttons["results.restartButton"]
         XCTAssertTrue(restartButton.waitForExistence(timeout: 5))
@@ -147,11 +141,8 @@ final class ChessNotationUITests: XCTestCase {
         XCTAssertTrue(timerText.waitForExistence(timeout: 5))
         XCTAssertTrue(timerText.label.range(of: #"Timed mode, 2:5[0-9] remaining|Timed mode, 3:00 remaining"#, options: .regularExpression) != nil)
 
-        let answerField = app.textFields["game.answerField"]
-        XCTAssertTrue(answerField.waitForExistence(timeout: 5))
-        answerField.tap()
-        answerField.typeText("e4")
-        app.buttons["game.submitButton"].tap()
+        enterMove("e4", in: app)
+        app.buttons["ChessNotationKeyboard.Submit"].tap()
 
         XCTAssertTrue(app.staticTexts["Finish reason"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Completed"].exists)
@@ -202,6 +193,18 @@ final class ChessNotationUITests: XCTestCase {
         XCTAssertTrue(tile.waitForExistence(timeout: 5))
         tile.tap()
         XCTAssertTrue(app.collectionViews["library.screen"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    private func enterMove(_ move: String, in app: XCUIApplication) {
+        XCTAssertTrue(app.otherElements["ChessNotationKeyboard.Root"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.keyboards.element.exists)
+
+        for character in move {
+            let key = app.buttons["ChessNotationKeyboard.Key.\(character)"]
+            XCTAssertTrue(key.waitForExistence(timeout: 5), "Missing notation key \(character)")
+            key.tap()
+        }
     }
 
     @MainActor

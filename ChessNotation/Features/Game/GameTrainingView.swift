@@ -4,14 +4,12 @@ struct GameTrainingView: View {
     @Environment(AppSettings.self) private var appSettings
     @Environment(\.dismiss) private var dismiss
     @State var viewModel: GameViewModel
-    @FocusState private var isAnswerFieldFocused: Bool
 
     var body: some View {
         Group {
             if viewModel.isFinished {
                 ResultsView(summary: viewModel.summary) {
                     viewModel.reset()
-                    refocusAnswerFieldIfNeeded()
                 } startNewGame: {
                     dismiss()
                 }
@@ -21,15 +19,6 @@ struct GameTrainingView: View {
         }
         .task(id: viewModel.isFinished) {
             await runCountdownIfNeeded()
-        }
-        .onAppear {
-            refocusAnswerFieldIfNeeded()
-        }
-        .onChange(of: viewModel.currentMoveIndex) { _, _ in
-            refocusAnswerFieldIfNeeded()
-        }
-        .onChange(of: viewModel.isFinished) { _, _ in
-            refocusAnswerFieldIfNeeded()
         }
         .navigationTitle(viewModel.game.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -55,29 +44,19 @@ struct GameTrainingView: View {
                             .font(.headline)
                             .foregroundStyle(PremiumDesign.primaryText)
 
-                        TextField("Enter SAN, e.g. Nf3", text: $viewModel.answerText)
-                            .focused($isAnswerFieldFocused)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .submitLabel(.done)
-                            .accessibilityIdentifier("game.answerField")
-                            .padding(12)
-                            .foregroundStyle(PremiumDesign.primaryText)
-                            .background(PremiumDesign.elevatedSurface)
-                            .clipShape(RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium))
-                            .overlay {
-                                RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium)
-                                    .stroke(PremiumDesign.stroke, lineWidth: 1)
-                            }
-                            .onSubmit {
-                                viewModel.submitAnswer()
-                                refocusAnswerFieldIfNeeded()
-                            }
+                        notationAnswerField
+
+                        ChessNotationKeyboard(
+                            onKey: viewModel.appendToAnswer,
+                            onBackspace: viewModel.removeLastAnswerCharacter,
+                            onClear: viewModel.clearAnswer,
+                            onSubmit: viewModel.submitAnswer,
+                            enabledKeys: ChessNotationKeyAvailability.availableKeys(for: viewModel.answerText)
+                        )
 
                         HStack {
                             Button("Submit") {
                                 viewModel.submitAnswer()
-                                refocusAnswerFieldIfNeeded()
                             }
                             .buttonStyle(.borderedProminent)
                             .tint(PremiumDesign.Accent.practice.color)
@@ -85,7 +64,6 @@ struct GameTrainingView: View {
 
                             Button("Reveal") {
                                 viewModel.skipMove()
-                                refocusAnswerFieldIfNeeded()
                             }
                             .buttonStyle(.bordered)
                             .tint(PremiumDesign.Accent.learning.color)
@@ -100,6 +78,55 @@ struct GameTrainingView: View {
             .padding(.vertical, 10)
         }
         .premiumScreenBackground()
+    }
+
+    private var notationAnswerField: some View {
+        HStack(spacing: 8) {
+            Text(viewModel.answerText.isEmpty ? "Enter SAN, e.g. Nf3" : viewModel.answerText)
+                .font(.title3.monospaced())
+                .foregroundStyle(viewModel.answerText.isEmpty ? PremiumDesign.secondaryText : PremiumDesign.primaryText)
+                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                .accessibilityIdentifier("game.answerField")
+                .accessibilityLabel("Move answer")
+                .accessibilityValue(viewModel.answerText.isEmpty ? "Empty" : viewModel.answerText)
+
+            Divider()
+                .frame(height: 24)
+
+            Button {
+                viewModel.removeLastAnswerCharacter()
+            } label: {
+                Image(systemName: "delete.left")
+                    .font(.body.weight(.semibold))
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.plain)
+            .disabled(viewModel.answerText.isEmpty)
+            .accessibilityIdentifier("game.answerBackspaceButton")
+            .accessibilityLabel("Backspace")
+
+            Button {
+                viewModel.submitAnswer()
+            } label: {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.title3)
+                    .symbolRenderingMode(.hierarchical)
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.plain)
+            .disabled(viewModel.answerText.isEmpty)
+            .foregroundStyle(PremiumDesign.Accent.practice.color)
+            .accessibilityIdentifier("game.answerSubmitButton")
+            .accessibilityLabel("Submit move")
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 4)
+        .background(PremiumDesign.elevatedSurface)
+        .clipShape(RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium))
+        .overlay {
+            RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium)
+                .stroke(PremiumDesign.stroke, lineWidth: 1)
+        }
     }
 
     private var header: some View {
@@ -173,10 +200,6 @@ struct GameTrainingView: View {
         .padding(.vertical, 8)
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 14))
-    }
-
-    private func refocusAnswerFieldIfNeeded() {
-        isAnswerFieldFocused = !viewModel.isFinished && viewModel.currentMove != nil
     }
 
     private func runCountdownIfNeeded() async {

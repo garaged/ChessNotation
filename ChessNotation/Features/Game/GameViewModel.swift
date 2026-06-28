@@ -82,6 +82,20 @@ final class GameViewModel {
         return "\(Int((accuracy * 100).rounded()))%"
     }
 
+    func appendToAnswer(_ value: String) {
+        guard !isFinished else { return }
+        answerText.append(value)
+    }
+
+    func removeLastAnswerCharacter() {
+        guard !answerText.isEmpty else { return }
+        answerText.removeLast()
+    }
+
+    func clearAnswer() {
+        answerText.removeAll(keepingCapacity: true)
+    }
+
     func submitAnswer() {
         guard let move = currentMove, !isFinished else { return }
         let answer = answerText.trimmingCharacters(in: .whitespacesAndNewlines)

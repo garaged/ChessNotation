@@ -18,6 +18,22 @@ struct GameViewModelIntegrationTests {
     }
 
     @Test
+    func notationKeyboardInputBuildsAndEditsAnswer() {
+        let viewModel = GameViewModel(game: TestFixtures.operaGame)
+
+        viewModel.appendToAnswer("N")
+        viewModel.appendToAnswer("f")
+        viewModel.appendToAnswer("3")
+        #expect(viewModel.answerText == "Nf3")
+
+        viewModel.removeLastAnswerCharacter()
+        #expect(viewModel.answerText == "Nf")
+
+        viewModel.clearAnswer()
+        #expect(viewModel.answerText.isEmpty)
+    }
+
+    @Test
     func exhaustingAttemptsRevealsAnswerAndContinues() {
         let viewModel = GameViewModel(game: TestFixtures.operaGame)
 

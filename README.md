@@ -2,14 +2,24 @@
 
 ChessNotation is an iOS SwiftUI app for practicing standard algebraic chess notation from real games. It loads bundled training games, renders the board position for each move, and asks the player to enter the correct SAN move with feedback, hints, and session summaries.
 
+## Current release
+
+- Version: `2.0.0`
+- Build: `10`
+- Release focus: premium visual redesign, rendered chess-piece artwork, timed training, square recognition, and richer game-library previews.
+
 ## Current scope
 
-- Browse the game library from the home screen
-- Filter by level
-- Filter by opening
-- Search by title, players, opening, or difficulty
-- Start a random game from the filtered library
-- Train move-by-move with SAN input, hints, reveal, and results
+- Launch notation practice, timed notation, square recognition, and instructions from a premium visual home screen.
+- Browse the game library with thumbnail board previews for each game.
+- Filter by level and opening, or search by title, players, opening, or difficulty.
+- Start a random game from the filtered library.
+- Train move-by-move with SAN input, hints, reveal, evaluation context, and results.
+- Play timed notation sessions with selectable duration, remaining-time display, timeout handling, and timed results.
+- Practice square recognition by tapping prompted coordinates with bonus or strict timing variants.
+- Review square-recognition results history stored on device.
+- Customize board coordinates, per-difficulty evaluation visibility, and board style.
+- Render boards with bundled transparent chess-piece artwork and selectable visual themes: Current, Marble, Wood, and Metal.
 
 ## Project structure
 
@@ -35,7 +45,7 @@ ChessNotation is an iOS SwiftUI app for practicing standard algebraic chess nota
 
 The repository includes three layers of coverage:
 
-- Unit tests for parsing, normalization, and library filtering
+- Unit tests for parsing, normalization, library filtering, square recognition, and thumbnail preview state
 - Integration tests for the training flow state machine
 - UI tests for launching the app and completing the first move
 
@@ -66,6 +76,15 @@ Each game contains:
 - a move list with SAN, `fenBefore`, source and destination squares, and move tags
 
 The app currently trusts bundled chess data rather than deriving SAN from a rules engine.
+
+## Visual assets
+
+Premium artwork and chess-piece PNGs live in `ChessNotation/ChessNotation/Assets.xcassets`.
+
+- Home and mode tile artwork are referenced through `PremiumAssetName`.
+- Chess pieces are referenced by `ChessPiece.imageName` and rendered through `ChessPieceGraphic`.
+- Piece image names use the pattern `white-king`, `black-queen`, and so on.
+- Piece assets must be PNGs with real alpha transparency so board squares remain visible.
 
 ## License
 

@@ -51,14 +51,17 @@ struct AppearanceSettingsView: View {
                             }
                         }
                     }
-
-                    AppVersionFooter()
                 }
                 .padding()
             }
             .premiumScreenBackground()
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    AppVersionTitle()
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
                         dismiss()
@@ -94,14 +97,19 @@ struct AppearanceSettingsView: View {
     }
 }
 
-private struct AppVersionFooter: View {
+private struct AppVersionTitle: View {
     var body: some View {
-        Text(versionText)
-            .font(.footnote.monospacedDigit())
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity)
-            .padding(.top, 2)
-            .accessibilityIdentifier("settings.versionText")
+        VStack(spacing: 1) {
+            Text("Settings")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.primary)
+
+            Text(versionText)
+                .font(.caption2.monospacedDigit().weight(.medium))
+                .foregroundStyle(.secondary)
+                .accessibilityIdentifier("settings.versionText")
+        }
+        .accessibilityElement(children: .contain)
     }
 
     private var versionText: String {
