@@ -139,6 +139,33 @@ struct SquareRecognitionTests {
         #expect(abs(result.averageLatency - 0.766666) < 0.001)
         #expect(result.fastestCorrectLatency == 0.4)
         #expect(result.slowestLatency == 1.1)
+        #expect(result.schemaVersion == 1)
+        #expect(result.gameType == "squareRecognition")
+    }
+
+    @Test
+    @MainActor
+    func resultDecodesExistingHistoryWithoutSchemaVersion() throws {
+        let data = try #require(
+            """
+            {
+              "id": "00000000-0000-0000-0000-000000000001",
+              "initialTime": 10,
+              "variant": "bonus",
+              "answers": [],
+              "finishedAt": "2026-06-28T12:00:00Z",
+              "gameType": "squareRecognition"
+            }
+            """.data(using: .utf8)
+        )
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        let result = try decoder.decode(SquareRecognitionResult.self, from: data)
+
+        #expect(result.schemaVersion == 1)
+        #expect(result.score == 0)
+        #expect(result.gameType == "squareRecognition")
     }
 
     @Test

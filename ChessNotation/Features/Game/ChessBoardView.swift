@@ -4,7 +4,7 @@ struct ChessBoardView: View {
     @Environment(AppSettings.self) private var appSettings
     let fen: String
     let highlightedMove: NotationMove?
-    let showsEvaluation: Bool
+    let evaluation: EngineEvaluation?
     let showsCoordinates: Bool
 
     private var squares: [BoardSquare] {
@@ -17,18 +17,16 @@ struct ChessBoardView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let evaluationBarWidth: CGFloat = showsEvaluation ? 30 : 0
-            let barSpacing: CGFloat = showsEvaluation ? 8 : 0
+            let evaluationBarWidth: CGFloat = evaluation == nil ? 0 : 34
+            let barSpacing: CGFloat = evaluation == nil ? 0 : 8
             let availableBoardWidth = max(proxy.size.width - evaluationBarWidth - barSpacing, 0)
             let boardSize = min(availableBoardWidth, proxy.size.height)
             let squareSize = boardSize / 8
 
             HStack(spacing: barSpacing) {
-                if showsEvaluation {
+                if let evaluation {
                     EvaluationBarView(
-                        whiteAdvantageFraction: highlightedMove?.engineEvaluation?.whiteAdvantageFraction ?? 0.5,
-                        displayText: highlightedMove?.engineEvaluation?.displayText,
-                        depth: highlightedMove?.engineEvaluation?.depth,
+                        evaluation: evaluation,
                         palette: palette
                     )
                     .frame(width: evaluationBarWidth, height: boardSize)
@@ -139,18 +137,16 @@ private struct BoardCoordinatesOverlay: View {
 }
 
 struct EvaluationBarView: View {
-    let whiteAdvantageFraction: Double
-    let displayText: String?
-    let depth: Int?
+    let evaluation: EngineEvaluation
     let palette: ChessVisualPalette
 
     var body: some View {
         GeometryReader { proxy in
-            let whiteFraction = max(0.0, min(1.0, whiteAdvantageFraction))
+            let whiteFraction = max(0.0, min(1.0, evaluation.whiteAdvantageFraction))
             let whiteHeight = proxy.size.height * whiteFraction
-            let valueText = displayText ?? "0.0"
+            let valueText = evaluation.displayText
             let textNearTop = whiteFraction >= 0.5
-            let scoreLabelBottomInset: CGFloat = depth == nil ? 8 : 34
+            let scoreLabelBottomInset: CGFloat = 34
             let labelBackground = textNearTop ? palette.whitePieceTop.opacity(0.92) : palette.blackPieceBottom.opacity(0.92)
             let labelForeground = textNearTop ? palette.blackPieceBottom : palette.whitePieceTop
 
@@ -197,29 +193,27 @@ struct EvaluationBarView: View {
                     .stroke(palette.boardBorder, lineWidth: 1)
             }
             .overlay(alignment: .bottom) {
-                if let depth {
-                    depthBadge(depth: depth)
-                        .padding(.bottom, 8)
-                }
+                engineDepthBadge(engine: evaluation.engine, depth: evaluation.depth)
+                    .padding(.bottom, 8)
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Position evaluation")
-            .accessibilityValue(Text(depth.map { "\(valueText), depth \($0)" } ?? valueText))
+            .accessibilityValue(Text("\(valueText), \(evaluation.engine), depth \(evaluation.depth)"))
         }
     }
 
-    private func depthBadge(depth: Int) -> some View {
-        ZStack {
-            Image(systemName: "cpu")
-                .font(.system(size: 24, weight: .medium))
+    private func engineDepthBadge(engine: String, depth: Int) -> some View {
+        VStack(spacing: 1) {
+            Text(engine.prefix(1).uppercased())
+                .font(.system(size: 8, weight: .black, design: .rounded))
             Text("\(depth)")
-                .font(.system(size: 9, weight: .black, design: .rounded).monospacedDigit())
-                .foregroundStyle(palette.blackPieceTop)
-                .minimumScaleFactor(0.7)
-                .offset(y: 0.5)
+                .font(.system(size: 8, weight: .black, design: .rounded).monospacedDigit())
         }
-        .foregroundStyle(palette.whitePieceTop.opacity(0.95))
-        .frame(width: 26, height: 22)
+        .foregroundStyle(palette.blackPieceTop)
+        .minimumScaleFactor(0.7)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 3)
+        .background(Capsule(style: .continuous).fill(palette.whitePieceTop.opacity(0.95)))
     }
 }
 

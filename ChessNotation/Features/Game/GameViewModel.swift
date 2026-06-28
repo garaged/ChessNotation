@@ -15,6 +15,7 @@ final class GameViewModel {
     private(set) var revealedAnswer: String?
     private(set) var remainingSeconds: Int?
     private(set) var finishReason: TimedSessionFinishReason = .completed
+    private(set) var finishedAt: Date?
 
     var answerText = ""
 
@@ -29,6 +30,11 @@ final class GameViewModel {
     var currentMove: NotationMove? {
         guard currentMoveIndex < game.moves.count else { return nil }
         return game.moves[currentMoveIndex]
+    }
+
+    var currentPositionEvaluation: EngineEvaluation? {
+        guard currentMoveIndex > 0, currentMoveIndex <= game.moves.count else { return nil }
+        return game.moves[currentMoveIndex - 1].engineEvaluation
     }
 
     var isTimed: Bool { mode.isTimed }
@@ -69,7 +75,8 @@ final class GameViewModel {
             records: records,
             mode: mode,
             remainingSeconds: remainingSeconds,
-            finishReason: finishReason
+            finishReason: finishReason,
+            finishedAt: finishedAt ?? Date()
         )
     }
 
@@ -159,6 +166,7 @@ final class GameViewModel {
         answerText = ""
         remainingSeconds = mode.durationSeconds
         finishReason = .completed
+        finishedAt = nil
         moveStartedAt = Date()
     }
 
@@ -195,6 +203,7 @@ final class GameViewModel {
         guard !isFinished else { return }
         isFinished = true
         finishReason = reason
+        finishedAt = Date()
         feedback = reason == .timedOut ? "Time expired." : "Session complete."
     }
 

@@ -38,6 +38,7 @@ struct SquareRecognitionAnswer: Codable, Equatable, Identifiable {
 }
 
 struct SquareRecognitionResult: Codable, Equatable, Identifiable {
+    let schemaVersion: Int
     let id: UUID
     let initialTime: TimeInterval
     let variant: SquareRecognitionVariant
@@ -53,12 +54,24 @@ struct SquareRecognitionResult: Codable, Equatable, Identifiable {
         finishedAt: Date = Date(),
         gameType: String = "squareRecognition"
     ) {
+        self.schemaVersion = 1
         self.id = id
         self.initialTime = initialTime
         self.variant = variant
         self.answers = answers
         self.finishedAt = finishedAt
         self.gameType = gameType
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        schemaVersion = try container.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
+        id = try container.decode(UUID.self, forKey: .id)
+        initialTime = try container.decode(TimeInterval.self, forKey: .initialTime)
+        variant = try container.decode(SquareRecognitionVariant.self, forKey: .variant)
+        answers = try container.decode([SquareRecognitionAnswer].self, forKey: .answers)
+        finishedAt = try container.decode(Date.self, forKey: .finishedAt)
+        gameType = try container.decodeIfPresent(String.self, forKey: .gameType) ?? "squareRecognition"
     }
 
     var totalPrompts: Int { answers.count }

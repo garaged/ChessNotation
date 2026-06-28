@@ -238,3 +238,200 @@ struct PremiumMetricPill: View {
         .premiumPanel(accent: accent)
     }
 }
+
+struct PremiumTrendLine: View {
+    let values: [Double]
+    var xAxisLabels: [String] = []
+    var accent: PremiumDesign.Accent = .brand
+    var valueFormatter: (Double) -> String = { value in
+        value.formatted(.number.precision(.fractionLength(1)))
+    }
+
+    @State private var selectedPointIndex: Int?
+    @State private var overlayDismissTask: Task<Void, Never>?
+
+    private var domain: ClosedRange<Double> {
+        guard let minValue = values.min(), let maxValue = values.max() else { return 0...1 }
+        guard minValue != maxValue else {
+            let padding = max(abs(minValue) * 0.2, 1)
+            return max(0, minValue - padding)...(maxValue + padding)
+        }
+
+        let padding = (maxValue - minValue) * 0.12
+        return max(0, minValue - padding)...(maxValue + padding)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .center, spacing: 8) {
+                VStack(alignment: .trailing) {
+                    Text(valueFormatter(domain.upperBound))
+                    Spacer()
+                    Text(valueFormatter(domain.lowerBound))
+                }
+                .font(.caption2.monospacedDigit())
+                .foregroundStyle(PremiumDesign.secondaryText)
+                .frame(width: 44)
+
+                GeometryReader { proxy in
+                    let points = chartPoints(in: proxy.size)
+
+                    ZStack {
+                        VStack(spacing: 0) {
+                            ForEach(0..<3, id: \.self) { index in
+                                Rectangle()
+                                    .fill(PremiumDesign.stroke)
+                                    .frame(height: index == 1 ? 1 : 0.7)
+                                if index < 2 {
+                                    Spacer()
+                                }
+                            }
+                        }
+
+                        Path { path in
+                            guard let first = points.first else { return }
+                            path.move(to: first)
+                            for point in points.dropFirst() {
+                                path.addLine(to: point)
+                            }
+                        }
+                        .stroke(accent.color, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+
+                        ForEach(Array(points.enumerated()), id: \.offset) { index, point in
+                            Circle()
+                                .fill(selectedPointIndex == index ? PremiumDesign.primaryText : accent.color)
+                                .frame(width: selectedPointIndex == index ? 10 : 7, height: selectedPointIndex == index ? 10 : 7)
+                                .position(point)
+                                .shadow(color: accent.color.opacity(0.35), radius: 3)
+                        }
+
+                        if let selectedPointIndex, points.indices.contains(selectedPointIndex) {
+                            valueOverlay(
+                                value: values[selectedPointIndex],
+                                index: selectedPointIndex,
+                                point: points[selectedPointIndex],
+                                chartSize: proxy.size
+                            )
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture(coordinateSpace: .local) { location in
+                        selectNearestPoint(to: location, points: points)
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 2)
+                    .accessibilityHidden(true)
+                }
+                .frame(height: 64)
+            }
+
+            if !xAxisLabels.isEmpty {
+                HStack {
+                    ForEach(Array(xAxisLabels.enumerated()), id: \.offset) { index, label in
+                        Text(label)
+                            .frame(
+                                maxWidth: .infinity,
+                                alignment: xAxisLabelAlignment(for: index, count: xAxisLabels.count)
+                            )
+                    }
+                }
+                .font(.caption2.monospacedDigit())
+                .foregroundStyle(PremiumDesign.mutedText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .padding(.leading, 52)
+            }
+
+            HStack {
+                if let first = values.first {
+                    Text("Oldest \(valueFormatter(first))")
+                }
+                Spacer()
+                if let last = values.last {
+                    Text("Latest \(valueFormatter(last))")
+                }
+            }
+            .font(.caption2.monospacedDigit())
+            .foregroundStyle(PremiumDesign.secondaryText)
+            .padding(.leading, 52)
+        }
+        .padding(12)
+        .background(PremiumDesign.surface)
+        .clipShape(RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium))
+        .overlay {
+            RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium)
+                .stroke(accent.color.opacity(0.2), lineWidth: 1)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Trend chart")
+        .accessibilityValue(accessibilitySummary)
+        .onDisappear {
+            overlayDismissTask?.cancel()
+        }
+    }
+
+    private func chartPoints(in size: CGSize) -> [CGPoint] {
+        let range = max(domain.upperBound - domain.lowerBound, 0.0001)
+        return values.enumerated().map { index, value in
+            let x = values.count == 1 ? size.width / 2 : size.width * CGFloat(index) / CGFloat(values.count - 1)
+            let normalizedY = (value - domain.lowerBound) / range
+            let y = size.height * CGFloat(1 - normalizedY)
+            return CGPoint(x: x, y: y)
+        }
+    }
+
+    private func showOverlay(for index: Int) {
+        selectedPointIndex = index
+        overlayDismissTask?.cancel()
+        overlayDismissTask = Task {
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                selectedPointIndex = nil
+                overlayDismissTask = nil
+            }
+        }
+    }
+
+    private func selectNearestPoint(to location: CGPoint, points: [CGPoint]) {
+        guard let nearest = points.enumerated().min(by: { lhs, rhs in
+            abs(lhs.element.x - location.x) < abs(rhs.element.x - location.x)
+        }) else { return }
+        showOverlay(for: nearest.offset)
+    }
+
+    private func xAxisLabelAlignment(for index: Int, count: Int) -> Alignment {
+        if count == 1 { return .center }
+        if index == 0 { return .leading }
+        if index == count - 1 { return .trailing }
+        return .center
+    }
+
+    private func valueOverlay(value: Double, index: Int, point: CGPoint, chartSize: CGSize) -> some View {
+        Text("Point \(index + 1): \(valueFormatter(value))")
+            .font(.caption2.weight(.semibold).monospacedDigit())
+            .foregroundStyle(PremiumDesign.primaryText)
+            .lineLimit(1)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(.thinMaterial, in: Capsule())
+            .overlay {
+                Capsule()
+                    .stroke(accent.color.opacity(0.35), lineWidth: 1)
+            }
+            .position(
+                x: min(max(point.x, 58), max(58, chartSize.width - 58)),
+                y: point.y < 24 ? min(point.y + 24, chartSize.height - 14) : max(point.y - 20, 14)
+            )
+            .transition(.opacity.combined(with: .scale(scale: 0.96)))
+            .accessibilityHidden(true)
+    }
+
+    private var accessibilitySummary: Text {
+        guard let first = values.first, let last = values.last else {
+            return Text("No values")
+        }
+        return Text("Oldest \(valueFormatter(first)), latest \(valueFormatter(last)), range \(valueFormatter(domain.lowerBound)) to \(valueFormatter(domain.upperBound))")
+    }
+}

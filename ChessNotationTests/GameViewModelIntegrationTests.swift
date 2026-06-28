@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import ChessNotation
 
@@ -15,6 +16,22 @@ struct GameViewModelIntegrationTests {
         #expect(viewModel.records[0].attemptsUsed == 1)
         #expect(viewModel.answerText.isEmpty)
         #expect(viewModel.feedback == "Enter the notation for the highlighted move.")
+    }
+
+    @Test
+    func currentPositionEvaluationUsesReachedPositionOnly() throws {
+        let viewModel = GameViewModel(game: TestFixtures.evaluatedGame)
+
+        #expect(viewModel.currentPositionEvaluation == nil)
+
+        viewModel.answerText = "e4"
+        viewModel.submitAnswer()
+
+        let evaluation = try #require(viewModel.currentPositionEvaluation)
+        #expect(evaluation.displayText == "+0.4")
+        #expect(evaluation.depth == 12)
+        #expect(evaluation.engine == "Stockfish")
+        #expect(viewModel.currentMove?.san == "e5")
     }
 
     @Test
@@ -146,6 +163,92 @@ struct GameViewModelIntegrationTests {
         #expect(viewModel.summary.correctMoves == 1)
         #expect(viewModel.summary.incorrectMoves == 0)
         #expect(viewModel.summary.accuracy == 1)
+        #expect(viewModel.summary.finishedAt == viewModel.finishedAt)
+    }
+
+    @Test
+    func notationHistoryRecordCapturesUntimedMetrics() throws {
+        let viewModel = GameViewModel(game: TestFixtures.operaGame)
+
+        viewModel.answerText = "e4"
+        viewModel.submitAnswer()
+        viewModel.skipMove()
+
+        let record = NotationTrainingHistoryRecord(summary: viewModel.summary)
+
+        #expect(record.schemaVersion == 1)
+        #expect(record.gameType == "notation")
+        #expect(record.gameID == TestFixtures.operaGame.id)
+        #expect(record.completedMoves == 2)
+        #expect(record.totalMoves == 2)
+        #expect(record.correctMoves == 1)
+        #expect(record.incorrectMoves == 1)
+        #expect(record.firstTryCorrectCount == 1)
+        #expect(record.skippedOrRevealedCount == 1)
+        #expect(record.completionPercentage == 1)
+        #expect(record.attemptsDistribution[1] == 1)
+        #expect(record.attemptsDistribution[0] == 1)
+        #expect(record.mistakesByTag[MoveTypeTag.pawnMove.rawValue] == 1)
+    }
+
+    @Test
+    func notationHistoryRecordCapturesTimedMetricsAndStoreDeduplicates() throws {
+        let fileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("json")
+        let store = NotationTrainingHistoryStore(fileURL: fileURL)
+        let viewModel = GameViewModel(game: TestFixtures.operaGame, mode: .timed(durationSeconds: 60))
+
+        viewModel.tickTimer()
+        viewModel.answerText = "e4"
+        viewModel.submitAnswer()
+
+        let record = NotationTrainingHistoryRecord(summary: viewModel.summary)
+        try store.saveResult(record)
+        try store.saveResult(record)
+
+        let loaded = try store.loadResults()
+        #expect(loaded.count == 1)
+        #expect(loaded[0].gameType == "timedNotation")
+        #expect(loaded[0].selectedDurationSeconds == 60)
+        #expect(loaded[0].timeUsedSeconds == 1)
+        #expect(loaded[0].movesPerMinute == 60)
+        #expect(loaded[0].completionPercentage == 0.5)
+
+        try? FileManager.default.removeItem(at: fileURL)
+    }
+
+    @Test
+    func historyRangeFiltersTrailingWindows() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        let eightDaysAgo = now.addingTimeInterval(-8 * 24 * 60 * 60)
+        let twoMonthsAgo = now.addingTimeInterval(-62 * 24 * 60 * 60)
+
+        #expect(HistoryRange.lastWeek.contains(now.addingTimeInterval(-2 * 24 * 60 * 60), now: now))
+        #expect(!HistoryRange.lastWeek.contains(eightDaysAgo, now: now))
+        #expect(HistoryRange.lastMonth.contains(eightDaysAgo, now: now))
+        #expect(!HistoryRange.lastMonth.contains(twoMonthsAgo, now: now))
+        #expect(HistoryRange.lastYear.contains(twoMonthsAgo, now: now))
+    }
+
+    @Test
+    func historyRangeFiltersTodayAndKeepsAxisLabelsSparse() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let now = Date(timeIntervalSince1970: 1_783_069_200)
+        let earlierToday = now.addingTimeInterval(-6 * 60 * 60)
+        let yesterday = now.addingTimeInterval(-26 * 60 * 60)
+        let dates = [
+            now.addingTimeInterval(-11 * 60 * 60),
+            now.addingTimeInterval(-8 * 60 * 60),
+            now.addingTimeInterval(-3 * 60 * 60),
+            now
+        ]
+
+        #expect(HistoryRange.today.contains(earlierToday, now: now, calendar: calendar))
+        #expect(!HistoryRange.today.contains(yesterday, now: now, calendar: calendar))
+        #expect(HistoryRange.today.axisLabels(for: dates).count == 3)
+        #expect(HistoryRange.lastMonth.axisLabels(for: Array(dates.prefix(2))).count == 2)
     }
 
     @Test

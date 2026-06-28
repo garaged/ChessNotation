@@ -1,6 +1,6 @@
 # CN-SPEC-0014: Position Evaluation and Training History
 
-Status: Proposed
+Status: Accepted
 Owner: Project
 Last updated: 2026-06-28
 
@@ -23,7 +23,7 @@ In scope:
 - Defining shared history fields that support filtering, sorting, and future
   migration.
 - Showing mode-appropriate summary metrics and plots.
-- Providing last week, last month, and last year range controls for history
+- Providing today, last week, last month, and last year range controls for history
   views.
 - Preserving square-recognition result history while extending it with trend
   views.
@@ -53,8 +53,8 @@ Out of scope:
 - CN-SPEC-0014-FR011: Notation histories for a specific game must emphasize accuracy, first-try rate, completion percentage, average move time, and recurring weak move tags.
 - CN-SPEC-0014-FR012: Timed notation histories must emphasize accuracy, completed moves, moves per minute, completion percentage, finish reason, and selected duration.
 - CN-SPEC-0014-FR013: Square-recognition histories must emphasize score, accuracy, average latency, fastest correct latency, initial time, and variant.
-- CN-SPEC-0014-FR014: History views must offer last week, last month, and last year range controls and filter the displayed summaries, plots, and lists to the selected trailing range from the current date.
-- CN-SPEC-0014-FR015: Each history view must choose a default range that contains useful data, preferring last week, then last month, then last year when the shorter range is empty.
+- CN-SPEC-0014-FR014: History views must offer today, last week, last month, and last year range controls and filter the displayed summaries, plots, and lists to the selected range from the current date.
+- CN-SPEC-0014-FR015: Each history view must choose a default range that contains useful data, preferring today, then last week, then last month, then last year when the shorter range is empty.
 - CN-SPEC-0014-FR016: Notation game detail history must show a trend plot for accuracy and first-try rate when at least two sessions for the selected game exist in the selected range.
 - CN-SPEC-0014-FR017: Timed notation history must show a trend plot for completed moves or moves per minute and a secondary accuracy signal when at least two timed sessions exist in the selected range.
 - CN-SPEC-0014-FR018: Square-recognition history must show score and average-latency trend plots when at least two sessions exist in the selected range.
@@ -62,6 +62,8 @@ Out of scope:
 - CN-SPEC-0014-FR020: Result screens must save the completed session once and must not duplicate records when the player restarts, returns to the library, or revisits results.
 - CN-SPEC-0014-FR021: History storage failures must not prevent the current results screen from being shown or the player from starting another game.
 - CN-SPEC-0014-FR022: Existing square-recognition history data must remain readable after the history model is extended.
+- CN-SPEC-0014-FR023: Trend plots must show sparse x-axis labels that communicate the selected time range without crowding the chart.
+- CN-SPEC-0014-FR024: Trend plots must let players reveal the value for a plotted data point with a simple temporary overlay.
 
 ## Acceptance Criteria
 
@@ -75,41 +77,42 @@ Out of scope:
 - CN-SPEC-0014-AC008: Given history records exist inside and outside the last week, when last week is selected, then summaries, plots, and session lists include only records from the last seven days.
 - CN-SPEC-0014-AC009: Given history records exist inside and outside the last month, when last month is selected, then summaries, plots, and session lists include only records from the trailing one-month window.
 - CN-SPEC-0014-AC010: Given history records exist inside and outside the last year, when last year is selected, then summaries, plots, and session lists include only records from the trailing one-year window.
-- CN-SPEC-0014-AC011: Given the last week contains no records but the last month does, when a history view first opens, then last month is selected by default.
+- CN-SPEC-0014-AC011: Given today contains no records but a longer range does, when a history view first opens, then the shortest range containing records is selected by default.
 - CN-SPEC-0014-AC012: Given a specific notation game has at least two sessions in the selected range, when its history is shown, then accuracy and first-try rate trends are plotted and weak move tags are summarized.
 - CN-SPEC-0014-AC013: Given timed notation has at least two sessions in the selected range, when timed history is shown, then completed moves or moves per minute are plotted with accuracy visible as a companion metric.
 - CN-SPEC-0014-AC014: Given square-recognition has at least two sessions in the selected range, when square-recognition history is shown, then score and average-latency trends are plotted.
 - CN-SPEC-0014-AC015: Given a selected range has fewer than two records for a plot, when history is shown, then the latest metrics remain visible and the chart area communicates that more sessions are needed.
 - CN-SPEC-0014-AC016: Given pre-existing square-recognition history exists in the current JSON shape, when the updated app loads history, then those results still appear with their original metrics.
 - CN-SPEC-0014-AC017: Given history storage fails, when any training mode finishes, then the current result screen still appears and reports the save problem without blocking further play.
+- CN-SPEC-0014-AC018: Given history records exist inside and outside today, when today is selected, then summaries, plots, and session lists include only records from the current calendar day.
+- CN-SPEC-0014-AC019: Given a trend plot is shown, when x-axis labels render, then the plot shows no more than three compact labels for the selected range.
+- CN-SPEC-0014-AC020: Given a trend plot is shown, when the player taps the plot area, then a readable value overlay appears for the nearest data point and disappears automatically after a few seconds.
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0014-AC001
-- Pending coverage: CN-SPEC-0014-AC002
-- Pending coverage: CN-SPEC-0014-AC003
-- Pending coverage: CN-SPEC-0014-AC004
-- Pending coverage: CN-SPEC-0014-AC005
-- Pending coverage: CN-SPEC-0014-AC006
-- Pending coverage: CN-SPEC-0014-AC007
-- Pending coverage: CN-SPEC-0014-AC008
-- Pending coverage: CN-SPEC-0014-AC009
-- Pending coverage: CN-SPEC-0014-AC010
-- Pending coverage: CN-SPEC-0014-AC011
-- Pending coverage: CN-SPEC-0014-AC012
-- Pending coverage: CN-SPEC-0014-AC013
-- Pending coverage: CN-SPEC-0014-AC014
-- Pending coverage: CN-SPEC-0014-AC015
-- Pending coverage: CN-SPEC-0014-AC016
-- Pending coverage: CN-SPEC-0014-AC017
+- `ChessNotationTests/GameViewModelIntegrationTests.swift`: CN-SPEC-0014-AC001, CN-SPEC-0014-AC002, CN-SPEC-0014-AC003, CN-SPEC-0014-AC004, CN-SPEC-0014-AC005, CN-SPEC-0014-AC007, CN-SPEC-0014-AC008, CN-SPEC-0014-AC009, CN-SPEC-0014-AC010, CN-SPEC-0014-AC018, CN-SPEC-0014-AC019
+- `ChessNotationTests/SquareRecognitionTests.swift`: CN-SPEC-0014-AC006, CN-SPEC-0014-AC016
+- `ChessNotation/Features/Game/GameViewModel.swift`: CN-SPEC-0014-AC001, CN-SPEC-0014-AC002, CN-SPEC-0014-AC003, CN-SPEC-0014-AC004, CN-SPEC-0014-AC005, CN-SPEC-0014-AC007
+- `ChessNotation/Features/Game/ChessBoardView.swift`: CN-SPEC-0014-AC001, CN-SPEC-0014-AC002, CN-SPEC-0014-AC003
+- `ChessNotation/Features/Game/GameTrainingView.swift`: CN-SPEC-0014-AC004, CN-SPEC-0014-AC005, CN-SPEC-0014-AC007, CN-SPEC-0014-AC017
+- `ChessNotation/Domain/TrainingSession.swift`: CN-SPEC-0014-AC004, CN-SPEC-0014-AC005, CN-SPEC-0014-AC007, CN-SPEC-0014-AC008, CN-SPEC-0014-AC009, CN-SPEC-0014-AC010, CN-SPEC-0014-AC018, CN-SPEC-0014-AC019
+- `ChessNotation/Features/Results/ResultsView.swift`: CN-SPEC-0014-AC017
+- `ChessNotation/Features/Home/HomeView.swift`: CN-SPEC-0014-AC008, CN-SPEC-0014-AC009, CN-SPEC-0014-AC010, CN-SPEC-0014-AC011, CN-SPEC-0014-AC012, CN-SPEC-0014-AC013, CN-SPEC-0014-AC015, CN-SPEC-0014-AC018, CN-SPEC-0014-AC019, CN-SPEC-0014-AC020
+- `ChessNotation/Features/Home/PremiumDesign.swift`: CN-SPEC-0014-AC019, CN-SPEC-0014-AC020
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionModels.swift`: CN-SPEC-0014-AC006, CN-SPEC-0014-AC016
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionViewModel.swift`: CN-SPEC-0014-AC006, CN-SPEC-0014-AC017
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionHistoryStore.swift`: CN-SPEC-0014-AC006, CN-SPEC-0014-AC016
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionViews.swift`: CN-SPEC-0014-AC008, CN-SPEC-0014-AC009, CN-SPEC-0014-AC010, CN-SPEC-0014-AC011, CN-SPEC-0014-AC014, CN-SPEC-0014-AC015, CN-SPEC-0014-AC017, CN-SPEC-0014-AC018, CN-SPEC-0014-AC019, CN-SPEC-0014-AC020
 
 ## Open Questions
 
-- Should notation history live on each game detail/library row, a dedicated History destination, or both?
-- Should players be able to clear history per mode in the first implementation?
-- Should timed notation history compare all durations together by default, or default to the last selected duration?
-- Should the current-position evaluation be hidden during timed notation to reduce distraction, or shown consistently across notation modes?
+- Resolved: Notation history is a dedicated Game Library destination for the selected launch mode.
+- Resolved: Clear-history controls are deferred.
+- Resolved: Timed notation history compares all durations together in the first implementation while preserving duration on each record.
+- Resolved: Current-position evaluation is shown consistently across notation modes when the per-difficulty evaluation setting allows it.
 
 ## Revision Notes
 
 - 2026-06-28: Initial proposed spec for stored current-position evaluation, all-mode training history, and mode-specific trend views.
+- 2026-06-28: Accepted after implementing reached-position evaluation, notation history persistence, range-filtered history summaries, trend views, and backward-compatible square-recognition history.
+- 2026-06-28: Added today filtering, sparse x-axis labels, and temporary tap overlays for trend values.

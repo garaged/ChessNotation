@@ -340,15 +340,100 @@ struct SquareRecognitionResultsView: View {
 struct SquareRecognitionHistoryView: View {
     let historyStore: SquareRecognitionHistoryStoring
     @State private var results: [SquareRecognitionResult] = []
+    @State private var selectedRange: HistoryRange = .lastWeek
     @State private var loadError: String?
+
+    private var filteredResults: [SquareRecognitionResult] {
+        results.filter { selectedRange.contains($0.finishedAt) }
+    }
+
+    private var chronologicalResults: [SquareRecognitionResult] {
+        filteredResults.sorted { $0.finishedAt < $1.finishedAt }
+    }
 
     var body: some View {
         List {
-            if results.isEmpty, loadError == nil {
-                ContentUnavailableView("No Results", systemImage: "clock.arrow.circlepath", description: Text("Completed square-recognition runs will appear here."))
+            Section {
+                Picker("Range", selection: $selectedRange) {
+                    ForEach(HistoryRange.allCases) { range in
+                        Text(range.displayName).tag(range)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .accessibilityIdentifier("squareRecognition.historyRangePicker")
             }
 
-            ForEach(results) { result in
+            if filteredResults.isEmpty, loadError == nil {
+                ContentUnavailableView("No Results", systemImage: "clock.arrow.circlepath", description: Text("Completed square-recognition runs will appear here."))
+            } else {
+                summarySection
+                trendSection
+                sessionsSection
+            }
+
+            if let loadError {
+                Text(loadError)
+                    .foregroundStyle(.red)
+            }
+        }
+        .listStyle(.insetGrouped)
+        .premiumScreenBackground()
+        .navigationTitle("History")
+        .task {
+            loadHistory()
+        }
+    }
+
+    private var summarySection: some View {
+        Section("Summary") {
+            metricRow("Sessions", "\(filteredResults.count)")
+            metricRow("Best score", "\(filteredResults.map(\.score).max() ?? 0)")
+            metricRow("Average score", averageScore.formatted(.number.precision(.fractionLength(1))))
+            metricRow("Accuracy", average(\.accuracy).formatted(.percent.precision(.fractionLength(0))))
+            metricRow("Average latency", average(\.averageLatency).formattedTenths)
+            metricRow("Fastest correct", fastestCorrectText)
+        }
+    }
+
+    private var trendSection: some View {
+        Section("Trends") {
+            if chronologicalResults.count >= 2 {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Score")
+                        .font(.headline)
+                    PremiumTrendLine(
+                        values: chronologicalResults.map { Double($0.score) },
+                        xAxisLabels: selectedRange.axisLabels(for: chronologicalResults.map(\.finishedAt)),
+                        accent: .square,
+                        valueFormatter: { value in
+                            value.formatted(.number.precision(.fractionLength(0)))
+                        }
+                    )
+
+                    Text("Average latency")
+                        .font(.headline)
+                    PremiumTrendLine(
+                        values: chronologicalResults.map(\.averageLatency),
+                        xAxisLabels: selectedRange.axisLabels(for: chronologicalResults.map(\.finishedAt)),
+                        accent: .timed,
+                        valueFormatter: { value in
+                            value.formattedTenths
+                        }
+                    )
+                }
+            } else if let latest = filteredResults.first {
+                metricRow("Latest score", "\(latest.score)")
+                metricRow("Latest latency", latest.averageLatency.formattedTenths)
+                Text("Complete at least two sessions in this range to draw trends.")
+                    .font(.caption)
+                    .foregroundStyle(PremiumDesign.secondaryText)
+            }
+        }
+    }
+
+    private var sessionsSection: some View {
+        Section("Sessions") {
+            ForEach(filteredResults) { result in
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
                         Text(result.finishedAt.formatted(date: .abbreviated, time: .shortened))
@@ -372,27 +457,48 @@ struct SquareRecognitionHistoryView: View {
                 }
                 .padding(.vertical, 4)
             }
+        }
+    }
 
-            if let loadError {
-                Text(loadError)
-                    .foregroundStyle(.red)
-            }
-        }
-        .listStyle(.insetGrouped)
-        .premiumScreenBackground()
-        .navigationTitle("History")
-        .task {
-            loadHistory()
-        }
+    private var averageScore: Double {
+        guard !filteredResults.isEmpty else { return 0 }
+        return Double(filteredResults.map(\.score).reduce(0, +)) / Double(filteredResults.count)
+    }
+
+    private var fastestCorrectText: String {
+        let fastest = filteredResults.compactMap(\.fastestCorrectLatency).min()
+        return fastest?.formattedTenths ?? "-"
+    }
+
+    private func average(_ keyPath: KeyPath<SquareRecognitionResult, Double>) -> Double {
+        guard !filteredResults.isEmpty else { return 0 }
+        return filteredResults.map { $0[keyPath: keyPath] }.reduce(0, +) / Double(filteredResults.count)
     }
 
     private func loadHistory() {
         do {
             results = try historyStore.loadResults()
+            selectedRange = defaultRange(for: results.map(\.finishedAt))
             loadError = nil
         } catch {
             results = []
             loadError = error.localizedDescription
+        }
+    }
+
+    private func defaultRange(for dates: [Date]) -> HistoryRange {
+        HistoryRange.allCases.first { range in
+            dates.contains { range.contains($0) }
+        } ?? .lastWeek
+    }
+
+    private func metricRow(_ title: String, _ value: String) -> some View {
+        HStack {
+            Text(title)
+                .foregroundStyle(PremiumDesign.primaryText)
+            Spacer()
+            Text(value)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
     }
 }
