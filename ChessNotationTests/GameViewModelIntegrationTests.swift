@@ -22,6 +22,7 @@ struct GameViewModelIntegrationTests {
     func currentPositionEvaluationUsesReachedPositionOnly() throws {
         let viewModel = GameViewModel(game: TestFixtures.evaluatedGame)
 
+        #expect(viewModel.hasStoredEvaluations)
         #expect(viewModel.currentPositionEvaluation == nil)
 
         viewModel.answerText = "e4"
@@ -32,6 +33,14 @@ struct GameViewModelIntegrationTests {
         #expect(evaluation.depth == 12)
         #expect(evaluation.engine == "Stockfish")
         #expect(viewModel.currentMove?.san == "e5")
+    }
+
+    @Test
+    func gameWithoutStoredEvaluationsDoesNotRequestEvaluationBar() {
+        let viewModel = GameViewModel(game: TestFixtures.operaGame)
+
+        #expect(!viewModel.hasStoredEvaluations)
+        #expect(viewModel.currentPositionEvaluation == nil)
     }
 
     @Test

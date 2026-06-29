@@ -5,6 +5,7 @@ struct ChessBoardView: View {
     let fen: String
     let highlightedMove: NotationMove?
     let evaluation: EngineEvaluation?
+    let showsEvaluation: Bool
     let showsCoordinates: Bool
 
     private var squares: [BoardSquare] {
@@ -17,14 +18,14 @@ struct ChessBoardView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let evaluationBarWidth: CGFloat = evaluation == nil ? 0 : 34
-            let barSpacing: CGFloat = evaluation == nil ? 0 : 8
+            let evaluationBarWidth: CGFloat = showsEvaluation ? 34 : 0
+            let barSpacing: CGFloat = showsEvaluation ? 8 : 0
             let availableBoardWidth = max(proxy.size.width - evaluationBarWidth - barSpacing, 0)
             let boardSize = min(availableBoardWidth, proxy.size.height)
             let squareSize = boardSize / 8
 
             HStack(spacing: barSpacing) {
-                if let evaluation {
+                if showsEvaluation {
                     EvaluationBarView(
                         evaluation: evaluation,
                         palette: palette
@@ -137,83 +138,153 @@ private struct BoardCoordinatesOverlay: View {
 }
 
 struct EvaluationBarView: View {
-    let evaluation: EngineEvaluation
+    let evaluation: EngineEvaluation?
     let palette: ChessVisualPalette
 
     var body: some View {
         GeometryReader { proxy in
-            let whiteFraction = max(0.0, min(1.0, evaluation.whiteAdvantageFraction))
-            let whiteHeight = proxy.size.height * whiteFraction
-            let valueText = evaluation.displayText
-            let textNearTop = whiteFraction >= 0.5
-            let scoreLabelBottomInset: CGFloat = 34
-            let labelBackground = textNearTop ? palette.whitePieceTop.opacity(0.92) : palette.blackPieceBottom.opacity(0.92)
-            let labelForeground = textNearTop ? palette.blackPieceBottom : palette.whitePieceTop
-
-            ZStack(alignment: .bottom) {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(
-                        LinearGradient(
-                            colors: [palette.blackPieceTop, palette.blackPieceBottom],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(
-                        LinearGradient(
-                            colors: [palette.whitePieceTop, palette.whitePieceBottom],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .frame(height: whiteHeight)
-                    .frame(maxHeight: .infinity, alignment: .bottom)
-                    .animation(.easeInOut(duration: 0.35), value: whiteFraction)
+            if let evaluation {
+                evaluationContent(evaluation: evaluation, size: proxy.size)
+            } else {
+                neutralPlaceholderContent(size: proxy.size)
             }
-            .overlay(alignment: textNearTop ? .top : .bottom) {
-                Text(valueText)
-                    .font(.system(size: 9, weight: .bold, design: .rounded).monospacedDigit())
-                    .foregroundStyle(labelForeground)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 3)
-                    .background(
-                        Capsule(style: .continuous)
-                            .fill(labelBackground)
-                    )
-                    .padding(.top, textNearTop ? 8 : 0)
-                    .padding(.bottom, textNearTop ? 0 : scoreLabelBottomInset)
-                    .animation(.easeInOut(duration: 0.35), value: textNearTop)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(palette.boardBorder, lineWidth: 1)
-            }
-            .overlay(alignment: .bottom) {
-                engineDepthBadge(engine: evaluation.engine, depth: evaluation.depth)
-                    .padding(.bottom, 8)
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Position evaluation")
-            .accessibilityValue(Text("\(valueText), \(evaluation.engine), depth \(evaluation.depth)"))
         }
     }
 
+    private func evaluationContent(evaluation: EngineEvaluation, size: CGSize) -> some View {
+        let whiteFraction = max(0.0, min(1.0, evaluation.whiteAdvantageFraction))
+        let whiteHeight = size.height * whiteFraction
+        let valueText = evaluation.displayText
+        let textNearTop = whiteFraction >= 0.5
+        let scoreLabelBottomInset: CGFloat = 34
+        let labelBackground = textNearTop ? palette.whitePieceTop.opacity(0.92) : palette.blackPieceBottom.opacity(0.92)
+        let labelForeground = textNearTop ? palette.blackPieceBottom : palette.whitePieceTop
+
+        return ZStack(alignment: .bottom) {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(
+                    LinearGradient(
+                        colors: [palette.blackPieceTop, palette.blackPieceBottom],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+
+            RoundedRectangle(cornerRadius: 10)
+                .fill(
+                    LinearGradient(
+                        colors: [palette.whitePieceTop, palette.whitePieceBottom],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(height: whiteHeight)
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .animation(.easeInOut(duration: 0.35), value: whiteFraction)
+        }
+        .overlay(alignment: textNearTop ? .top : .bottom) {
+            Text(valueText)
+                .font(.system(size: 9, weight: .bold, design: .rounded).monospacedDigit())
+                .foregroundStyle(labelForeground)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .padding(.horizontal, 4)
+                .padding(.vertical, 3)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(labelBackground)
+                )
+                .padding(.top, textNearTop ? 8 : 0)
+                .padding(.bottom, textNearTop ? 0 : scoreLabelBottomInset)
+                .animation(.easeInOut(duration: 0.35), value: textNearTop)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(palette.boardBorder, lineWidth: 1)
+        }
+        .overlay(alignment: .bottom) {
+            engineDepthBadge(engine: evaluation.engine, depth: evaluation.depth)
+                .padding(.bottom, 8)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Position evaluation")
+        .accessibilityValue(Text("\(valueText), \(evaluation.engine), depth \(evaluation.depth)"))
+        .accessibilityIdentifier("game.positionEvaluation")
+    }
+
+    private func neutralPlaceholderContent(size: CGSize) -> some View {
+        ZStack(alignment: .bottom) {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(
+                    LinearGradient(
+                        colors: [palette.blackPieceTop, palette.blackPieceBottom],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+
+            RoundedRectangle(cornerRadius: 10)
+                .fill(
+                    LinearGradient(
+                        colors: [palette.whitePieceTop, palette.whitePieceBottom],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(height: size.height * 0.5)
+                .frame(maxHeight: .infinity, alignment: .bottom)
+        }
+        .overlay {
+            Text("0.0")
+                .font(.system(size: 9, weight: .bold, design: .rounded).monospacedDigit())
+                .foregroundStyle(palette.blackPieceBottom)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .padding(.horizontal, 4)
+                .padding(.vertical, 3)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(palette.whitePieceTop.opacity(0.92))
+                )
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(palette.boardBorder, lineWidth: 1)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Position evaluation")
+        .accessibilityValue("Neutral placeholder until a stored position evaluation is available")
+        .accessibilityIdentifier("game.positionEvaluation")
+    }
+
     private func engineDepthBadge(engine: String, depth: Int) -> some View {
-        VStack(spacing: 1) {
-            Text(engine.prefix(1).uppercased())
-                .font(.system(size: 8, weight: .black, design: .rounded))
+        ZStack {
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .fill(palette.whitePieceTop.opacity(0.96))
+                .shadow(color: palette.blackPieceBottom.opacity(0.18), radius: 2, x: 0, y: 1)
+
+            Image(systemName: "cpu")
+                .font(.system(size: 20, weight: .semibold))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(palette.blackPieceTop.opacity(0.82))
+
             Text("\(depth)")
                 .font(.system(size: 8, weight: .black, design: .rounded).monospacedDigit())
+                .foregroundStyle(palette.blackPieceTop)
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
+                .padding(.horizontal, 2)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(palette.whitePieceTop.opacity(0.78))
+                )
         }
-        .foregroundStyle(palette.blackPieceTop)
-        .minimumScaleFactor(0.7)
-        .padding(.horizontal, 4)
-        .padding(.vertical, 3)
-        .background(Capsule(style: .continuous).fill(palette.whitePieceTop.opacity(0.95)))
+        .frame(width: 26, height: 26)
+        .overlay {
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .stroke(palette.blackPieceTop.opacity(0.16), lineWidth: 0.8)
+        }
+        .accessibilityLabel("\(engine) depth \(depth)")
     }
 }
 

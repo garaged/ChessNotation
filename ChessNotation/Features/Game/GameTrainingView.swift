@@ -52,6 +52,7 @@ struct GameTrainingView: View {
                         fen: move.fenBefore,
                         highlightedMove: move,
                         evaluation: displayedEvaluation,
+                        showsEvaluation: showsEvaluationBar,
                         showsCoordinates: appSettings.showBoardCoordinates
                     )
                         .padding(.horizontal)
@@ -181,6 +182,10 @@ struct GameTrainingView: View {
     private var displayedEvaluation: EngineEvaluation? {
         guard appSettings.isEvaluationEnabled(for: viewModel.game.difficulty) else { return nil }
         return viewModel.currentPositionEvaluation
+    }
+
+    private var showsEvaluationBar: Bool {
+        viewModel.hasStoredEvaluations
     }
 
     private var statsCard: some View {

@@ -68,6 +68,34 @@ final class ChessNotationUITests: XCTestCase {
     }
 
     @MainActor
+    func testEvaluatedGameShowsNeutralEvaluationBarAtLaunch() throws {
+        let app = makeApp()
+
+        openPracticeLibrary(in: app)
+
+        let operaGameButton = app.buttons["library.game.opera-game-1858"]
+        XCTAssertTrue(operaGameButton.waitForExistence(timeout: 5))
+        operaGameButton.tap()
+
+        let evaluationBar = app.otherElements["game.positionEvaluation"]
+        XCTAssertTrue(evaluationBar.waitForExistence(timeout: 5))
+        XCTAssertEqual(evaluationBar.value as? String, "Neutral placeholder until a stored position evaluation is available")
+    }
+
+    @MainActor
+    func testNonEvaluatedGameDoesNotShowEvaluationBar() throws {
+        let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
+
+        openPracticeLibrary(in: app)
+
+        let beginnerGame = app.buttons["library.game.mini-opera"]
+        XCTAssertTrue(beginnerGame.waitForExistence(timeout: 5))
+        beginnerGame.tap()
+
+        XCTAssertFalse(app.otherElements["game.positionEvaluation"].exists)
+    }
+
+    @MainActor
     func testLibraryFiltersByLevel() throws {
         let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
 

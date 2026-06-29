@@ -37,6 +37,10 @@ final class GameViewModel {
         return game.moves[currentMoveIndex - 1].engineEvaluation
     }
 
+    var hasStoredEvaluations: Bool {
+        game.moves.contains { $0.engineEvaluation != nil }
+    }
+
     var isTimed: Bool { mode.isTimed }
 
     var timerText: String? {
