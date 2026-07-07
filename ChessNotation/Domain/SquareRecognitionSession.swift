@@ -23,7 +23,7 @@ struct SquareBoardMapping {
     }
 }
 
-enum SquareRecognitionAnswer: Hashable {
+enum SquareRecognitionSubmission: Hashable {
     case square(ChessSquare)
     case coordinate(String)
     case color(ChessSquareColor)
@@ -73,7 +73,7 @@ final class SquareRecognitionSession {
         return configuration
     }
 
-    func submit(_ answer: SquareRecognitionAnswer, at timestamp: TimeInterval) -> SquareRecognitionEvaluation? {
+    func submit(_ answer: SquareRecognitionSubmission, at timestamp: TimeInterval) -> SquareRecognitionEvaluation? {
         guard !inputLocked else { return nil }
         inputLocked = true
 
@@ -112,7 +112,7 @@ final class SquareRecognitionSession {
         )
     }
 
-    private func evaluate(_ answer: SquareRecognitionAnswer) -> Bool {
+    private func evaluate(_ answer: SquareRecognitionSubmission) -> Bool {
         switch (configuration.drill, answer) {
         case (.findSquare, .square(let square)):
             return square == currentPrompt.target
