@@ -19,7 +19,7 @@ enum SquareRecognitionZone: Hashable, Codable, Sendable {
     case center
     case corners
     case edges
-    case file(Character)
+    case file(String)
     case rank(Int)
     case quadrant(Int)
 }
@@ -84,8 +84,9 @@ struct SquareRecognitionPromptFactory {
             return allSquares.filter { [$0.file, $0.rank].allSatisfy { $0 == 0 || $0 == 7 } }
         case .edges:
             return allSquares.filter { $0.file == 0 || $0.file == 7 || $0.rank == 0 || $0.rank == 7 }
-        case let .file(character):
-            guard let scalar = character.unicodeScalars.first?.value else { return [] }
+        case let .file(fileName):
+            guard fileName.count == 1,
+                  let scalar = fileName.unicodeScalars.first?.value else { return [] }
             let file = Int(scalar - UnicodeScalar("a").value)
             return allSquares.filter { $0.file == file }
         case let .rank(rank):
