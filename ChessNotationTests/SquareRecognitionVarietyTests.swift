@@ -103,7 +103,7 @@ struct SquareRecognitionVarietyTests {
     @Test
     func resultRoundTripsConfigurationAndMetrics() throws {
         let result = SquareRecognitionDrillResult(
-            configuration: SquareRecognitionConfiguration(
+            configuration: SquareRecognitionDrillConfiguration(
                 drill: .route,
                 orientation: .black,
                 zone: .center,
