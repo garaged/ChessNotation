@@ -42,12 +42,15 @@ struct ChessSquare: Hashable, Codable, Sendable, CustomStringConvertible {
     init?(_ coordinate: String) {
         guard coordinate.count == 2,
               let fileScalar = coordinate.unicodeScalars.first?.value,
-              let rank = Int(String(coordinate.last!)) else { return nil }
+              let rankCharacter = coordinate.last,
+              let rank = Int(String(rankCharacter)) else { return nil }
         self.init(file: Int(fileScalar - UnicodeScalar("a").value), rank: rank - 1)
     }
 
     var description: String {
-        let fileScalar = UnicodeScalar(Int(UnicodeScalar("a").value) + file)!
+        guard let fileScalar = UnicodeScalar(Int(UnicodeScalar("a").value) + file) else {
+            return "?\(rank + 1)"
+        }
         return "\(Character(fileScalar))\(rank + 1)"
     }
 
@@ -161,7 +164,7 @@ struct SquareRouteAttempt: Hashable, Sendable {
     var isCorrect: Bool { isResolved && selected == expected }
 }
 
-struct SquareRecognitionConfiguration: Hashable, Codable, Sendable {
+struct SquareRecognitionConfiguration: Hashable, Codable {
     let drill: SquareRecognitionDrillKind
     let orientation: BoardOrientationPolicy
     let zone: SquareRecognitionZone
@@ -169,7 +172,7 @@ struct SquareRecognitionConfiguration: Hashable, Codable, Sendable {
     let variant: SquareRecognitionVariant
 }
 
-struct SquareRecognitionDrillResult: Hashable, Codable, Sendable {
+struct SquareRecognitionDrillResult: Hashable, Codable {
     let configuration: SquareRecognitionConfiguration
     let score: Int
     let totalPrompts: Int
