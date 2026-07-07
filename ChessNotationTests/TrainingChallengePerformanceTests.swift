@@ -20,7 +20,8 @@ struct TrainingChallengePerformanceTests {
     @Test
     func representativeGenerationAndLookupStayWithinRegressionBudget() {
         let fixtures = makeChallenges(count: 500)
-        let startedAt = ContinuousClock.now
+        let clock = ContinuousClock()
+        let startedAt = clock.now
         let catalog = TrainingChallengeCatalog(challenges: fixtures)
         let generator = TrainingChallengeGenerator(
             challenges: catalog.index.all,
@@ -35,7 +36,7 @@ struct TrainingChallengePerformanceTests {
             _ = catalog.index.challenges(moveTag: "capture")
         }
 
-        let elapsed = startedAt.duration(to: .now)
+        let elapsed = startedAt.duration(to: clock.now)
 
         #expect(elapsed < .seconds(2))
         #expect(generator.retainedChallengeCount <= fixtures.count)
