@@ -68,6 +68,20 @@ extension TrainingChallengeIndex {
     }
 }
 
+/// Owns one validated immutable index for a content lifetime.
+final class TrainingChallengeCatalog: @unchecked Sendable {
+    let index: TrainingChallengeIndex
+    let validationIssues: [TrainingChallengeValidationIssue]
+    let indexBuildCount: Int
+
+    init(challenges: [TrainingChallenge]) {
+        let result = TrainingChallengeIndex.build(validating: challenges)
+        index = result.index
+        validationIssues = result.issues
+        indexBuildCount = 1
+    }
+}
+
 /// Prevents results from an older generation task from being applied to a newer session.
 @MainActor
 final class TrainingGenerationSessionGuard {
