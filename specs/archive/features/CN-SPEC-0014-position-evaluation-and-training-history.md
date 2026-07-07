@@ -119,3 +119,4 @@ Out of scope:
 - 2026-06-28: Accepted after implementing reached-position evaluation, notation history persistence, range-filtered history summaries, trend views, and backward-compatible square-recognition history.
 - 2026-06-28: Added today filtering, sparse x-axis labels, and temporary tap overlays for trend values.
 - 2026-06-28: Updated evaluated-game board behavior so the evaluation bar appears from the start with a neutral placeholder.
+- 2026-07-07: Archived after completion before opening the training-expansion roadmap.
