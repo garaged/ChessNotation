@@ -165,7 +165,7 @@ struct SquareRouteAttempt: Hashable, Sendable {
     var isCorrect: Bool { isResolved && selected == expected }
 }
 
-struct SquareRecognitionConfiguration: Hashable, Codable {
+struct SquareRecognitionDrillConfiguration: Hashable, Codable {
     let drill: SquareRecognitionDrillKind
     let orientation: BoardOrientationPolicy
     let zone: SquareRecognitionZone
@@ -174,7 +174,7 @@ struct SquareRecognitionConfiguration: Hashable, Codable {
 }
 
 struct SquareRecognitionDrillResult: Hashable, Codable {
-    let configuration: SquareRecognitionConfiguration
+    let configuration: SquareRecognitionDrillConfiguration
     let score: Int
     let totalPrompts: Int
     let correctPrompts: Int
