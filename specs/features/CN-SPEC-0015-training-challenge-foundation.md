@@ -1,6 +1,6 @@
 # CN-SPEC-0015: Training Challenge Foundation
 
-Status: Proposed
+Status: Accepted
 Owner: Project
 Last updated: 2026-07-07
 
@@ -66,20 +66,13 @@ Out of scope:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0015-AC001
-- Pending coverage: CN-SPEC-0015-AC002
-- Pending coverage: CN-SPEC-0015-AC003
-- Pending coverage: CN-SPEC-0015-AC004
-- Pending coverage: CN-SPEC-0015-AC005
-- Pending coverage: CN-SPEC-0015-AC006
-- Pending coverage: CN-SPEC-0015-AC007
-- Pending coverage: CN-SPEC-0015-AC008
-- Pending coverage: CN-SPEC-0015-AC009
-- Pending coverage: CN-SPEC-0015-AC010
-- Pending coverage: CN-SPEC-0015-AC011
-- Pending coverage: CN-SPEC-0015-AC012
-- Pending coverage: CN-SPEC-0015-AC013
-- Pending coverage: CN-SPEC-0015-AC014
+- `ChessNotationTests/TrainingChallengeFoundationTests.swift`: CN-SPEC-0015-AC001, CN-SPEC-0015-AC002, CN-SPEC-0015-AC003, CN-SPEC-0015-AC004, CN-SPEC-0015-AC005, CN-SPEC-0015-AC007, CN-SPEC-0015-AC008, CN-SPEC-0015-AC013
+- `ChessNotationTests/TrainingChallengeValidationTests.swift`: CN-SPEC-0015-AC006, CN-SPEC-0015-AC009, CN-SPEC-0015-AC014
+- `ChessNotationTests/TrainingChallengePerformanceTests.swift`: CN-SPEC-0015-AC008, CN-SPEC-0015-AC011, CN-SPEC-0015-AC012
+- `ChessNotationTests/GameViewModelIntegrationTests.swift`: CN-SPEC-0015-AC010
+- `ChessNotationTests/SquareRecognitionTests.swift`: CN-SPEC-0015-AC010
+- `ChessNotation/Domain/TrainingChallenge.swift`: CN-SPEC-0015-AC001, CN-SPEC-0015-AC002, CN-SPEC-0015-AC003, CN-SPEC-0015-AC004, CN-SPEC-0015-AC005, CN-SPEC-0015-AC007, CN-SPEC-0015-AC008, CN-SPEC-0015-AC011, CN-SPEC-0015-AC013
+- `ChessNotation/Domain/TrainingChallengeValidation.swift`: CN-SPEC-0015-AC006, CN-SPEC-0015-AC009, CN-SPEC-0015-AC011, CN-SPEC-0015-AC014
 
 ## Open Questions
 
@@ -88,3 +81,4 @@ Out of scope:
 ## Revision Notes
 
 - 2026-07-07: Initial proposed spec for PR1.
+- 2026-07-07: Accepted after implementing deterministic challenge generation, bounded shuffled bags, immutable indexing, validation, cancellation/session ownership, schema metadata, diagnostics, and regression/performance coverage.
