@@ -36,7 +36,7 @@ struct NotationTrainingVarietyTests {
 
         #expect(firstIDs == secondIDs)
         #expect(firstIDs.count == 6)
-        #expect(zip(firstIDs, firstIDs.dropFirst()).allSatisfy { $0 != $1 })
+        #expect(zip(firstIDs, firstIDs.dropFirst()).allSatisfy { $0.0 != $0.1 })
     }
 
     @Test
