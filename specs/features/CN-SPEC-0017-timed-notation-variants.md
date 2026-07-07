@@ -1,6 +1,6 @@
 # CN-SPEC-0017: Timed Notation Variants
 
-Status: Proposed
+Status: Accepted
 Owner: Project
 Last updated: 2026-07-07
 
@@ -76,4 +76,5 @@ Out of scope:
 
 - 2026-07-07: Initial proposed spec for PR3.
 - 2026-07-07: Initial implementation and simulator tests completed on iPhone 17 / iOS 26.5.
-- 2026-07-07: Restored complete requirements and acceptance criteria; added aggregate score metadata, personal-best policy, and explicit legacy metric preservation. Status remains Proposed until corrective validation passes.
+- 2026-07-07: Restored complete requirements and acceptance criteria; added aggregate score metadata, personal-best policy, and explicit legacy metric preservation.
+- 2026-07-07: Accepted after corrective simulator validation passed for all timed-notation variant, compatibility, result, and completion suites.
