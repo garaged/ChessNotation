@@ -1,6 +1,6 @@
 # CN-SPEC-0016: Notation Training Variety
 
-Status: Proposed
+Status: Accepted
 Owner: Project
 Last updated: 2026-07-07
 
@@ -65,25 +65,18 @@ Out of scope:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0016-AC001
-- Pending coverage: CN-SPEC-0016-AC002
-- Pending coverage: CN-SPEC-0016-AC003
-- Pending coverage: CN-SPEC-0016-AC004
-- Pending coverage: CN-SPEC-0016-AC005
-- Pending coverage: CN-SPEC-0016-AC006
-- Pending coverage: CN-SPEC-0016-AC007
-- Pending coverage: CN-SPEC-0016-AC008
-- Pending coverage: CN-SPEC-0016-AC009
-- Pending coverage: CN-SPEC-0016-AC010
-- Pending coverage: CN-SPEC-0016-AC011
-- Pending coverage: CN-SPEC-0016-AC012
-- Pending coverage: CN-SPEC-0016-AC013
-- Pending coverage: CN-SPEC-0016-AC014
+- `ChessNotationTests/NotationTrainingVarietyTests.swift`: CN-SPEC-0016-AC001, CN-SPEC-0016-AC002, CN-SPEC-0016-AC003, CN-SPEC-0016-AC004, CN-SPEC-0016-AC005, CN-SPEC-0016-AC006, CN-SPEC-0016-AC007, CN-SPEC-0016-AC008, CN-SPEC-0016-AC009, CN-SPEC-0016-AC010, CN-SPEC-0016-AC011, CN-SPEC-0016-AC013, CN-SPEC-0016-AC014
+- `ChessNotationTests/NotationTrainingHistoryCompatibilityTests.swift`: CN-SPEC-0016-AC011, CN-SPEC-0016-AC012
+- `ChessNotationTests/GameViewModelIntegrationTests.swift`: CN-SPEC-0016-AC001
+- `ChessNotation/Domain/NotationTraining.swift`: CN-SPEC-0016-AC002, CN-SPEC-0016-AC003, CN-SPEC-0016-AC004, CN-SPEC-0016-AC005, CN-SPEC-0016-AC008, CN-SPEC-0016-AC009, CN-SPEC-0016-AC010, CN-SPEC-0016-AC011, CN-SPEC-0016-AC014
+- `ChessNotation/Features/Game/NotationDrillSession.swift`: CN-SPEC-0016-AC006, CN-SPEC-0016-AC007, CN-SPEC-0016-AC010, CN-SPEC-0016-AC011, CN-SPEC-0016-AC013
+- `ChessNotation/Services/NotationTrainingHistoryCompatibility.swift`: CN-SPEC-0016-AC012
 
 ## Open Questions
 
-- None. Exact opening-ply defaults and difficulty thresholds must be constants covered by tests, not undocumented UI behavior.
+- None. Exact opening-ply defaults and difficulty thresholds are constants covered by tests, not undocumented UI behavior.
 
 ## Revision Notes
 
 - 2026-07-07: Initial proposed spec for PR2.
+- 2026-07-07: Accepted after implementing configurable drill planning, independent prompt generation, answer policies, semantic SAN feedback, result metadata, legacy history defaults, accessibility-safe status text, and bounded long-session coverage.
