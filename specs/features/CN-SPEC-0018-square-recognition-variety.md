@@ -1,6 +1,6 @@
 # CN-SPEC-0018: Square Recognition Variety
 
-Status: Proposed
+Status: Accepted
 Owner: Project
 Last updated: 2026-07-07
 
@@ -60,25 +60,22 @@ Out of scope:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0018-AC001
-- Pending coverage: CN-SPEC-0018-AC002
-- Pending coverage: CN-SPEC-0018-AC003
-- Pending coverage: CN-SPEC-0018-AC004
-- Pending coverage: CN-SPEC-0018-AC005
-- Pending coverage: CN-SPEC-0018-AC006
-- Pending coverage: CN-SPEC-0018-AC007
-- Pending coverage: CN-SPEC-0018-AC008
-- Pending coverage: CN-SPEC-0018-AC009
-- Pending coverage: CN-SPEC-0018-AC010
-- Pending coverage: CN-SPEC-0018-AC011
-- Pending coverage: CN-SPEC-0018-AC012
-- Pending coverage: CN-SPEC-0018-AC013
-- Pending coverage: CN-SPEC-0018-AC014
+- `ChessNotationTests/SquareRecognitionVarietyTests.swift`: CN-SPEC-0018-AC002, CN-SPEC-0018-AC003, CN-SPEC-0018-AC004, CN-SPEC-0018-AC005, CN-SPEC-0018-AC007, CN-SPEC-0018-AC010, CN-SPEC-0018-AC011, CN-SPEC-0018-AC013, CN-SPEC-0018-AC014
+- `ChessNotationTests/SquareRecognitionSessionTests.swift`: CN-SPEC-0018-AC002, CN-SPEC-0018-AC003, CN-SPEC-0018-AC005, CN-SPEC-0018-AC006, CN-SPEC-0018-AC008, CN-SPEC-0018-AC009, CN-SPEC-0018-AC010, CN-SPEC-0018-AC011
+- `ChessNotationTests/SquareRecognitionIntegrationTests.swift`: CN-SPEC-0018-AC001, CN-SPEC-0018-AC012, CN-SPEC-0018-AC013, CN-SPEC-0018-AC014
+- `ChessNotationTests/ExpandedSquareRecognitionViewModelTests.swift`: CN-SPEC-0018-AC002, CN-SPEC-0018-AC003, CN-SPEC-0018-AC005, CN-SPEC-0018-AC006, CN-SPEC-0018-AC008, CN-SPEC-0018-AC013
+- `ChessNotation/Domain/SquareRecognitionDrills.swift`: CN-SPEC-0018-AC003, CN-SPEC-0018-AC004, CN-SPEC-0018-AC005, CN-SPEC-0018-AC007, CN-SPEC-0018-AC014
+- `ChessNotation/Domain/SquareRecognitionSession.swift`: CN-SPEC-0018-AC002, CN-SPEC-0018-AC005, CN-SPEC-0018-AC006, CN-SPEC-0018-AC008, CN-SPEC-0018-AC009, CN-SPEC-0018-AC010, CN-SPEC-0018-AC011
+- `ChessNotation/Features/SquareRecognition/SquareRecognitionIntegration.swift`: CN-SPEC-0018-AC001, CN-SPEC-0018-AC012, CN-SPEC-0018-AC013, CN-SPEC-0018-AC014
+- `ChessNotation/Features/SquareRecognition/ExpandedSquareRecognitionView.swift`: CN-SPEC-0018-AC002, CN-SPEC-0018-AC005, CN-SPEC-0018-AC006, CN-SPEC-0018-AC008, CN-SPEC-0018-AC013
 
 ## Open Questions
 
-- None. Exact route lengths and zone coordinate sets must be explicit tested constants.
+- None. Exact route lengths and zone coordinate sets are explicit tested constants.
 
 ## Revision Notes
 
 - 2026-07-07: Initial proposed spec for PR4.
+- 2026-07-07: Added square-recognition domain geometry, shuffled-bag generation, session evaluation, black-orientation mapping, persistence, migration, accessibility, and board-resource reuse coverage.
+- 2026-07-07: Added production-facing expanded SwiftUI/view-model support for all five drills.
+- 2026-07-07: Accepted after corrective simulator validation passed for variety, session, integration, and expanded view-model suites.
