@@ -25,11 +25,12 @@ final class ExpandedSquareRecognitionViewModel {
             orientationPolicy: sanitized.orientation,
             randomizer: randomizer
         )
-        let initialPrompt = generator.next() ?? SquareRecognitionPrompt(
+        let basePrompt = generator.next() ?? SquareRecognitionPrompt(
             target: ChessSquare("a1")!,
             orientation: .white,
             route: []
         )
+        let initialPrompt = Self.adapt(basePrompt, for: sanitized)
         self.session = SquareRecognitionSession(
             configuration: sanitized,
             prompt: initialPrompt,
@@ -52,8 +53,7 @@ final class ExpandedSquareRecognitionViewModel {
         switch configuration.drill {
         case .route:
             routeSelection.append(square)
-            let expectedCount = max(1, prompt.route.count)
-            if routeSelection.count >= expectedCount {
+            if routeSelection.count >= prompt.route.count {
                 resolve(.route(routeSelection))
             }
         case .findSquare, .relativeSquare:
@@ -72,7 +72,8 @@ final class ExpandedSquareRecognitionViewModel {
     }
 
     func advance() {
-        guard let next = generator.next() else { return }
+        guard let basePrompt = generator.next() else { return }
+        let next = Self.adapt(basePrompt, for: configuration)
         session.advance(to: next)
         routeSelection = []
         coordinateEntry = ""
@@ -95,6 +96,19 @@ final class ExpandedSquareRecognitionViewModel {
             feedback: evaluation.isCorrect ? "Correct" : "Incorrect"
         )
     }
+
+    private static func adapt(
+        _ prompt: SquareRecognitionPrompt,
+        for configuration: SquareRecognitionDrillConfiguration
+    ) -> SquareRecognitionPrompt {
+        guard configuration.drill == .route else { return prompt }
+        let eligible = SquareRecognitionPromptFactory.squares(in: configuration.zone)
+        guard !eligible.isEmpty else { return prompt }
+        let startIndex = eligible.firstIndex(of: prompt.target) ?? 0
+        let length = min(SquareRecognitionPromptFactory.routeLength(for: configuration.difficulty), eligible.count)
+        let route = (0..<length).map { eligible[(startIndex + $0) % eligible.count] }
+        return SquareRecognitionPrompt(target: prompt.target, orientation: prompt.orientation, route: route)
+    }
 }
 
 struct ExpandedSquareRecognitionView: View {
@@ -113,7 +127,6 @@ struct ExpandedSquareRecognitionView: View {
                     .foregroundStyle(.secondary)
 
                 board
-
                 responseControls
 
                 HStack {
@@ -181,7 +194,7 @@ struct ExpandedSquareRecognitionView: View {
             .buttonStyle(.bordered)
             .disabled(viewModel.inputLocked)
         case .route:
-            Text("Selected \(viewModel.routeSelection.count) squares")
+            Text("Selected \(viewModel.routeSelection.count) of \(viewModel.prompt.route.count) squares")
                 .foregroundStyle(.secondary)
         case .findSquare, .relativeSquare:
             Text("Tap the answer on the board")
