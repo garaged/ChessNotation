@@ -129,8 +129,10 @@ struct PositionRecallGameTests {
 
         let firstPrompt = try #require(first.next())
         let secondPrompt = try #require(first.next())
-        #expect(firstPrompt == #require(second.next()))
-        #expect(secondPrompt == #require(second.next()))
+        let matchingFirstPrompt = try #require(second.next())
+        let matchingSecondPrompt = try #require(second.next())
+        #expect(firstPrompt == matchingFirstPrompt)
+        #expect(secondPrompt == matchingSecondPrompt)
         #expect(firstPrompt.orientation == .white)
         #expect(secondPrompt.orientation == .black)
     }
