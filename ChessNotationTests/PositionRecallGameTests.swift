@@ -21,7 +21,7 @@ struct PositionRecallGameTests {
         ])
 
         #expect(!snapshot.isValid)
-        #expect(PositionRecallPromptFactory.makePrompt(
+        #expect(PositionRecallReconstructionPromptFactory.makePrompt(
             snapshot: snapshot,
             difficulty: .beginner,
             orientation: .white,
@@ -31,7 +31,7 @@ struct PositionRecallGameTests {
 
     @Test
     func beginnerMasksExactlyOneOccupiedSquare() throws {
-        let prompt = try #require(PositionRecallPromptFactory.makePrompt(
+        let prompt = try #require(PositionRecallReconstructionPromptFactory.makePrompt(
             snapshot: sampleSnapshot(),
             difficulty: .beginner,
             orientation: .white,
@@ -49,7 +49,7 @@ struct PositionRecallGameTests {
             PositionRecallPlacedPiece(square: try #require(ChessSquare("e4")), piece: PositionRecallPiece(piece: .king, side: .white)),
             PositionRecallPlacedPiece(square: try #require(ChessSquare("a8")), piece: PositionRecallPiece(piece: .queen, side: .black))
         ])
-        let prompt = try #require(PositionRecallPromptFactory.makePrompt(
+        let prompt = try #require(PositionRecallReconstructionPromptFactory.makePrompt(
             snapshot: snapshot,
             difficulty: .advanced,
             orientation: .black,
@@ -62,13 +62,13 @@ struct PositionRecallGameTests {
 
     @Test
     func exactAnswerIsOrderIndependent() throws {
-        let prompt = try #require(PositionRecallPromptFactory.makePrompt(
+        let prompt = try #require(PositionRecallReconstructionPromptFactory.makePrompt(
             snapshot: sampleSnapshot(),
             difficulty: .intermediate,
             orientation: .white,
             randomizer: SeededChallengeRandomizer(seed: 4)
         ))
-        let reversed = PositionRecallAnswer(pieces: Set(prompt.expectedPieces.reversed()))
+        let reversed = PositionRecallReconstructionAnswer(pieces: Set(prompt.expectedPieces.reversed()))
         let evaluation = PositionRecallEvaluation(answer: reversed, expected: prompt.expectedPieces)
 
         #expect(evaluation.isExact)
@@ -78,7 +78,7 @@ struct PositionRecallGameTests {
 
     @Test
     func missingExtraWrongPieceAndWrongSideAreRecorded() throws {
-        let prompt = try #require(PositionRecallPromptFactory.makePrompt(
+        let prompt = try #require(PositionRecallReconstructionPromptFactory.makePrompt(
             snapshot: sampleSnapshot(),
             difficulty: .beginner,
             orientation: .white,
@@ -98,29 +98,29 @@ struct PositionRecallGameTests {
             piece: PositionRecallPiece(piece: .pawn, side: .white)
         )
 
-        let wrongPieceEval = PositionRecallEvaluation(answer: PositionRecallAnswer(pieces: [wrongPiece, extra]), expected: prompt.expectedPieces)
-        let wrongSideEval = PositionRecallEvaluation(answer: PositionRecallAnswer(pieces: [wrongSide]), expected: prompt.expectedPieces)
-        let missingEval = PositionRecallEvaluation(answer: PositionRecallAnswer(pieces: []), expected: prompt.expectedPieces)
+        let wrongPieceEval = PositionRecallEvaluation(answer: PositionRecallReconstructionAnswer(pieces: [wrongPiece, extra]), expected: prompt.expectedPieces)
+        let wrongSideEval = PositionRecallEvaluation(answer: PositionRecallReconstructionAnswer(pieces: [wrongSide]), expected: prompt.expectedPieces)
+        let missingEval = PositionRecallEvaluation(answer: PositionRecallReconstructionAnswer(pieces: []), expected: prompt.expectedPieces)
 
         #expect(wrongPieceEval.wrongPieceSquares == [expected.square])
         #expect(wrongPieceEval.extra.contains(extra))
         #expect(wrongSideEval.wrongSideSquares == [expected.square])
         #expect(!missingEval.missing.isEmpty)
-        #expect(PositionRecallFeedback.message(for: wrongPieceEval).contains("piece types"))
-        #expect(PositionRecallFeedback.message(for: wrongSideEval).contains("colors"))
-        #expect(PositionRecallFeedback.message(for: missingEval).contains("missing"))
+        #expect(PositionRecallReconstructionFeedback.message(for: wrongPieceEval).contains("piece types"))
+        #expect(PositionRecallReconstructionFeedback.message(for: wrongSideEval).contains("colors"))
+        #expect(PositionRecallReconstructionFeedback.message(for: missingEval).contains("missing"))
     }
 
     @Test
     func seededPromptGenerationIsDeterministicAndAlternatesOrientation() throws {
         let snapshots = try [sampleSnapshot()]
-        let first = PositionRecallPromptGenerator(
+        let first = PositionRecallReconstructionPromptGenerator(
             snapshots: snapshots,
             difficulty: .intermediate,
             orientation: .alternating,
             randomizer: SeededChallengeRandomizer(seed: 9)
         )
-        let second = PositionRecallPromptGenerator(
+        let second = PositionRecallReconstructionPromptGenerator(
             snapshots: snapshots,
             difficulty: .intermediate,
             orientation: .alternating,
@@ -137,7 +137,7 @@ struct PositionRecallGameTests {
 
     @Test
     func blackOrientationMappingRoundTripsMaskedSquares() throws {
-        let prompt = try #require(PositionRecallPromptFactory.makePrompt(
+        let prompt = try #require(PositionRecallReconstructionPromptFactory.makePrompt(
             snapshot: sampleSnapshot(),
             difficulty: .beginner,
             orientation: .black,
@@ -172,14 +172,14 @@ struct PositionRecallGameTests {
 
     @Test
     func accessibilityDescriptionMentionsVisibleMaskedAndReconstructedPieces() throws {
-        let prompt = try #require(PositionRecallPromptFactory.makePrompt(
+        let prompt = try #require(PositionRecallReconstructionPromptFactory.makePrompt(
             snapshot: sampleSnapshot(),
             difficulty: .beginner,
             orientation: .black,
             randomizer: SeededChallengeRandomizer(seed: 7)
         ))
-        let answer = PositionRecallAnswer(pieces: prompt.expectedPieces)
-        let summary = PositionRecallFeedback.accessibilityDescription(prompt: prompt, answer: answer, progress: "Prompt 1 of 5")
+        let answer = PositionRecallReconstructionAnswer(pieces: prompt.expectedPieces)
+        let summary = PositionRecallReconstructionFeedback.accessibilityDescription(prompt: prompt, answer: answer, progress: "Prompt 1 of 5")
 
         #expect(summary.contains("Position recall"))
         #expect(summary.contains("Orientation: black"))
@@ -191,7 +191,7 @@ struct PositionRecallGameTests {
 
     @Test
     func thousandPromptGenerationIsBoundedAndValid() throws {
-        let generator = PositionRecallPromptGenerator(
+        let generator = PositionRecallReconstructionPromptGenerator(
             snapshots: try [sampleSnapshot()],
             difficulty: .advanced,
             orientation: .alternating,
