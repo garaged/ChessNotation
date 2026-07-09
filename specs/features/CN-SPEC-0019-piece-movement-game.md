@@ -1,6 +1,6 @@
 # CN-SPEC-0019: Piece Movement Game
 
-Status: Proposed
+Status: Accepted
 Owner: Project
 Last updated: 2026-07-07
 
@@ -58,19 +58,12 @@ Out of scope:
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0019-AC001
-- Pending coverage: CN-SPEC-0019-AC002
-- Pending coverage: CN-SPEC-0019-AC003
-- Pending coverage: CN-SPEC-0019-AC004
-- Pending coverage: CN-SPEC-0019-AC005
-- Pending coverage: CN-SPEC-0019-AC006
-- Pending coverage: CN-SPEC-0019-AC007
-- Pending coverage: CN-SPEC-0019-AC008
-- Pending coverage: CN-SPEC-0019-AC009
-- Pending coverage: CN-SPEC-0019-AC010
-- Pending coverage: CN-SPEC-0019-AC011
-- Pending coverage: CN-SPEC-0019-AC012
-- Pending coverage: CN-SPEC-0019-AC013
+- `ChessNotationTests/PieceMovementGameTests.swift`: CN-SPEC-0019-AC001, CN-SPEC-0019-AC002, CN-SPEC-0019-AC003, CN-SPEC-0019-AC004, CN-SPEC-0019-AC005, CN-SPEC-0019-AC006, CN-SPEC-0019-AC008, CN-SPEC-0019-AC009, CN-SPEC-0019-AC012
+- `ChessNotationTests/PieceMovementSessionTests.swift`: CN-SPEC-0019-AC007, CN-SPEC-0019-AC008, CN-SPEC-0019-AC009, CN-SPEC-0019-AC010, CN-SPEC-0019-AC011, CN-SPEC-0019-AC013
+- `ChessNotationTests/PieceMovementFeatureTests.swift`: CN-SPEC-0019-AC009, CN-SPEC-0019-AC011, CN-SPEC-0019-AC012
+- `ChessNotation/Domain/PieceMovementGame.swift`: CN-SPEC-0019-AC001, CN-SPEC-0019-AC002, CN-SPEC-0019-AC003, CN-SPEC-0019-AC004, CN-SPEC-0019-AC005, CN-SPEC-0019-AC006, CN-SPEC-0019-AC008, CN-SPEC-0019-AC009, CN-SPEC-0019-AC012
+- `ChessNotation/Domain/PieceMovementSession.swift`: CN-SPEC-0019-AC007, CN-SPEC-0019-AC008, CN-SPEC-0019-AC009, CN-SPEC-0019-AC010, CN-SPEC-0019-AC011, CN-SPEC-0019-AC013
+- `ChessNotation/Features/PieceMovement/PieceMovementFeature.swift`: CN-SPEC-0019-AC009, CN-SPEC-0019-AC010, CN-SPEC-0019-AC011, CN-SPEC-0019-AC012
 
 ## Open Questions
 
@@ -79,3 +72,6 @@ Out of scope:
 ## Revision Notes
 
 - 2026-07-07: Initial proposed spec for PR5.
+- 2026-07-08: Added deterministic generation, mixed-piece/difficulty/orientation policies, session lifecycle, exact/partial scoring, latency/streak metrics, and bounded-generation coverage.
+- 2026-07-08: Added production-facing SwiftUI board interaction, history persistence, textual feedback, VoiceOver summaries, and result save flow.
+- 2026-07-08: Accepted after corrective simulator validation passed for movement geometry, session, and feature suites.
