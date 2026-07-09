@@ -69,6 +69,10 @@ final class PieceMovementViewModel {
     private let historyStore: PieceMovementHistoryStoring
     private var session: PieceMovementSession
     private(set) var presentation: PieceMovementPresentation
+    private(set) var prompt: PieceMovementPrompt
+    private(set) var selected: Set<ChessSquare>
+    private(set) var inputLocked: Bool
+    private(set) var score: Int
     private(set) var saveError: String?
     private(set) var isFinished = false
     private(set) var result: PieceMovementSessionResult?
@@ -81,22 +85,22 @@ final class PieceMovementViewModel {
     ) {
         let generator = PieceMovementPromptGenerator(configuration: configuration, randomizer: randomizer)
         guard let session = PieceMovementSession(configuration: configuration, generator: generator, clock: clock) else { return nil }
-        self.configuration = configuration
-        self.historyStore = historyStore
-        self.session = session
-        self.presentation = PieceMovementPresentation.make(
+        let initialPresentation = PieceMovementPresentation.make(
             prompt: session.currentPrompt,
             selected: session.selected,
             completed: session.result().promptCount,
             limit: configuration.promptLimit,
             feedback: nil
         )
+        self.configuration = configuration
+        self.historyStore = historyStore
+        self.session = session
+        self.presentation = initialPresentation
+        self.prompt = session.currentPrompt
+        self.selected = session.selected
+        self.inputLocked = session.inputLocked
+        self.score = session.score
     }
-
-    var prompt: PieceMovementPrompt { session.currentPrompt }
-    var selected: Set<ChessSquare> { session.selected }
-    var inputLocked: Bool { session.inputLocked }
-    var score: Int { session.score }
 
     func toggle(_ square: ChessSquare) {
         session.toggle(square)
@@ -130,6 +134,10 @@ final class PieceMovementViewModel {
     }
 
     private func refresh(feedback: String?) {
+        prompt = session.currentPrompt
+        selected = session.selected
+        inputLocked = session.inputLocked
+        score = session.score
         presentation = PieceMovementPresentation.make(
             prompt: session.currentPrompt,
             selected: session.selected,
@@ -151,6 +159,7 @@ struct PieceMovementGameView: View {
                     .accessibilityIdentifier("pieceMovement.task")
 
                 board
+                    .id(viewModel.prompt.source.description + viewModel.prompt.piece.rawValue + viewModel.prompt.side.rawValue)
 
                 Text(viewModel.presentation.progress)
                     .font(.subheadline)
