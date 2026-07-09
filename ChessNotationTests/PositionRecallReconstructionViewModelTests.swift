@@ -37,8 +37,49 @@ struct PositionRecallReconstructionViewModelTests {
         #expect(viewModel.phase == .answering)
         #expect(studyLabel != "?")
         #expect(viewModel.pieceLabel(at: masked) == "?")
+        #expect(viewModel.displayedPiece(at: masked) == nil)
         #expect(viewModel.accessibilityLabel(for: masked).contains("masked square"))
         #expect(!viewModel.accessibilityLabel(for: masked).contains("visible"))
+    }
+
+    @Test
+    func hideNowImmediatelyMovesFromStudyToAnswering() throws {
+        let clock = TestMonotonicClock(now: 10)
+        let viewModel = try #require(PositionRecallReconstructionViewModel(
+            configuration: PositionRecallReconstructionConfiguration(difficulty: .beginner, orientation: .white, promptLimit: 1, studyDuration: 30),
+            snapshots: [snapshot()],
+            randomizer: SeededChallengeRandomizer(seed: 7),
+            clock: clock,
+            historyStore: MemoryPositionRecallHistoryStore()
+        ))
+        let masked = try #require(viewModel.prompt.maskedSquares.first)
+
+        #expect(viewModel.phase == .studying)
+        #expect(viewModel.displayedPiece(at: masked) != nil)
+
+        viewModel.hideNow()
+
+        #expect(viewModel.phase == .answering)
+        #expect(viewModel.displayedPiece(at: masked) == nil)
+        #expect(viewModel.isMaskedPlaceholder(at: masked))
+    }
+
+    @Test
+    func answerPhaseKeepsUnmaskedPiecesVisible() throws {
+        let clock = TestMonotonicClock(now: 20)
+        let viewModel = try #require(PositionRecallReconstructionViewModel(
+            configuration: PositionRecallReconstructionConfiguration(difficulty: .beginner, orientation: .white, promptLimit: 1, studyDuration: 0),
+            snapshots: [snapshot()],
+            randomizer: SeededChallengeRandomizer(seed: 8),
+            clock: clock,
+            historyStore: MemoryPositionRecallHistoryStore()
+        ))
+        viewModel.refresh()
+        let visiblePiece = try #require(viewModel.prompt.snapshot.pieces.first { !viewModel.prompt.maskedSquares.contains($0.square) })
+
+        #expect(viewModel.phase == .answering)
+        #expect(viewModel.displayedPiece(at: visiblePiece.square) == visiblePiece.piece)
+        #expect(viewModel.pieceLabel(at: visiblePiece.square) != visiblePiece.square.description)
     }
 
     @Test
@@ -58,6 +99,7 @@ struct PositionRecallReconstructionViewModelTests {
         viewModel.place(PositionRecallPiece(piece: .queen, side: .black), at: masked)
 
         #expect(viewModel.pieceLabel(at: masked) == "BQ")
+        #expect(viewModel.displayedPiece(at: masked) == PositionRecallPiece(piece: .queen, side: .black))
         #expect(viewModel.accessibilityLabel(for: masked).contains("reconstructed black queen"))
         #expect(viewModel.accessibilitySummary.contains("Reconstructed pieces"))
     }
