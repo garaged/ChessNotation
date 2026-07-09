@@ -1,8 +1,8 @@
 # CN-SPEC-0020: Notation Concept Games
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-07-07
+Last updated: 2026-07-08
 
 ## Intent
 
@@ -13,12 +13,12 @@ Add two complementary mini-games—SAN Builder and Position Recall—that teach 
 In scope:
 
 - SAN Builder component selection for piece, disambiguation, capture, destination, promotion, and check/checkmate suffix.
-- Position Recall questions for piece location, square occupant, and occupied-square subsets after a bounded study period.
+- Position Recall questions for piece location, square occupant, occupied-square subsets, and bounded reconstruction after a study period.
 - Difficulty, scoring, prompt generation, history, accessibility, and performance constraints for both games.
 
 Out of scope:
 
-- Full-board drag reconstruction in the first release.
+- Full legal-position validation, checkmate/stalemate detection, engine analysis, or best-move tactics.
 - Runtime engine analysis or deriving best moves.
 - Accepting SAN that cannot be validated against a trusted expected move.
 - Testing complete legal chess positions beyond bundled/validated source data.
@@ -32,7 +32,7 @@ Out of scope:
 - CN-SPEC-0020-FR005: Difficulty must progress from simple pawn and piece moves to captures, castling, checks, promotion, and disambiguation.
 - CN-SPEC-0020-FR006: Feedback must identify the incorrect component category without revealing unresolved later components unless the challenge is finished or explicitly revealed.
 - CN-SPEC-0020-FR007: Position Recall must display a validated position for a configured bounded study duration, then hide all or the relevant subset of pieces before asking a question.
-- CN-SPEC-0020-FR008: Initial recall question kinds must include locating a named piece, naming the occupant of a square, and selecting occupied squares within a bounded region or subset.
+- CN-SPEC-0020-FR008: Initial recall question kinds must include locating a named piece, naming the occupant of a square, selecting occupied squares within a bounded region or subset, and reconstructing bounded hidden pieces.
 - CN-SPEC-0020-FR009: Recall prompts must have one unambiguous expected answer or expected set and must exclude positions that cannot satisfy that requirement.
 - CN-SPEC-0020-FR010: Study timing must use an injected clock and transition exactly once even if UI callbacks are delayed.
 - CN-SPEC-0020-FR011: The hidden-answer state must not leave piece accessibility labels, hit targets, debug text, or overlays that expose the memorized position.
@@ -54,35 +54,38 @@ Out of scope:
 - CN-SPEC-0020-AC007: Given the hidden phase, when the accessibility tree and visible hierarchy are inspected, then concealed pieces and answers are not exposed.
 - CN-SPEC-0020-AC008: Given a locate-piece question, when a unique requested piece exists, then its square is the only accepted answer.
 - CN-SPEC-0020-AC009: Given an occupant question, when the requested square is empty or occupied, then the corresponding explicit answer is accepted and distractors are rejected.
-- CN-SPEC-0020-AC010: Given an occupied-subset question, when the exact expected set is selected, then order does not affect correctness and extra/missing squares are recorded separately.
-- CN-SPEC-0020-AC011: Given a source position with ambiguous requested pieces, when generating a unique locate-piece prompt, then it is excluded or a disambiguated piece description is used.
+- CN-SPEC-0020-AC010: Given an occupied-subset or reconstruction question, when the exact expected set is selected, then order does not affect correctness and extra/missing squares or pieces are recorded separately.
+- CN-SPEC-0020-AC011: Given a source position with ambiguous requested pieces or duplicate occupied squares, when generating a unique recall prompt, then it is excluded or a disambiguated piece description is used.
 - CN-SPEC-0020-AC012: Given filters produce insufficient prompts, when either game starts, then it recovers with a documented fallback or clear configuration state rather than hanging.
 - CN-SPEC-0020-AC013: Given completed SAN Builder and Position Recall sessions, when history is saved and restored, then all game-specific configuration and metrics are preserved.
 - CN-SPEC-0020-AC014: Given VoiceOver, when using SAN Builder or transitioning from study to hidden recall, then controls remain usable and concealed position data is not announced.
-- CN-SPEC-0020-AC015: Given repeated recall prompts from cached source positions, when a long session runs, then FEN parsing is reused and retained memory remains bounded.
+- CN-SPEC-0020-AC015: Given repeated recall prompts from cached source positions, when a long session runs, then generation terminates within documented bounds and retained memory remains bounded.
 
 ## Coverage
 
-- Pending coverage: CN-SPEC-0020-AC001
-- Pending coverage: CN-SPEC-0020-AC002
-- Pending coverage: CN-SPEC-0020-AC003
-- Pending coverage: CN-SPEC-0020-AC004
-- Pending coverage: CN-SPEC-0020-AC005
-- Pending coverage: CN-SPEC-0020-AC006
-- Pending coverage: CN-SPEC-0020-AC007
-- Pending coverage: CN-SPEC-0020-AC008
-- Pending coverage: CN-SPEC-0020-AC009
-- Pending coverage: CN-SPEC-0020-AC010
-- Pending coverage: CN-SPEC-0020-AC011
-- Pending coverage: CN-SPEC-0020-AC012
-- Pending coverage: CN-SPEC-0020-AC013
-- Pending coverage: CN-SPEC-0020-AC014
-- Pending coverage: CN-SPEC-0020-AC015
+- `ChessNotationTests/NotationConceptGameTests.swift`: CN-SPEC-0020-AC001, CN-SPEC-0020-AC002, CN-SPEC-0020-AC003, CN-SPEC-0020-AC004, CN-SPEC-0020-AC008, CN-SPEC-0020-AC009, CN-SPEC-0020-AC010, CN-SPEC-0020-AC013
+- `ChessNotationTests/NotationConceptSessionTests.swift`: CN-SPEC-0020-AC006, CN-SPEC-0020-AC007, CN-SPEC-0020-AC010, CN-SPEC-0020-AC013, CN-SPEC-0020-AC014
+- `ChessNotationTests/NotationTrainingVarietyTests.swift`: CN-SPEC-0020-AC005, CN-SPEC-0020-AC012, CN-SPEC-0020-AC014, CN-SPEC-0020-AC015
+- `ChessNotationTests/PositionRecallGameTests.swift`: CN-SPEC-0020-AC006, CN-SPEC-0020-AC007, CN-SPEC-0020-AC010, CN-SPEC-0020-AC011, CN-SPEC-0020-AC013, CN-SPEC-0020-AC014, CN-SPEC-0020-AC015
+- `ChessNotationTests/PositionRecallReconstructionSessionTests.swift`: CN-SPEC-0020-AC006, CN-SPEC-0020-AC007, CN-SPEC-0020-AC010, CN-SPEC-0020-AC013, CN-SPEC-0020-AC014
+- `ChessNotationTests/PositionRecallReconstructionViewModelTests.swift`: CN-SPEC-0020-AC006, CN-SPEC-0020-AC007, CN-SPEC-0020-AC010, CN-SPEC-0020-AC014
+- `ChessNotation/Domain/SANBuilderGame.swift`: CN-SPEC-0020-AC001, CN-SPEC-0020-AC002, CN-SPEC-0020-AC003, CN-SPEC-0020-AC004
+- `ChessNotation/Domain/PositionRecallModels.swift`: CN-SPEC-0020-AC006, CN-SPEC-0020-AC007, CN-SPEC-0020-AC008, CN-SPEC-0020-AC009, CN-SPEC-0020-AC010, CN-SPEC-0020-AC013, CN-SPEC-0020-AC014
+- `ChessNotation/Domain/PositionRecallSession.swift`: CN-SPEC-0020-AC006, CN-SPEC-0020-AC007, CN-SPEC-0020-AC014
+- `ChessNotation/Domain/PositionRecallGame.swift`: CN-SPEC-0020-AC010, CN-SPEC-0020-AC011, CN-SPEC-0020-AC013, CN-SPEC-0020-AC014, CN-SPEC-0020-AC015
+- `ChessNotation/Domain/PositionRecallReconstructionSession.swift`: CN-SPEC-0020-AC006, CN-SPEC-0020-AC007, CN-SPEC-0020-AC010, CN-SPEC-0020-AC013, CN-SPEC-0020-AC014
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionHistoryStore.swift`: CN-SPEC-0020-AC013
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionView.swift`: CN-SPEC-0020-AC006, CN-SPEC-0020-AC007, CN-SPEC-0020-AC010, CN-SPEC-0020-AC014
 
 ## Open Questions
 
-- None. Full-board reconstruction remains deferred until targeted recall interactions have proven usable and performant.
+- None. Complete chess legality and engine-derived tactics remain out of scope.
 
 ## Revision Notes
 
 - 2026-07-07: Initial proposed spec for PR6.
+- 2026-07-08: Added SAN Builder and targeted Position Recall foundation coverage.
+- 2026-07-08: Added reconstruction-domain prompt generation, duplicate-square rejection, bounded masking, order-independent evaluation, textual feedback, and result coverage.
+- 2026-07-08: Added reconstruction session lifecycle, injected-clock study transitions, scoring, history, and `NotationConceptResult` conversion.
+- 2026-07-08: Added production-facing reconstruction SwiftUI/view-model support with hidden-answer VoiceOver protection and black-orientation mapping coverage.
+- 2026-07-08: Accepted after corrective simulator validation passed for concept, reconstruction domain, session, UI view-model, and notation variety suites.
