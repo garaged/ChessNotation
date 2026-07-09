@@ -218,41 +218,93 @@ struct PieceMovementGameView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                Text(viewModel.presentation.task)
-                    .font(.headline)
-                    .accessibilityIdentifier("pieceMovement.task")
-
-                board
-                    .id(boardIdentity)
-
-                Text(viewModel.presentation.progress)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .accessibilityIdentifier("pieceMovement.progress")
-
-                Text("Score \(viewModel.score)")
-                    .font(.subheadline.monospacedDigit())
-                    .accessibilityIdentifier("pieceMovement.score")
-
-                if let feedback = viewModel.presentation.feedback {
-                    Text(feedback)
-                        .font(.headline)
-                        .accessibilityIdentifier("pieceMovement.feedback")
-                    Button(viewModel.canAdvanceToNextPrompt ? "Next" : "Finish") { viewModel.advanceOrFinish() }
-                        .buttonStyle(.borderedProminent)
-                        .accessibilityIdentifier(viewModel.canAdvanceToNextPrompt ? "pieceMovement.next" : "pieceMovement.finish")
-                } else {
-                    Button("Submit") { viewModel.submit() }
-                        .buttonStyle(.borderedProminent)
-                        .accessibilityIdentifier("pieceMovement.submit")
-                }
+            if viewModel.isFinished, let result = viewModel.result {
+                completionSummary(result)
+                    .padding()
+            } else {
+                activeGame
+                    .padding()
             }
-            .padding()
         }
         .navigationTitle("Piece Movement")
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(viewModel.presentation.accessibilitySummary)
+        .accessibilityLabel(viewModel.isFinished ? "Piece Movement complete" : viewModel.presentation.accessibilitySummary)
+    }
+
+    private var activeGame: some View {
+        VStack(spacing: 16) {
+            Text(viewModel.presentation.task)
+                .font(.headline)
+                .accessibilityIdentifier("pieceMovement.task")
+
+            board
+                .id(boardIdentity)
+
+            Text(viewModel.presentation.progress)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .accessibilityIdentifier("pieceMovement.progress")
+
+            Text("Score \(viewModel.score)")
+                .font(.subheadline.monospacedDigit())
+                .accessibilityIdentifier("pieceMovement.score")
+
+            if let feedback = viewModel.presentation.feedback {
+                Text(feedback)
+                    .font(.headline)
+                    .accessibilityIdentifier("pieceMovement.feedback")
+                Button(viewModel.canAdvanceToNextPrompt ? "Next" : "Finish") { viewModel.advanceOrFinish() }
+                    .buttonStyle(.borderedProminent)
+                    .accessibilityIdentifier(viewModel.canAdvanceToNextPrompt ? "pieceMovement.next" : "pieceMovement.finish")
+            } else {
+                Button("Submit") { viewModel.submit() }
+                    .buttonStyle(.borderedProminent)
+                    .accessibilityIdentifier("pieceMovement.submit")
+            }
+        }
+    }
+
+    private func completionSummary(_ result: PieceMovementSessionResult) -> some View {
+        VStack(spacing: 16) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 54, weight: .semibold))
+                .foregroundStyle(.green)
+                .accessibilityHidden(true)
+
+            Text("Piece Movement Complete")
+                .font(.title2.weight(.bold))
+                .accessibilityIdentifier("pieceMovement.resultsTitle")
+
+            VStack(spacing: 10) {
+                summaryRow("Score", "\(viewModel.score)")
+                summaryRow("Prompts", "\(result.promptCount)")
+                summaryRow("Exact", "\(result.exactCount)")
+                summaryRow("Partial", "\(result.partialCount)")
+                summaryRow("Best streak", "\(result.bestStreak)")
+            }
+            .padding()
+            .background(.secondary.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .accessibilityIdentifier("pieceMovement.resultsSummary")
+
+            if let saveError = viewModel.saveError {
+                Text("History could not be saved: \(saveError)")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("pieceMovement.saveError")
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func summaryRow(_ label: String, _ value: String) -> some View {
+        HStack {
+            Text(label)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .font(.headline.monospacedDigit())
+        }
     }
 
     private var boardIdentity: String {
