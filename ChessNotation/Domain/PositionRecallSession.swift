@@ -1,6 +1,6 @@
 import Foundation
 
-enum PositionRecallPhase: String, Codable {
+nonisolated enum PositionRecallPhase: String, Codable {
     case studying
     case answering
     case finished
@@ -29,7 +29,7 @@ final class PositionRecallSession {
     }
 }
 
-struct PositionRecallAnswer: Hashable, Codable {
+nonisolated struct PositionRecallAnswer: Hashable, Codable {
     let selected: Set<ChessSquare>
     let expected: Set<ChessSquare>
     let missing: Set<ChessSquare>
