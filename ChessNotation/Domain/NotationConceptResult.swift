@@ -1,7 +1,7 @@
 import Foundation
 
-struct NotationConceptResult: Hashable, Codable {
-    enum Kind: String, Codable {
+nonisolated struct NotationConceptResult: Hashable, Codable {
+    nonisolated enum Kind: String, Codable {
         case sanBuilder
         case positionRecall
     }
