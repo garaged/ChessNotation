@@ -29,7 +29,7 @@ struct ThemedMiniGameBoard<Content: View>: View {
                         if let square = SquareBoardMapping.square(forDisplayIndex: index, orientation: orientation) {
                             ZStack {
                                 Rectangle()
-                                    .fill(palette.squareStyle(isLight: square.color == .light))
+                                    .fill(palette.squareStyle(isLight: isLightSquare(square)))
                                 content(square, squareSize, palette)
 
                                 if appSettings.showBoardCoordinates {
@@ -71,7 +71,7 @@ private struct MiniGameBoardCoordinateOverlay: View {
             if square.rank == 0 {
                 Text(fileLabel)
                     .font(.system(size: max(8, squareSize * 0.18), weight: .bold, design: .serif))
-                    .foregroundStyle(palette.coordinateLabelColor(isLightSquare: square.color == .light))
+                    .foregroundStyle(palette.coordinateLabelColor(isLightSquare: isLightSquare(square)))
                     .padding(3)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
             }
@@ -79,7 +79,7 @@ private struct MiniGameBoardCoordinateOverlay: View {
             if square.file == 0 {
                 Text("\(square.rank + 1)")
                     .font(.system(size: max(8, squareSize * 0.18), weight: .bold, design: .serif))
-                    .foregroundStyle(palette.coordinateLabelColor(isLightSquare: square.color == .light))
+                    .foregroundStyle(palette.coordinateLabelColor(isLightSquare: isLightSquare(square)))
                     .padding(3)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
@@ -90,6 +90,10 @@ private struct MiniGameBoardCoordinateOverlay: View {
         guard let scalar = UnicodeScalar(Int(UnicodeScalar("a").value) + square.file) else { return "" }
         return String(Character(scalar))
     }
+}
+
+private func isLightSquare(_ square: ChessSquare) -> Bool {
+    (square.file + square.rank).isMultiple(of: 2)
 }
 
 extension TrainingPiece {
