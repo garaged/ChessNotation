@@ -1,6 +1,6 @@
 import Foundation
 
-enum TrainingPiece: String, Codable, CaseIterable, Sendable {
+nonisolated enum TrainingPiece: String, Codable, CaseIterable, Sendable {
     case king
     case queen
     case rook
@@ -9,12 +9,12 @@ enum TrainingPiece: String, Codable, CaseIterable, Sendable {
     case pawn
 }
 
-enum TrainingSide: String, Codable, Sendable {
+nonisolated enum TrainingSide: String, Codable, Sendable {
     case white
     case black
 }
 
-struct PieceMovementOccupancy: Hashable, Codable, Sendable {
+nonisolated struct PieceMovementOccupancy: Hashable, Codable, Sendable {
     let friendly: Set<ChessSquare>
     let enemy: Set<ChessSquare>
 
@@ -26,7 +26,7 @@ struct PieceMovementOccupancy: Hashable, Codable, Sendable {
     var isValid: Bool { friendly.isDisjoint(with: enemy) }
 }
 
-struct PieceMovementPrompt: Hashable, Codable, Sendable {
+nonisolated struct PieceMovementPrompt: Hashable, Codable, Sendable {
     let piece: TrainingPiece
     let side: TrainingSide
     let source: ChessSquare
@@ -37,7 +37,7 @@ struct PieceMovementPrompt: Hashable, Codable, Sendable {
     let expectedDestinations: Set<ChessSquare>
 }
 
-struct PieceMovementSubmission: Hashable, Codable, Sendable {
+nonisolated struct PieceMovementSubmission: Hashable, Codable, Sendable {
     let selected: Set<ChessSquare>
     let missing: Set<ChessSquare>
     let extra: Set<ChessSquare>
@@ -220,7 +220,7 @@ struct PieceMovementPromptFactory {
     }
 }
 
-struct PieceMovementSessionResult: Hashable, Codable, Sendable {
+nonisolated struct PieceMovementSessionResult: Hashable, Codable, Sendable {
     let pieceTypes: Set<TrainingPiece>
     let difficulty: TrainingDifficulty
     let orientation: BoardOrientationPolicy

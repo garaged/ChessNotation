@@ -29,7 +29,7 @@ enum ChessSquareColor: String, Codable, Sendable {
     case dark
 }
 
-struct ChessSquare: Hashable, Codable, Sendable, CustomStringConvertible {
+nonisolated struct ChessSquare: Hashable, Codable, Sendable, CustomStringConvertible {
     let file: Int
     let rank: Int
 

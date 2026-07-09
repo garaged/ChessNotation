@@ -1,17 +1,17 @@
 import Foundation
 
-enum PositionRecallQuestion: String, Codable {
+nonisolated enum PositionRecallQuestion: String, Codable {
     case locatePiece
     case squareOccupant
     case occupiedSubset
 }
 
-struct PositionRecallItem: Hashable, Codable {
+nonisolated struct PositionRecallItem: Hashable, Codable {
     let name: String
     let square: ChessSquare
 }
 
-struct PositionRecallPrompt: Hashable, Codable {
+nonisolated struct PositionRecallPrompt: Hashable, Codable {
     let items: [PositionRecallItem]
     let question: PositionRecallQuestion
     let requestedName: String?

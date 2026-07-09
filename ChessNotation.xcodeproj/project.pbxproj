@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 3536BE712F9CF2AF00F413D1 /* Build configuration list for PBXProject "ChessNotation" */;
+			buildConfigurationList = 3536BE712F9CF2B000F413D1 /* Build configuration list for PBXProject "ChessNotation" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -415,7 +415,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -448,7 +447,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -545,7 +543,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3536BE712F9CF2AF00F413D1 /* Build configuration list for PBXProject "ChessNotation" */ = {
+		3536BE712F9CF2B000F413D1 /* Build configuration list for PBXProject "ChessNotation" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3536BE972F9CF2B000F413D1 /* Debug */,

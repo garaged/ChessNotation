@@ -6,7 +6,7 @@ struct ChessNotationApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView(libraryService: AppEnvironment.makeLibraryService())
+            RestoredHomeView(libraryService: AppEnvironment.makeLibraryService())
                 .environment(appSettings)
         }
     }

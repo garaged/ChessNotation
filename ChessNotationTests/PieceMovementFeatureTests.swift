@@ -60,6 +60,92 @@ struct PieceMovementFeatureTests {
     }
 
     @Test
+    func viewModelAdvancesDisplayedPromptAfterNext() throws {
+        let store = MemoryPieceMovementHistoryStore()
+        let configuration = PieceMovementConfiguration(pieces: Set(TrainingPiece.allCases), difficulty: .beginner, orientation: .white, promptLimit: 3)
+        let viewModel = try #require(PieceMovementViewModel(
+            configuration: configuration,
+            randomizer: SeededChallengeRandomizer(seed: 4),
+            clock: TestMonotonicClock(),
+            historyStore: store
+        ))
+        let firstPrompt = viewModel.prompt
+
+        for square in firstPrompt.expectedDestinations { viewModel.toggle(square) }
+        viewModel.submit()
+
+        #expect(viewModel.canAdvanceToNextPrompt)
+
+        viewModel.advanceOrFinish()
+
+        #expect(!viewModel.isFinished)
+        #expect(!viewModel.inputLocked)
+        #expect(viewModel.selected.isEmpty)
+        #expect(viewModel.prompt != firstPrompt)
+        #expect(viewModel.presentation.task.contains(viewModel.prompt.source.description))
+        #expect(viewModel.presentation.task.contains(viewModel.prompt.piece.rawValue))
+        #expect(viewModel.presentation.progress == "Prompt 2 of 3")
+        #expect(viewModel.presentation.feedback == nil)
+    }
+
+    @Test
+    func finalSubmittedPromptShowsFinishActionInsteadOfNext() throws {
+        let store = MemoryPieceMovementHistoryStore()
+        let configuration = PieceMovementConfiguration(pieces: [.king], difficulty: .beginner, orientation: .white, promptLimit: 1)
+        let viewModel = try #require(PieceMovementViewModel(
+            configuration: configuration,
+            randomizer: SeededChallengeRandomizer(seed: 4),
+            clock: TestMonotonicClock(),
+            historyStore: store
+        ))
+
+        for square in viewModel.prompt.expectedDestinations { viewModel.toggle(square) }
+        viewModel.submit()
+
+        #expect(viewModel.presentation.feedback != nil)
+        #expect(!viewModel.canAdvanceToNextPrompt)
+        #expect(!viewModel.isFinished)
+
+        viewModel.advanceOrFinish()
+
+        #expect(viewModel.isFinished)
+        #expect(viewModel.result?.finishReason == .completed)
+    }
+
+    @Test
+    func playAgainResetsFinishedSession() throws {
+        let store = MemoryPieceMovementHistoryStore()
+        let configuration = PieceMovementConfiguration(pieces: [.king], difficulty: .beginner, orientation: .white, promptLimit: 1)
+        let viewModel = try #require(PieceMovementViewModel(
+            configuration: configuration,
+            randomizerFactory: { SeededChallengeRandomizer(seed: 4) },
+            clock: TestMonotonicClock(),
+            historyStore: store
+        ))
+        let firstPrompt = viewModel.prompt
+
+        for square in viewModel.prompt.expectedDestinations { viewModel.toggle(square) }
+        viewModel.submit()
+        viewModel.advanceOrFinish()
+
+        #expect(viewModel.isFinished)
+        #expect(viewModel.result != nil)
+        #expect(store.results.count == 1)
+
+        viewModel.playAgain()
+
+        #expect(!viewModel.isFinished)
+        #expect(viewModel.result == nil)
+        #expect(viewModel.saveError == nil)
+        #expect(!viewModel.inputLocked)
+        #expect(viewModel.score == 0)
+        #expect(viewModel.selected.isEmpty)
+        #expect(viewModel.presentation.feedback == nil)
+        #expect(viewModel.presentation.progress == "Prompt 1 of 1")
+        #expect(viewModel.prompt == firstPrompt)
+    }
+
+    @Test
     func viewModelSavesCompletedResult() throws {
         let store = MemoryPieceMovementHistoryStore()
         let configuration = PieceMovementConfiguration(pieces: [.king], difficulty: .beginner, orientation: .white, promptLimit: 1)
