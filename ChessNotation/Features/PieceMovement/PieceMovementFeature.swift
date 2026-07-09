@@ -121,6 +121,8 @@ struct PieceMovementBoardCellPresentation: Identifiable, Hashable, Sendable {
 @Observable
 final class PieceMovementViewModel {
     private let configuration: PieceMovementConfiguration
+    private let randomizerFactory: () -> ChallengeRandomizing
+    private let clock: MonotonicTimeProviding
     private let historyStore: PieceMovementHistoryStoring
     private var session: PieceMovementSession
     private(set) var presentation: PieceMovementPresentation
@@ -140,27 +142,33 @@ final class PieceMovementViewModel {
         clock: MonotonicTimeProviding = SystemMonotonicClock(),
         historyStore: PieceMovementHistoryStoring = PieceMovementHistoryStore()
     ) {
-        let generator = PieceMovementPromptGenerator(configuration: configuration, randomizer: randomizer)
-        guard let session = PieceMovementSession(configuration: configuration, generator: generator, clock: clock) else { return nil }
-        let initialPrompt = session.currentPrompt
-        let initialSelected = session.selected
-        let initialPresentation = PieceMovementPresentation.make(
-            prompt: initialPrompt,
-            selected: initialSelected,
-            completed: session.result().promptCount,
-            limit: configuration.promptLimit,
-            feedback: nil
-        )
         self.configuration = configuration
+        self.randomizerFactory = { randomizer }
+        self.clock = clock
         self.historyStore = historyStore
-        self.session = session
-        self.presentation = initialPresentation
-        self.prompt = initialPrompt
-        self.selected = initialSelected
-        self.boardCells = PieceMovementBoardCellPresentation.cells(prompt: initialPrompt, selected: initialSelected)
-        self.inputLocked = session.inputLocked
-        self.score = session.score
+        guard let initialState = Self.makeInitialState(configuration: configuration, randomizer: randomizer, clock: clock) else { return nil }
+        self.session = initialState.session
+        self.presentation = initialState.presentation
+        self.prompt = initialState.prompt
+        self.selected = initialState.selected
+        self.boardCells = initialState.boardCells
+        self.inputLocked = initialState.inputLocked
+        self.score = initialState.score
         self.canAdvanceToNextPrompt = false
+    }
+
+    convenience init?(
+        configuration: PieceMovementConfiguration,
+        randomizerFactory: @escaping () -> ChallengeRandomizing,
+        clock: MonotonicTimeProviding = SystemMonotonicClock(),
+        historyStore: PieceMovementHistoryStoring = PieceMovementHistoryStore()
+    ) {
+        self.init(
+            configuration: configuration,
+            randomizer: randomizerFactory(),
+            clock: clock,
+            historyStore: historyStore
+        )
     }
 
     func toggle(_ square: ChessSquare) {
@@ -179,6 +187,25 @@ final class PieceMovementViewModel {
         } else {
             finish(reason: .completed)
         }
+    }
+
+    func playAgain() {
+        guard let restartState = Self.makeInitialState(
+            configuration: configuration,
+            randomizer: randomizerFactory(),
+            clock: clock
+        ) else { return }
+        session = restartState.session
+        presentation = restartState.presentation
+        prompt = restartState.prompt
+        selected = restartState.selected
+        boardCells = restartState.boardCells
+        inputLocked = restartState.inputLocked
+        score = restartState.score
+        canAdvanceToNextPrompt = false
+        saveError = nil
+        isFinished = false
+        result = nil
     }
 
     func finish(reason: TrainingFinishReason = .userExited) {
@@ -210,6 +237,42 @@ final class PieceMovementViewModel {
             limit: configuration.promptLimit,
             feedback: feedback
         )
+    }
+
+    private static func makeInitialState(
+        configuration: PieceMovementConfiguration,
+        randomizer: ChallengeRandomizing,
+        clock: MonotonicTimeProviding
+    ) -> InitialState? {
+        let generator = PieceMovementPromptGenerator(configuration: configuration, randomizer: randomizer)
+        guard let session = PieceMovementSession(configuration: configuration, generator: generator, clock: clock) else { return nil }
+        let prompt = session.currentPrompt
+        let selected = session.selected
+        return InitialState(
+            session: session,
+            presentation: PieceMovementPresentation.make(
+                prompt: prompt,
+                selected: selected,
+                completed: session.result().promptCount,
+                limit: configuration.promptLimit,
+                feedback: nil
+            ),
+            prompt: prompt,
+            selected: selected,
+            boardCells: PieceMovementBoardCellPresentation.cells(prompt: prompt, selected: selected),
+            inputLocked: session.inputLocked,
+            score: session.score
+        )
+    }
+
+    private struct InitialState {
+        let session: PieceMovementSession
+        let presentation: PieceMovementPresentation
+        let prompt: PieceMovementPrompt
+        let selected: Set<ChessSquare>
+        let boardCells: [PieceMovementBoardCellPresentation]
+        let inputLocked: Bool
+        let score: Int
     }
 }
 
@@ -286,6 +349,10 @@ struct PieceMovementGameView: View {
             .background(.secondary.opacity(0.12))
             .clipShape(RoundedRectangle(cornerRadius: 14))
             .accessibilityIdentifier("pieceMovement.resultsSummary")
+
+            Button("Play Again") { viewModel.playAgain() }
+                .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("pieceMovement.playAgain")
 
             if let saveError = viewModel.saveError {
                 Text("History could not be saved: \(saveError)")
