@@ -245,23 +245,40 @@ private struct PositionRecallLauncherView: View {
 
     private static var snapshots: [PositionRecallSnapshot] {
         [
-            PositionRecallSnapshot(pieces: [
-                PositionRecallPlacedPiece(square: ChessSquare(file: 4, rank: 3), piece: PositionRecallPiece(piece: .king, side: .white)),
-                PositionRecallPlacedPiece(square: ChessSquare(file: 3, rank: 0), piece: PositionRecallPiece(piece: .queen, side: .white)),
-                PositionRecallPlacedPiece(square: ChessSquare(file: 6, rank: 5), piece: PositionRecallPiece(piece: .knight, side: .white)),
-                PositionRecallPlacedPiece(square: ChessSquare(file: 4, rank: 7), piece: PositionRecallPiece(piece: .king, side: .black)),
-                PositionRecallPlacedPiece(square: ChessSquare(file: 0, rank: 7), piece: PositionRecallPiece(piece: .rook, side: .black)),
-                PositionRecallPlacedPiece(square: ChessSquare(file: 2, rank: 4), piece: PositionRecallPiece(piece: .bishop, side: .black))
+            snapshot([
+                placed(file: 4, rank: 3, piece: .king, side: .white),
+                placed(file: 3, rank: 0, piece: .queen, side: .white),
+                placed(file: 6, rank: 5, piece: .knight, side: .white),
+                placed(file: 4, rank: 7, piece: .king, side: .black),
+                placed(file: 0, rank: 7, piece: .rook, side: .black),
+                placed(file: 2, rank: 4, piece: .bishop, side: .black)
             ]),
-            PositionRecallSnapshot(pieces: [
-                PositionRecallPlacedPiece(square: ChessSquare(file: 6, rank: 0), piece: PositionRecallPiece(piece: .king, side: .white)),
-                PositionRecallPlacedPiece(square: ChessSquare(file: 5, rank: 2), piece: PositionRecallPiece(piece: .bishop, side: .white)),
-                PositionRecallPlacedPiece(square: ChessSquare(file: 1, rank: 1), piece: PositionRecallPiece(piece: .pawn, side: .white)),
-                PositionRecallPlacedPiece(square: ChessSquare(file: 6, rank: 7), piece: PositionRecallPiece(piece: .king, side: .black)),
-                PositionRecallPlacedPiece(square: ChessSquare(file: 5, rank: 6), piece: PositionRecallPiece(piece: .pawn, side: .black)),
-                PositionRecallPlacedPiece(square: ChessSquare(file: 7, rank: 5), piece: PositionRecallPiece(piece: .rook, side: .black))
+            snapshot([
+                placed(file: 6, rank: 0, piece: .king, side: .white),
+                placed(file: 5, rank: 2, piece: .bishop, side: .white),
+                placed(file: 1, rank: 1, piece: .pawn, side: .white),
+                placed(file: 6, rank: 7, piece: .king, side: .black),
+                placed(file: 5, rank: 6, piece: .pawn, side: .black),
+                placed(file: 7, rank: 5, piece: .rook, side: .black)
             ])
         ]
+    }
+
+    private static func snapshot(_ pieces: [PositionRecallPlacedPiece?]) -> PositionRecallSnapshot {
+        PositionRecallSnapshot(pieces: pieces.compactMap { $0 })
+    }
+
+    private static func placed(
+        file: Int,
+        rank: Int,
+        piece: TrainingPiece,
+        side: TrainingSide
+    ) -> PositionRecallPlacedPiece? {
+        guard let square = ChessSquare(file: file, rank: rank) else { return nil }
+        return PositionRecallPlacedPiece(
+            square: square,
+            piece: PositionRecallPiece(piece: piece, side: side)
+        )
     }
 }
 
