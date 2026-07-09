@@ -29,7 +29,7 @@ enum ChessSquareColor: String, Codable, Sendable {
     case dark
 }
 
-struct ChessSquare: Hashable, Codable, Sendable, CustomStringConvertible {
+nonisolated struct ChessSquare: Hashable, Codable, Sendable, CustomStringConvertible {
     let file: Int
     let rank: Int
 
@@ -81,114 +81,30 @@ struct SquareRecognitionPromptFactory {
         case .center:
             return allSquares.filter { (2...5).contains($0.file) && (2...5).contains($0.rank) }
         case .corners:
-            return allSquares.filter { [$0.file, $0.rank].allSatisfy { $0 == 0 || $0 == 7 } }
+            return allSquares.filter { [0, 7].contains($0.file) && [0, 7].contains($0.rank) }
         case .edges:
-            return allSquares.filter { $0.file == 0 || $0.file == 7 || $0.rank == 0 || $0.rank == 7 }
-        case let .file(fileName):
-            guard fileName.count == 1,
-                  let scalar = fileName.unicodeScalars.first?.value else { return [] }
-            let file = Int(scalar - UnicodeScalar("a").value)
-            return allSquares.filter { $0.file == file }
-        case let .rank(rank):
+            return allSquares.filter { [0, 7].contains($0.file) || [0, 7].contains($0.rank) }
+        case .file(let file):
+            guard let first = file.lowercased().unicodeScalars.first else { return [] }
+            let index = Int(first.value - UnicodeScalar("a").value)
+            return allSquares.filter { $0.file == index }
+        case .rank(let rank):
             return allSquares.filter { $0.rank == rank - 1 }
-        case let .quadrant(index):
-            guard (1...4).contains(index) else { return [] }
-            let highFile = index == 2 || index == 4
-            let highRank = index == 3 || index == 4
-            return allSquares.filter {
-                (highFile ? $0.file >= 4 : $0.file < 4) &&
-                (highRank ? $0.rank >= 4 : $0.rank < 4)
+        case .quadrant(let quadrant):
+            return allSquares.filter { square in
+                switch quadrant {
+                case 1:
+                    return square.file >= 4 && square.rank >= 4
+                case 2:
+                    return square.file < 4 && square.rank >= 4
+                case 3:
+                    return square.file < 4 && square.rank < 4
+                case 4:
+                    return square.file >= 4 && square.rank < 4
+                default:
+                    return false
+                }
             }
         }
-    }
-
-    static func relative(from origin: ChessSquare, fileDelta: Int, rankDelta: Int) -> ChessSquare? {
-        origin.offset(file: fileDelta, rank: rankDelta)
-    }
-
-    static func routeLength(for difficulty: TrainingDifficulty) -> Int {
-        switch difficulty {
-        case .beginner: 2
-        case .intermediate: 3
-        case .advanced: 4
-        }
-    }
-}
-
-final class SquareRecognitionPromptGenerator {
-    private let bag: ShuffledChallengeBag
-    private let orientationPolicy: BoardOrientationPolicy
-    private var promptIndex = 0
-
-    init(
-        zone: SquareRecognitionZone,
-        orientationPolicy: BoardOrientationPolicy,
-        randomizer: ChallengeRandomizing
-    ) {
-        self.orientationPolicy = orientationPolicy
-        let challenges = SquareRecognitionPromptFactory.squares(in: zone).map {
-            TrainingChallenge(
-                id: TrainingChallengeID($0.description),
-                kind: .squareRecognition,
-                difficulty: .beginner,
-                promptReference: $0.description
-            )
-        }
-        bag = ShuffledChallengeBag(challenges: challenges, randomizer: randomizer)
-    }
-
-    func next() -> SquareRecognitionPrompt? {
-        guard let challenge = bag.next(), let target = ChessSquare(challenge.promptReference) else { return nil }
-        defer { promptIndex += 1 }
-        let orientation: BoardOrientationPolicy
-        switch orientationPolicy {
-        case .white, .black:
-            orientation = orientationPolicy
-        case .alternating:
-            orientation = promptIndex.isMultiple(of: 2) ? .white : .black
-        }
-        return SquareRecognitionPrompt(target: target, orientation: orientation, route: [])
-    }
-}
-
-struct SquareRouteAttempt: Hashable, Sendable {
-    let expected: [ChessSquare]
-    private(set) var selected: [ChessSquare] = []
-    private(set) var isResolved = false
-
-    mutating func select(_ square: ChessSquare) {
-        guard !isResolved else { return }
-        selected.append(square)
-        if selected.count == expected.count { isResolved = true }
-    }
-
-    var isCorrect: Bool { isResolved && selected == expected }
-}
-
-struct SquareRecognitionDrillConfiguration: Hashable, Codable {
-    let drill: SquareRecognitionDrillKind
-    let orientation: BoardOrientationPolicy
-    let zone: SquareRecognitionZone
-    let difficulty: TrainingDifficulty
-    let variant: SquareRecognitionVariant
-}
-
-struct SquareRecognitionDrillResult: Hashable, Codable {
-    let configuration: SquareRecognitionDrillConfiguration
-    let score: Int
-    let totalPrompts: Int
-    let correctPrompts: Int
-    let averageLatency: TimeInterval
-    let routeCount: Int
-    let correctRoutes: Int
-}
-
-enum SquareRecognitionAccessibility {
-    static func squareLabel(_ square: ChessSquare, orientation: BoardOrientationPolicy) -> String {
-        "Square \(square.description), \(orientation == .black ? "Black" : "White") orientation"
-    }
-
-    static func feedback(correct: Bool) -> String {
-        correct ? "Correct" : "Incorrect"
     }
 }
