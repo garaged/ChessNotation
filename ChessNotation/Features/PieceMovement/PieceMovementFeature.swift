@@ -129,6 +129,7 @@ final class PieceMovementViewModel {
     private(set) var boardCells: [PieceMovementBoardCellPresentation]
     private(set) var inputLocked: Bool
     private(set) var score: Int
+    private(set) var canAdvanceToNextPrompt: Bool
     private(set) var saveError: String?
     private(set) var isFinished = false
     private(set) var result: PieceMovementSessionResult?
@@ -159,6 +160,7 @@ final class PieceMovementViewModel {
         self.boardCells = PieceMovementBoardCellPresentation.cells(prompt: initialPrompt, selected: initialSelected)
         self.inputLocked = session.inputLocked
         self.score = session.score
+        self.canAdvanceToNextPrompt = false
     }
 
     func toggle(_ square: ChessSquare) {
@@ -172,7 +174,7 @@ final class PieceMovementViewModel {
     }
 
     func advanceOrFinish() {
-        if session.advance() {
+        if canAdvanceToNextPrompt, session.advance() {
             refresh(feedback: nil)
         } else {
             finish(reason: .completed)
@@ -200,6 +202,7 @@ final class PieceMovementViewModel {
         boardCells = PieceMovementBoardCellPresentation.cells(prompt: currentPrompt, selected: currentSelected)
         inputLocked = session.inputLocked
         score = session.score
+        canAdvanceToNextPrompt = session.inputLocked && session.result().promptCount < configuration.promptLimit
         presentation = PieceMovementPresentation.make(
             prompt: currentPrompt,
             selected: currentSelected,
@@ -236,9 +239,9 @@ struct PieceMovementGameView: View {
                     Text(feedback)
                         .font(.headline)
                         .accessibilityIdentifier("pieceMovement.feedback")
-                    Button("Next") { viewModel.advanceOrFinish() }
+                    Button(viewModel.canAdvanceToNextPrompt ? "Next" : "Finish") { viewModel.advanceOrFinish() }
                         .buttonStyle(.borderedProminent)
-                        .accessibilityIdentifier("pieceMovement.next")
+                        .accessibilityIdentifier(viewModel.canAdvanceToNextPrompt ? "pieceMovement.next" : "pieceMovement.finish")
                 } else {
                     Button("Submit") { viewModel.submit() }
                         .buttonStyle(.borderedProminent)
