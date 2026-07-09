@@ -11,7 +11,7 @@ nonisolated struct TrainingChallengeID: Hashable, Codable, Sendable, CustomStrin
     var description: String { rawValue }
 }
 
-enum TrainingChallengeKind: String, Codable, CaseIterable, Sendable {
+nonisolated enum TrainingChallengeKind: String, Codable, CaseIterable, Sendable {
     case notationMove
     case squareRecognition
     case pieceMovement
@@ -19,20 +19,20 @@ enum TrainingChallengeKind: String, Codable, CaseIterable, Sendable {
     case positionRecall
 }
 
-enum TrainingDifficulty: String, Codable, CaseIterable, Sendable {
+nonisolated enum TrainingDifficulty: String, Codable, CaseIterable, Sendable {
     case beginner
     case intermediate
     case advanced
 }
 
-enum TrainingFinishReason: String, Codable, Sendable {
+nonisolated enum TrainingFinishReason: String, Codable, Sendable {
     case completed
     case timedOut
     case userExited
     case unavailableContent
 }
 
-struct TrainingChallengeSource: Hashable, Codable, Sendable {
+nonisolated struct TrainingChallengeSource: Hashable, Codable, Sendable {
     let gameID: String?
     let moveIndex: Int?
     let opening: String?
@@ -51,7 +51,7 @@ struct TrainingChallengeSource: Hashable, Codable, Sendable {
     }
 }
 
-struct TrainingChallenge: Hashable, Codable, Sendable {
+nonisolated struct TrainingChallenge: Hashable, Codable, Sendable {
     let id: TrainingChallengeID
     let kind: TrainingChallengeKind
     let difficulty: TrainingDifficulty
@@ -73,7 +73,7 @@ struct TrainingChallenge: Hashable, Codable, Sendable {
     }
 }
 
-struct TrainingSessionConfiguration: Hashable, Codable, Sendable {
+nonisolated struct TrainingSessionConfiguration: Hashable, Codable, Sendable {
     static let currentSchemaVersion = 1
 
     let schemaVersion: Int
@@ -97,7 +97,7 @@ struct TrainingSessionConfiguration: Hashable, Codable, Sendable {
     }
 }
 
-struct TrainingSessionMetadata: Hashable, Codable, Sendable {
+nonisolated struct TrainingSessionMetadata: Hashable, Codable, Sendable {
     static let currentSchemaVersion = 1
 
     let schemaVersion: Int
@@ -121,11 +121,11 @@ struct TrainingSessionMetadata: Hashable, Codable, Sendable {
     }
 }
 
-protocol ChallengeRandomizing: AnyObject {
+nonisolated protocol ChallengeRandomizing: AnyObject {
     func nextInt(upperBound: Int) -> Int
 }
 
-final class SystemChallengeRandomizer: ChallengeRandomizing {
+nonisolated final class SystemChallengeRandomizer: ChallengeRandomizing {
     func nextInt(upperBound: Int) -> Int {
         guard upperBound > 0 else { return 0 }
         return Int.random(in: 0..<upperBound)
@@ -133,7 +133,7 @@ final class SystemChallengeRandomizer: ChallengeRandomizing {
 }
 
 /// A small deterministic generator for reproducible tests and session replay.
-final class SeededChallengeRandomizer: ChallengeRandomizing {
+nonisolated final class SeededChallengeRandomizer: ChallengeRandomizing {
     private var state: UInt64
 
     init(seed: UInt64) {
@@ -147,7 +147,7 @@ final class SeededChallengeRandomizer: ChallengeRandomizing {
     }
 }
 
-final class ScriptedChallengeRandomizer: ChallengeRandomizing {
+nonisolated final class ScriptedChallengeRandomizer: ChallengeRandomizing {
     private let values: [Int]
     private var index = 0
 
@@ -162,19 +162,19 @@ final class ScriptedChallengeRandomizer: ChallengeRandomizing {
     }
 }
 
-enum ChallengeGenerationUnavailableReason: String, Equatable, Sendable {
+nonisolated enum ChallengeGenerationUnavailableReason: String, Equatable, Sendable {
     case noEligibleChallenges
     case attemptLimitReached
     case cancelled
 }
 
-enum ChallengeGenerationResult: Equatable, Sendable {
+nonisolated enum ChallengeGenerationResult: Equatable, Sendable {
     case challenge(TrainingChallenge)
     case unavailable(ChallengeGenerationUnavailableReason)
 }
 
 /// Produces one shuffled cycle at a time and only retains the current cycle.
-final class ShuffledChallengeBag {
+nonisolated final class ShuffledChallengeBag {
     private let source: [TrainingChallenge]
     private let randomizer: ChallengeRandomizing
     private var remaining: [TrainingChallenge] = []
@@ -224,7 +224,7 @@ final class ShuffledChallengeBag {
     }
 }
 
-final class TrainingChallengeGenerator {
+nonisolated final class TrainingChallengeGenerator {
     private let bag: ShuffledChallengeBag
     private let maximumAttempts: Int
     private let accepts: (TrainingChallenge) -> Bool
@@ -264,7 +264,7 @@ final class TrainingChallengeGenerator {
 }
 
 /// Immutable lookup structure built once and shared by prompt generators.
-struct TrainingChallengeIndex: Sendable {
+nonisolated struct TrainingChallengeIndex: Sendable {
     let all: [TrainingChallenge]
 
     private let byGameID: [String: [TrainingChallenge]]
