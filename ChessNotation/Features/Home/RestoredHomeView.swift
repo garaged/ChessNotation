@@ -99,7 +99,8 @@ struct RestoredHomeView: View {
                         systemImage: "pencil.and.list.clipboard",
                         tint: PremiumDesign.Accent.practice.color,
                         texture: .board,
-                        assetName: PremiumAssetName.notationTrainingTile
+                        assetName: PremiumAssetName.notationTrainingTile,
+                        accessibilityIdentifier: "home.notationTrainingTile"
                     )
                 }
                 .buttonStyle(.plain)
@@ -115,7 +116,8 @@ struct RestoredHomeView: View {
                         systemImage: "timer",
                         tint: PremiumDesign.Accent.timed.color,
                         texture: .speed,
-                        assetName: PremiumAssetName.timedNotationTile
+                        assetName: PremiumAssetName.timedNotationTile,
+                        accessibilityIdentifier: "home.timedNotationTile"
                     )
                 }
                 .buttonStyle(.plain)
@@ -140,7 +142,8 @@ struct RestoredHomeView: View {
                         systemImage: "scope",
                         tint: PremiumDesign.Accent.square.color,
                         texture: .target,
-                        assetName: PremiumAssetName.squareRecognitionTile
+                        assetName: PremiumAssetName.squareRecognitionTile,
+                        accessibilityIdentifier: "home.squareRecognitionLink"
                     )
                 }
                 .buttonStyle(.plain)
@@ -155,7 +158,8 @@ struct RestoredHomeView: View {
                         systemImage: "arrow.up.left.and.arrow.down.right",
                         tint: PremiumDesign.Accent.learning.color,
                         texture: .board,
-                        assetName: "TilePieceMovement"
+                        assetName: "TilePieceMovement",
+                        accessibilityIdentifier: "home.pieceMovementLink"
                     )
                 }
                 .buttonStyle(.plain)
@@ -170,7 +174,8 @@ struct RestoredHomeView: View {
                         systemImage: "brain.head.profile",
                         tint: PremiumDesign.Accent.timed.color,
                         texture: .target,
-                        assetName: "TilePositionRecall"
+                        assetName: "TilePositionRecall",
+                        accessibilityIdentifier: "home.positionRecallLink"
                     )
                 }
                 .buttonStyle(.plain)
@@ -185,7 +190,8 @@ struct RestoredHomeView: View {
                         systemImage: "book.pages",
                         tint: PremiumDesign.Accent.neutral.color,
                         texture: .book,
-                        assetName: PremiumAssetName.instructionsTile
+                        assetName: PremiumAssetName.instructionsTile,
+                        accessibilityIdentifier: "home.instructionsLink"
                     )
                 }
                 .buttonStyle(.plain)
@@ -313,6 +319,7 @@ private struct HomeMenuTile: View {
     let tint: Color
     let texture: Texture
     let assetName: String
+    let accessibilityIdentifier: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -376,6 +383,11 @@ private struct HomeMenuTile: View {
             RoundedRectangle(cornerRadius: 8)
                 .stroke(tint.opacity(0.2), lineWidth: 1)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityLabel(title)
+        .accessibilityHint(subtitle)
+        .accessibilityIdentifier(accessibilityIdentifier)
     }
 }
 
