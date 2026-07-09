@@ -113,6 +113,39 @@ struct PieceMovementFeatureTests {
     }
 
     @Test
+    func playAgainResetsFinishedSession() throws {
+        let store = MemoryPieceMovementHistoryStore()
+        let configuration = PieceMovementConfiguration(pieces: [.king], difficulty: .beginner, orientation: .white, promptLimit: 1)
+        let viewModel = try #require(PieceMovementViewModel(
+            configuration: configuration,
+            randomizerFactory: { SeededChallengeRandomizer(seed: 4) },
+            clock: TestMonotonicClock(),
+            historyStore: store
+        ))
+        let firstPrompt = viewModel.prompt
+
+        for square in viewModel.prompt.expectedDestinations { viewModel.toggle(square) }
+        viewModel.submit()
+        viewModel.advanceOrFinish()
+
+        #expect(viewModel.isFinished)
+        #expect(viewModel.result != nil)
+        #expect(store.results.count == 1)
+
+        viewModel.playAgain()
+
+        #expect(!viewModel.isFinished)
+        #expect(viewModel.result == nil)
+        #expect(viewModel.saveError == nil)
+        #expect(!viewModel.inputLocked)
+        #expect(viewModel.score == 0)
+        #expect(viewModel.selected.isEmpty)
+        #expect(viewModel.presentation.feedback == nil)
+        #expect(viewModel.presentation.progress == "Prompt 1 of 1")
+        #expect(viewModel.prompt == firstPrompt)
+    }
+
+    @Test
     func viewModelSavesCompletedResult() throws {
         let store = MemoryPieceMovementHistoryStore()
         let configuration = PieceMovementConfiguration(pieces: [.king], difficulty: .beginner, orientation: .white, promptLimit: 1)
