@@ -1,6 +1,6 @@
 # CN-SPEC-0021: Local Insights and Library Personalization
 
-Status: Proposed
+Status: Accepted
 Owner: Project
 Last updated: 2026-07-08
 
@@ -57,8 +57,9 @@ Out of scope:
 
 ## Open Questions
 
-- None. UI surfacing and richer practice routing can build on this local foundation.
+- None. UI surfacing and richer practice routing can build on this accepted local foundation.
 
 ## Revision Notes
 
 - 2026-07-08: Added proposed local insights and library personalization foundation after CN-SPEC-0017 through CN-SPEC-0020 were completed and accepted.
+- 2026-07-08: Accepted after corrective simulator validation passed for `TrainingInsightsTests` and `make spec-check`.
