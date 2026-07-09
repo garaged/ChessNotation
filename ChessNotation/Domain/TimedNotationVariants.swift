@@ -1,18 +1,18 @@
 import Foundation
 
-enum TimedNotationVariant: String, Codable, CaseIterable, Sendable {
+nonisolated enum TimedNotationVariant: String, Codable, CaseIterable, Sendable {
     case sprint
     case accuracyRace
     case survival
     case combo
 }
 
-enum TimedLifecyclePolicy: String, Codable, Sendable {
+nonisolated enum TimedLifecyclePolicy: String, Codable, Sendable {
     case continueAgainstDeadline
     case pauseWhileInactive
 }
 
-struct TimedNotationConfiguration: Hashable, Codable, Sendable {
+nonisolated struct TimedNotationConfiguration: Hashable, Codable, Sendable {
     let variant: TimedNotationVariant
     let initialDuration: TimeInterval
     let promptCount: Int
@@ -46,15 +46,15 @@ struct TimedNotationConfiguration: Hashable, Codable, Sendable {
     }
 }
 
-protocol MonotonicTimeProviding: AnyObject {
+nonisolated protocol MonotonicTimeProviding: AnyObject {
     var now: TimeInterval { get }
 }
 
-final class SystemMonotonicClock: MonotonicTimeProviding {
+nonisolated final class SystemMonotonicClock: MonotonicTimeProviding {
     var now: TimeInterval { ProcessInfo.processInfo.systemUptime }
 }
 
-final class TestMonotonicClock: MonotonicTimeProviding {
+nonisolated final class TestMonotonicClock: MonotonicTimeProviding {
     var now: TimeInterval
 
     init(now: TimeInterval = 0) {
@@ -66,7 +66,7 @@ final class TestMonotonicClock: MonotonicTimeProviding {
     }
 }
 
-struct TimedScoreInput: Hashable, Sendable {
+nonisolated struct TimedScoreInput: Hashable, Sendable {
     let correct: Bool
     let latency: TimeInterval
     let complexity: Int
@@ -75,7 +75,7 @@ struct TimedScoreInput: Hashable, Sendable {
     let multiplier: Double
 }
 
-struct TimedScoreBreakdown: Hashable, Codable, Sendable {
+nonisolated struct TimedScoreBreakdown: Hashable, Codable, Sendable {
     let base: Int
     let speed: Int
     let complexity: Int
@@ -110,7 +110,7 @@ enum TimedNotationScorer {
     }
 }
 
-struct TimedNotationResult: Hashable, Codable, Sendable {
+nonisolated struct TimedNotationResult: Hashable, Codable, Sendable {
     let variant: TimedNotationVariant
     let configuration: TimedNotationConfiguration
     let score: Int
