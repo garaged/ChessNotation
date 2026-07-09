@@ -157,18 +157,25 @@ final class PieceMovementViewModel {
         self.canAdvanceToNextPrompt = false
     }
 
-    convenience init?(
+    init?(
         configuration: PieceMovementConfiguration,
         randomizerFactory: @escaping () -> ChallengeRandomizing,
         clock: MonotonicTimeProviding = SystemMonotonicClock(),
         historyStore: PieceMovementHistoryStoring = PieceMovementHistoryStore()
     ) {
-        self.init(
-            configuration: configuration,
-            randomizer: randomizerFactory(),
-            clock: clock,
-            historyStore: historyStore
-        )
+        self.configuration = configuration
+        self.randomizerFactory = randomizerFactory
+        self.clock = clock
+        self.historyStore = historyStore
+        guard let initialState = Self.makeInitialState(configuration: configuration, randomizer: randomizerFactory(), clock: clock) else { return nil }
+        self.session = initialState.session
+        self.presentation = initialState.presentation
+        self.prompt = initialState.prompt
+        self.selected = initialState.selected
+        self.boardCells = initialState.boardCells
+        self.inputLocked = initialState.inputLocked
+        self.score = initialState.score
+        self.canAdvanceToNextPrompt = false
     }
 
     func toggle(_ square: ChessSquare) {
