@@ -186,7 +186,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 3536BE712F9CF2AF00F413D1 /* Build configuration list for PBXProject "ChessNotation" */;
+			buildConfigurationList = 3536BE712F9CF2B000F413D1 /* Build configuration list for PBXProject "ChessNotation" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
