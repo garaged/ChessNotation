@@ -1,16 +1,16 @@
 import Foundation
 
-struct PositionRecallPiece: Hashable, Codable, Sendable {
+nonisolated struct PositionRecallPiece: Hashable, Codable, Sendable {
     let piece: TrainingPiece
     let side: TrainingSide
 }
 
-struct PositionRecallPlacedPiece: Hashable, Codable, Sendable {
+nonisolated struct PositionRecallPlacedPiece: Hashable, Codable, Sendable {
     let square: ChessSquare
     let piece: PositionRecallPiece
 }
 
-struct PositionRecallSnapshot: Hashable, Codable, Sendable {
+nonisolated struct PositionRecallSnapshot: Hashable, Codable, Sendable {
     let pieces: [PositionRecallPlacedPiece]
 
     init(pieces: [PositionRecallPlacedPiece]) {
@@ -30,7 +30,7 @@ struct PositionRecallSnapshot: Hashable, Codable, Sendable {
     }
 }
 
-struct PositionRecallReconstructionPrompt: Hashable, Codable, Sendable {
+nonisolated struct PositionRecallReconstructionPrompt: Hashable, Codable, Sendable {
     let snapshot: PositionRecallSnapshot
     let maskedSquares: Set<ChessSquare>
     let orientation: BoardOrientationPolicy
@@ -41,11 +41,11 @@ struct PositionRecallReconstructionPrompt: Hashable, Codable, Sendable {
     }
 }
 
-struct PositionRecallReconstructionAnswer: Hashable, Codable, Sendable {
+nonisolated struct PositionRecallReconstructionAnswer: Hashable, Codable, Sendable {
     let pieces: Set<PositionRecallPlacedPiece>
 }
 
-struct PositionRecallEvaluation: Hashable, Codable, Sendable {
+nonisolated struct PositionRecallEvaluation: Hashable, Codable, Sendable {
     let isExact: Bool
     let missing: Set<PositionRecallPlacedPiece>
     let extra: Set<PositionRecallPlacedPiece>
@@ -74,7 +74,7 @@ struct PositionRecallEvaluation: Hashable, Codable, Sendable {
     }
 }
 
-struct PositionRecallReconstructionPromptFactory {
+nonisolated struct PositionRecallReconstructionPromptFactory {
     static func maskCount(for difficulty: TrainingDifficulty, occupiedCount: Int) -> Int {
         let requested: Int
         switch difficulty {
@@ -155,7 +155,7 @@ final class PositionRecallReconstructionPromptGenerator {
     }
 }
 
-struct PositionRecallSessionResult: Hashable, Codable, Sendable {
+nonisolated struct PositionRecallSessionResult: Hashable, Codable, Sendable {
     let difficulty: TrainingDifficulty
     let orientation: BoardOrientationPolicy
     let promptCount: Int
