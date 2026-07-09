@@ -65,9 +65,12 @@ final class PositionRecallReconstructionSession {
     func refresh() {
         guard phase == .studying else { return }
         guard clock.now - studyStartedAt >= configuration.studyDuration else { return }
-        phase = .answering
-        answerStartedAt = clock.now
-        transitionCount += 1
+        transitionToAnswering()
+    }
+
+    func hideNow() {
+        guard phase == .studying else { return }
+        transitionToAnswering()
     }
 
     func place(_ piece: PositionRecallPiece, at square: ChessSquare) {
@@ -164,5 +167,11 @@ final class PositionRecallReconstructionSession {
             orientation: result.orientation,
             finishReason: result.finishReason
         )
+    }
+
+    private func transitionToAnswering() {
+        phase = .answering
+        answerStartedAt = clock.now
+        transitionCount += 1
     }
 }
