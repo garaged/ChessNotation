@@ -125,17 +125,19 @@ final class TrainingInsightsViewModel {
         recentLimit: Int = 10,
         excludingRecent: Bool = true
     ) {
-        self.store = store
-        self.minimumSampleCount = minimumSampleCount
-        self.excludingRecent = excludingRecent
-        self.preferences = (try? store.loadPreferences()) ?? TrainingLibraryPreferences(recentLimit: recentLimit)
-        self.presentation = TrainingInsightsPresenter.presentation(
+        let loadedPreferences = (try? store.loadPreferences()) ?? TrainingLibraryPreferences(recentLimit: recentLimit)
+        let initialPresentation = TrainingInsightsPresenter.presentation(
             samples: samples,
             games: games,
-            preferences: preferences,
+            preferences: loadedPreferences,
             minimumSampleCount: minimumSampleCount,
             excludingRecent: excludingRecent
         )
+        self.store = store
+        self.minimumSampleCount = minimumSampleCount
+        self.excludingRecent = excludingRecent
+        self.preferences = loadedPreferences
+        self.presentation = initialPresentation
     }
 
     func refresh(samples: [TrainingMetricSample], games: [TrainingGameSummary]) {
