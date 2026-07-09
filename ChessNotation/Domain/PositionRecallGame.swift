@@ -30,7 +30,7 @@ struct PositionRecallSnapshot: Hashable, Codable, Sendable {
     }
 }
 
-struct PositionRecallPrompt: Hashable, Codable, Sendable {
+struct PositionRecallReconstructionPrompt: Hashable, Codable, Sendable {
     let snapshot: PositionRecallSnapshot
     let maskedSquares: Set<ChessSquare>
     let orientation: BoardOrientationPolicy
@@ -41,7 +41,7 @@ struct PositionRecallPrompt: Hashable, Codable, Sendable {
     }
 }
 
-struct PositionRecallAnswer: Hashable, Codable, Sendable {
+struct PositionRecallReconstructionAnswer: Hashable, Codable, Sendable {
     let pieces: Set<PositionRecallPlacedPiece>
 }
 
@@ -52,7 +52,7 @@ struct PositionRecallEvaluation: Hashable, Codable, Sendable {
     let wrongPieceSquares: Set<ChessSquare>
     let wrongSideSquares: Set<ChessSquare>
 
-    init(answer: PositionRecallAnswer, expected: Set<PositionRecallPlacedPiece>) {
+    init(answer: PositionRecallReconstructionAnswer, expected: Set<PositionRecallPlacedPiece>) {
         missing = expected.subtracting(answer.pieces)
         extra = answer.pieces.subtracting(expected)
         var wrongPieces: Set<ChessSquare> = []
@@ -74,7 +74,7 @@ struct PositionRecallEvaluation: Hashable, Codable, Sendable {
     }
 }
 
-struct PositionRecallPromptFactory {
+struct PositionRecallReconstructionPromptFactory {
     static func maskCount(for difficulty: TrainingDifficulty, occupiedCount: Int) -> Int {
         let requested: Int
         switch difficulty {
@@ -90,7 +90,7 @@ struct PositionRecallPromptFactory {
         difficulty: TrainingDifficulty,
         orientation: BoardOrientationPolicy,
         randomizer: ChallengeRandomizing
-    ) -> PositionRecallPrompt? {
+    ) -> PositionRecallReconstructionPrompt? {
         guard snapshot.isValid, !snapshot.pieces.isEmpty else { return nil }
         var available = snapshot.pieces.map(\.square)
         var masked: Set<ChessSquare> = []
@@ -100,7 +100,7 @@ struct PositionRecallPromptFactory {
             masked.insert(available.remove(at: index))
         }
         guard !masked.isEmpty else { return nil }
-        return PositionRecallPrompt(
+        return PositionRecallReconstructionPrompt(
             snapshot: snapshot,
             maskedSquares: masked,
             orientation: orientation,
@@ -109,7 +109,7 @@ struct PositionRecallPromptFactory {
     }
 }
 
-final class PositionRecallPromptGenerator {
+final class PositionRecallReconstructionPromptGenerator {
     private let snapshots: [PositionRecallSnapshot]
     private let difficulty: TrainingDifficulty
     private let orientation: BoardOrientationPolicy
@@ -131,7 +131,7 @@ final class PositionRecallPromptGenerator {
         self.maximumAttempts = max(1, maximumAttempts)
     }
 
-    func next() -> PositionRecallPrompt? {
+    func next() -> PositionRecallReconstructionPrompt? {
         guard !snapshots.isEmpty else { return nil }
         for _ in 0..<maximumAttempts {
             let snapshot = snapshots[randomizer.nextInt(upperBound: snapshots.count)]
@@ -142,7 +142,7 @@ final class PositionRecallPromptGenerator {
             case .alternating:
                 resolvedOrientation = promptIndex.isMultiple(of: 2) ? .white : .black
             }
-            guard let prompt = PositionRecallPromptFactory.makePrompt(
+            guard let prompt = PositionRecallReconstructionPromptFactory.makePrompt(
                 snapshot: snapshot,
                 difficulty: difficulty,
                 orientation: resolvedOrientation,
@@ -170,7 +170,7 @@ struct PositionRecallSessionResult: Hashable, Codable, Sendable {
     let finishReason: TrainingFinishReason
 }
 
-enum PositionRecallFeedback {
+enum PositionRecallReconstructionFeedback {
     static func message(for evaluation: PositionRecallEvaluation) -> String {
         if evaluation.isExact { return "Correct. The hidden position was recalled exactly." }
         var parts: [String] = []
@@ -182,8 +182,8 @@ enum PositionRecallFeedback {
     }
 
     static func accessibilityDescription(
-        prompt: PositionRecallPrompt,
-        answer: PositionRecallAnswer,
+        prompt: PositionRecallReconstructionPrompt,
+        answer: PositionRecallReconstructionAnswer,
         progress: String
     ) -> String {
         let visible = prompt.snapshot.pieces
@@ -191,7 +191,7 @@ enum PositionRecallFeedback {
             .map { "\($0.piece.side.rawValue) \($0.piece.piece.rawValue) on \($0.square.description)" }
             .sorted()
             .joined(separator: ", ")
-        let masked = prompt.maskedSquares.map(\.description).sorted().joined(separator: ", ")
+        let masked = prompt.maskedSquares.map { $0.description }.sorted().joined(separator: ", ")
         let reconstructed = answer.pieces
             .map { "\($0.piece.side.rawValue) \($0.piece.piece.rawValue) on \($0.square.description)" }
             .sorted()
