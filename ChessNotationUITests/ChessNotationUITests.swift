@@ -9,13 +9,17 @@ final class ChessNotationUITests: XCTestCase {
     func testHomeTilesNavigateToLibraryAndSquareRecognition() throws {
         let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
 
-        XCTAssertTrue(app.buttons["home.notationTrainingTile"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["home.timedNotationTile"].exists)
-        XCTAssertTrue(app.buttons["home.squareRecognitionLink"].exists)
-        XCTAssertTrue(app.buttons["home.instructionsLink"].exists)
+        XCTAssertTrue(homeButton("home.notationTrainingTile", in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(homeButton("home.timedNotationTile", in: app).exists)
         XCTAssertFalse(app.segmentedControls["library.levelFilter"].exists)
 
-        app.buttons["home.squareRecognitionLink"].tap()
+        let squareRecognitionLink = scrollToHomeButton("home.squareRecognitionLink", in: app)
+        XCTAssertTrue(squareRecognitionLink.exists)
+        XCTAssertTrue(scrollToHomeButton("home.pieceMovementLink", in: app).exists)
+        XCTAssertTrue(scrollToHomeButton("home.positionRecallLink", in: app).exists)
+        XCTAssertTrue(scrollToHomeButton("home.instructionsLink", in: app).exists)
+
+        squareRecognitionLink.tap()
         XCTAssertTrue(app.buttons["squareRecognition.startButton"].waitForExistence(timeout: 5))
     }
 
@@ -39,7 +43,7 @@ final class ChessNotationUITests: XCTestCase {
     func testInstructionsTileOpensInstructions() throws {
         let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
 
-        let instructionsTile = app.buttons["home.instructionsLink"]
+        let instructionsTile = scrollToHomeButton("home.instructionsLink", in: app)
         XCTAssertTrue(instructionsTile.waitForExistence(timeout: 5))
         instructionsTile.tap()
 
@@ -182,7 +186,7 @@ final class ChessNotationUITests: XCTestCase {
     func testSquareRecognitionSetupAndCorrectTapFlow() throws {
         let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
 
-        let squareRecognitionLink = app.buttons["home.squareRecognitionLink"]
+        let squareRecognitionLink = scrollToHomeButton("home.squareRecognitionLink", in: app)
         XCTAssertTrue(squareRecognitionLink.waitForExistence(timeout: 5))
         squareRecognitionLink.tap()
 
@@ -209,7 +213,7 @@ final class ChessNotationUITests: XCTestCase {
 
     @MainActor
     private func openPracticeLibrary(in app: XCUIApplication) {
-        let tile = app.buttons["home.notationTrainingTile"]
+        let tile = homeButton("home.notationTrainingTile", in: app)
         XCTAssertTrue(tile.waitForExistence(timeout: 5))
         tile.tap()
         XCTAssertTrue(app.collectionViews["library.screen"].waitForExistence(timeout: 5))
@@ -217,10 +221,35 @@ final class ChessNotationUITests: XCTestCase {
 
     @MainActor
     private func openTimedLibrary(in app: XCUIApplication) {
-        let tile = app.buttons["home.timedNotationTile"]
+        let tile = homeButton("home.timedNotationTile", in: app)
         XCTAssertTrue(tile.waitForExistence(timeout: 5))
         tile.tap()
         XCTAssertTrue(app.collectionViews["library.screen"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    private func scrollToHomeButton(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
+        let button = homeButton(identifier, in: app)
+        if button.waitForExistence(timeout: 1), button.isHittable {
+            return button
+        }
+
+        let scrollView = app.scrollViews.firstMatch
+        for _ in 0..<6 where !button.isHittable {
+            scrollView.swipeUp()
+            if button.waitForExistence(timeout: 1), button.isHittable {
+                break
+            }
+        }
+        return button
+    }
+
+    @MainActor
+    private func homeButton(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
+        let button = app.buttons[identifier]
+        if button.exists { return button }
+        let otherElement = app.otherElements[identifier]
+        return otherElement
     }
 
     @MainActor
