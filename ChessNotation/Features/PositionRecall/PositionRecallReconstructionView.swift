@@ -4,12 +4,17 @@ import SwiftUI
 @Observable
 final class PositionRecallReconstructionViewModel {
     private let configuration: PositionRecallReconstructionConfiguration
+    private let snapshots: [PositionRecallSnapshot]
+    private let randomizerFactory: () -> ChallengeRandomizing
+    private let clock: MonotonicTimeProviding
     private let historyStore: PositionRecallReconstructionHistoryStoring
     private var session: PositionRecallReconstructionSession
     private(set) var phase: PositionRecallPhase
     private(set) var prompt: PositionRecallReconstructionPrompt
     private(set) var answer: PositionRecallReconstructionAnswer
     private(set) var score: Int
+    private(set) var canAdvanceToNextPrompt: Bool
+    private(set) var isComplete: Bool
     private(set) var feedback: String?
     private(set) var saveError: String?
     private(set) var savedResult: PositionRecallSessionResult?
@@ -21,29 +26,57 @@ final class PositionRecallReconstructionViewModel {
         clock: MonotonicTimeProviding = SystemMonotonicClock(),
         historyStore: PositionRecallReconstructionHistoryStoring = PositionRecallReconstructionHistoryStore()
     ) {
-        let generator = PositionRecallReconstructionPromptGenerator(
-            snapshots: snapshots,
-            difficulty: configuration.difficulty,
-            orientation: configuration.orientation,
-            randomizer: randomizer
-        )
-        guard let session = PositionRecallReconstructionSession(
+        self.configuration = configuration
+        self.snapshots = snapshots
+        self.randomizerFactory = { randomizer }
+        self.clock = clock
+        self.historyStore = historyStore
+        guard let session = Self.makeSession(
             configuration: configuration,
-            generator: generator,
+            snapshots: snapshots,
+            randomizer: randomizer,
             clock: clock
         ) else { return nil }
-        self.configuration = configuration
-        self.historyStore = historyStore
         self.session = session
         self.phase = session.phase
         self.prompt = session.currentPrompt
         self.answer = session.answer
         self.score = session.score
+        self.canAdvanceToNextPrompt = false
+        self.isComplete = false
+    }
+
+    init?(
+        configuration: PositionRecallReconstructionConfiguration,
+        snapshots: [PositionRecallSnapshot],
+        randomizerFactory: @escaping () -> ChallengeRandomizing,
+        clock: MonotonicTimeProviding = SystemMonotonicClock(),
+        historyStore: PositionRecallReconstructionHistoryStoring = PositionRecallReconstructionHistoryStore()
+    ) {
+        self.configuration = configuration
+        self.snapshots = snapshots
+        self.randomizerFactory = randomizerFactory
+        self.clock = clock
+        self.historyStore = historyStore
+        guard let session = Self.makeSession(
+            configuration: configuration,
+            snapshots: snapshots,
+            randomizer: randomizerFactory(),
+            clock: clock
+        ) else { return nil }
+        self.session = session
+        self.phase = session.phase
+        self.prompt = session.currentPrompt
+        self.answer = session.answer
+        self.score = session.score
+        self.canAdvanceToNextPrompt = false
+        self.isComplete = false
     }
 
     var progressText: String { "Prompt \(min(session.promptCount + 1, configuration.promptLimit)) of \(configuration.promptLimit)" }
     var accessibilitySummary: String {
-        PositionRecallReconstructionFeedback.accessibilityDescription(
+        if isComplete { return "Position Recall complete" }
+        return PositionRecallReconstructionFeedback.accessibilityDescription(
             prompt: prompt,
             answer: answer,
             progress: progressText
@@ -84,12 +117,29 @@ final class PositionRecallReconstructionViewModel {
         }
     }
 
-    func advance() {
-        if session.advance() {
+    func advanceOrFinish() {
+        if canAdvanceToNextPrompt, session.advance() {
             feedback = nil
             savedResult = nil
             syncSessionState()
+        } else {
+            finish()
         }
+    }
+
+    func playAgain() {
+        guard let newSession = Self.makeSession(
+            configuration: configuration,
+            snapshots: snapshots,
+            randomizer: randomizerFactory(),
+            clock: clock
+        ) else { return }
+        session = newSession
+        feedback = nil
+        saveError = nil
+        savedResult = nil
+        isComplete = false
+        syncSessionState()
     }
 
     func displayedPiece(at square: ChessSquare) -> PositionRecallPiece? {
@@ -135,11 +185,37 @@ final class PositionRecallReconstructionViewModel {
         return parts.joined(separator: ", ")
     }
 
+    private func finish() {
+        savedResult = savedResult ?? session.result()
+        isComplete = true
+        canAdvanceToNextPrompt = false
+    }
+
     private func syncSessionState() {
         phase = session.phase
         prompt = session.currentPrompt
         answer = session.answer
         score = session.score
+        canAdvanceToNextPrompt = phase == .finished && session.promptCount < configuration.promptLimit
+    }
+
+    private static func makeSession(
+        configuration: PositionRecallReconstructionConfiguration,
+        snapshots: [PositionRecallSnapshot],
+        randomizer: ChallengeRandomizing,
+        clock: MonotonicTimeProviding
+    ) -> PositionRecallReconstructionSession? {
+        let generator = PositionRecallReconstructionPromptGenerator(
+            snapshots: snapshots,
+            difficulty: configuration.difficulty,
+            orientation: configuration.orientation,
+            randomizer: randomizer
+        )
+        return PositionRecallReconstructionSession(
+            configuration: configuration,
+            generator: generator,
+            clock: clock
+        )
     }
 
     private func shortLabel(for piece: PositionRecallPiece) -> String {
@@ -155,41 +231,96 @@ struct PositionRecallReconstructionView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                Text(title)
-                    .font(.title3.weight(.bold))
-                    .accessibilityIdentifier("positionRecall.task")
-
-                Text(viewModel.progressText)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .accessibilityIdentifier("positionRecall.progress")
-
-                board
-
-                controls
-
-                if let feedback = viewModel.feedback {
-                    Text(feedback)
-                        .font(.headline)
-                        .accessibilityIdentifier("positionRecall.feedback")
-                    Button("Next") { viewModel.advance() }
-                        .buttonStyle(.borderedProminent)
-                        .accessibilityIdentifier("positionRecall.next")
-                }
-
-                if let saveError = viewModel.saveError {
-                    Text("History save failed: \(saveError)")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
+            if viewModel.isComplete, let result = viewModel.savedResult {
+                completionSummary(result)
+                    .padding()
+            } else {
+                activeGame
+                    .padding()
             }
-            .padding()
         }
         .navigationTitle("Position Recall")
         .onAppear { viewModel.refresh() }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(viewModel.accessibilitySummary)
+    }
+
+    private var activeGame: some View {
+        VStack(spacing: 16) {
+            Text(title)
+                .font(.title3.weight(.bold))
+                .accessibilityIdentifier("positionRecall.task")
+
+            Text(viewModel.progressText)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .accessibilityIdentifier("positionRecall.progress")
+
+            board
+
+            controls
+
+            if let feedback = viewModel.feedback {
+                Text(feedback)
+                    .font(.headline)
+                    .accessibilityIdentifier("positionRecall.feedback")
+                Button(viewModel.canAdvanceToNextPrompt ? "Next" : "Finish") { viewModel.advanceOrFinish() }
+                    .buttonStyle(.borderedProminent)
+                    .accessibilityIdentifier(viewModel.canAdvanceToNextPrompt ? "positionRecall.next" : "positionRecall.finish")
+            }
+
+            if let saveError = viewModel.saveError {
+                Text("History save failed: \(saveError)")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func completionSummary(_ result: PositionRecallSessionResult) -> some View {
+        VStack(spacing: 16) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 54, weight: .semibold))
+                .foregroundStyle(.green)
+                .accessibilityHidden(true)
+
+            Text("Position Recall Complete")
+                .font(.title2.weight(.bold))
+                .accessibilityIdentifier("positionRecall.resultsTitle")
+
+            VStack(spacing: 10) {
+                summaryRow("Score", "\(viewModel.score)")
+                summaryRow("Prompts", "\(result.promptCount)")
+                summaryRow("Exact", "\(result.exactCount)")
+                summaryRow("Partial", "\(result.partialCount)")
+                summaryRow("Best streak", "\(result.bestStreak)")
+            }
+            .padding()
+            .background(.secondary.opacity(0.12))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .accessibilityIdentifier("positionRecall.resultsSummary")
+
+            Button("Play Again") { viewModel.playAgain() }
+                .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("positionRecall.playAgain")
+
+            if let saveError = viewModel.saveError {
+                Text("History could not be saved: \(saveError)")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func summaryRow(_ label: String, _ value: String) -> some View {
+        HStack {
+            Text(label)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .font(.headline.monospacedDigit())
+        }
     }
 
     private var title: String {
