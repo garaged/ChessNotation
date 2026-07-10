@@ -129,6 +129,67 @@ struct PositionRecallReconstructionViewModelTests {
     }
 
     @Test
+    func finalSubmittedPromptCanFinishInsteadOfTryingToAdvance() throws {
+        let clock = TestMonotonicClock(now: 50)
+        let viewModel = try #require(PositionRecallReconstructionViewModel(
+            configuration: PositionRecallReconstructionConfiguration(difficulty: .beginner, orientation: .white, promptLimit: 1, studyDuration: 0),
+            snapshots: [snapshot()],
+            randomizer: SeededChallengeRandomizer(seed: 9),
+            clock: clock,
+            historyStore: MemoryPositionRecallHistoryStore()
+        ))
+        viewModel.refresh()
+        for piece in viewModel.prompt.expectedPieces {
+            viewModel.place(piece.piece, at: piece.square)
+        }
+        viewModel.submit()
+
+        #expect(viewModel.phase == .finished)
+        #expect(!viewModel.canAdvanceToNextPrompt)
+        #expect(!viewModel.isComplete)
+
+        viewModel.advanceOrFinish()
+
+        #expect(viewModel.isComplete)
+        #expect(viewModel.savedResult?.promptCount == 1)
+        #expect(viewModel.accessibilitySummary == "Position Recall complete")
+    }
+
+    @Test
+    func playAgainResetsCompletedSession() throws {
+        let clock = TestMonotonicClock(now: 60)
+        let viewModel = try #require(PositionRecallReconstructionViewModel(
+            configuration: PositionRecallReconstructionConfiguration(difficulty: .beginner, orientation: .white, promptLimit: 1, studyDuration: 0),
+            snapshots: [snapshot()],
+            randomizerFactory: { SeededChallengeRandomizer(seed: 10) },
+            clock: clock,
+            historyStore: MemoryPositionRecallHistoryStore()
+        ))
+        let firstPrompt = viewModel.prompt
+        viewModel.refresh()
+        for piece in viewModel.prompt.expectedPieces {
+            viewModel.place(piece.piece, at: piece.square)
+        }
+        viewModel.submit()
+        viewModel.advanceOrFinish()
+
+        #expect(viewModel.isComplete)
+        #expect(viewModel.savedResult != nil)
+
+        viewModel.playAgain()
+
+        #expect(!viewModel.isComplete)
+        #expect(viewModel.savedResult == nil)
+        #expect(viewModel.saveError == nil)
+        #expect(viewModel.feedback == nil)
+        #expect(viewModel.phase == .studying)
+        #expect(viewModel.score == 0)
+        #expect(viewModel.answer.pieces.isEmpty)
+        #expect(viewModel.prompt == firstPrompt)
+        #expect(viewModel.progressText == "Prompt 1 of 1")
+    }
+
+    @Test
     func blackOrientationMappingUsesSameCoordinateAfterTap() throws {
         let clock = TestMonotonicClock(now: 40)
         let viewModel = try #require(PositionRecallReconstructionViewModel(
