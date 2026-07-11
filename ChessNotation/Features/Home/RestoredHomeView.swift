@@ -158,7 +158,8 @@ struct RestoredHomeView: View {
                         systemImage: "arrow.up.left.and.arrow.down.right",
                         tint: PremiumDesign.Accent.learning.color,
                         texture: .board,
-                        assetName: "TilePieceMovement",
+                        assetName: PremiumAssetName.pieceMovementTile,
+                        showsFallbackIcon: false,
                         accessibilityIdentifier: "home.pieceMovementLink"
                     )
                 }
@@ -174,7 +175,8 @@ struct RestoredHomeView: View {
                         systemImage: "brain.head.profile",
                         tint: PremiumDesign.Accent.timed.color,
                         texture: .target,
-                        assetName: "TilePositionRecall",
+                        assetName: PremiumAssetName.positionRecallTile,
+                        showsFallbackIcon: false,
                         accessibilityIdentifier: "home.positionRecallLink"
                     )
                 }
@@ -319,6 +321,7 @@ private struct HomeMenuTile: View {
     let tint: Color
     let texture: Texture
     let assetName: String
+    var showsFallbackIcon = true
     let accessibilityIdentifier: String
 
     var body: some View {
@@ -334,7 +337,7 @@ private struct HomeMenuTile: View {
                     endPoint: .bottom
                 )
 
-                if !PremiumAssetAvailability.hasImage(named: assetName) {
+                if showsFallbackIcon && !PremiumAssetAvailability.hasImage(named: assetName) {
                     Image(systemName: systemImage)
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.white.opacity(0.9))

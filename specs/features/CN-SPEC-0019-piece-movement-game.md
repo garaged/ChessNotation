@@ -39,6 +39,7 @@ Out of scope:
 - CN-SPEC-0019-FR013: Results must preserve piece type, difficulty, orientation, prompt count, exact/partial correctness, missing and extra selections, latency, streak, and finish reason.
 - CN-SPEC-0019-FR014: VoiceOver must identify the training piece, source, occupied-square relationship, selectable squares, current selections, feedback, and progress.
 - CN-SPEC-0019-FR015: Board rendering must reuse existing lightweight board components and must not require new network, engine, or large asset dependencies.
+- CN-SPEC-0019-FR016: Home must present Piece Movement as an image-based premium mini-game tile using `TilePieceMovement`, preserve `home.pieceMovementLink`, and avoid generic chess glyph or symbol overlays when production artwork is available.
 
 ## Acceptance Criteria
 
@@ -55,6 +56,7 @@ Out of scope:
 - CN-SPEC-0019-AC011: Given a completed session is saved and restored, then its configuration and movement-specific metrics are preserved.
 - CN-SPEC-0019-AC012: Given VoiceOver, when the player explores and submits a prompt, then piece, source, occupancy, selection state, feedback, and progress are understandable.
 - CN-SPEC-0019-AC013: Given one thousand generated prompts from representative fixtures, when generation is measured, then it terminates within documented bounds, avoids invalid states, and retains bounded memory.
+- CN-SPEC-0019-AC014: Given Home is displayed, when the Piece Movement tile is inspected and selected, then it uses the production `TilePieceMovement` artwork, keeps its accessibility entry point, and opens the Piece Movement game.
 
 ## Coverage
 
@@ -64,6 +66,9 @@ Out of scope:
 - `ChessNotation/Domain/PieceMovementGame.swift`: CN-SPEC-0019-AC001, CN-SPEC-0019-AC002, CN-SPEC-0019-AC003, CN-SPEC-0019-AC004, CN-SPEC-0019-AC005, CN-SPEC-0019-AC006, CN-SPEC-0019-AC008, CN-SPEC-0019-AC009, CN-SPEC-0019-AC012
 - `ChessNotation/Domain/PieceMovementSession.swift`: CN-SPEC-0019-AC007, CN-SPEC-0019-AC008, CN-SPEC-0019-AC009, CN-SPEC-0019-AC010, CN-SPEC-0019-AC011, CN-SPEC-0019-AC013
 - `ChessNotation/Features/PieceMovement/PieceMovementFeature.swift`: CN-SPEC-0019-AC009, CN-SPEC-0019-AC010, CN-SPEC-0019-AC011, CN-SPEC-0019-AC012
+- `ChessNotation/Features/Home/RestoredHomeView.swift`: CN-SPEC-0019-AC014
+- `ChessNotationTests/PremiumAssetTests.swift`: CN-SPEC-0019-AC014
+- `ChessNotationUITests/HomeUITests.swift`: CN-SPEC-0019-AC014
 
 ## Open Questions
 
@@ -75,3 +80,4 @@ Out of scope:
 - 2026-07-08: Added deterministic generation, mixed-piece/difficulty/orientation policies, session lifecycle, exact/partial scoring, latency/streak metrics, and bounded-generation coverage.
 - 2026-07-08: Added production-facing SwiftUI board interaction, history persistence, textual feedback, VoiceOver summaries, and result save flow.
 - 2026-07-08: Accepted after corrective simulator validation passed for movement geometry, session, and feature suites.
+- 2026-07-10: Added production Home tile artwork and navigation coverage.
