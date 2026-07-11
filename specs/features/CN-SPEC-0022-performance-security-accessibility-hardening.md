@@ -2,7 +2,7 @@
 
 Status: Proposed
 Owner: Project
-Last updated: 2026-07-07
+Last updated: 2026-07-10
 
 ## Intent
 
@@ -74,9 +74,17 @@ Out of scope:
 - CN-SPEC-0022-AC019: Given a reproducible defect fixed during implementation, when its PR is reviewed, then a regression test fails before the fix and passes with the fix whenever the behavior is testable.
 - CN-SPEC-0022-AC020: Given release documentation review, when the roadmap ships, then README, privacy/release notes, change log, and relevant specs accurately describe local-only behavior, migrations, modes, validation, and known limitations.
 
+## Policy Constants
+
+- FEN board cache capacity: 256 distinct normalized FEN strings.
+- `startpos` and the full standard starting-position FEN share one cache identity.
+- Cache eviction policy: least recently used.
+- Cache instrumentation is internal and exists for deterministic regression testing; production UI does not depend on cache metrics.
+
 ## Coverage
 
-- Pending coverage: CN-SPEC-0022-AC001
+- `ChessNotation/Services/FENParser.swift`: CN-SPEC-0022-AC001.
+- `ChessNotationTests/FENCacheTests.swift`: CN-SPEC-0022-AC001.
 - Pending coverage: CN-SPEC-0022-AC002
 - Pending coverage: CN-SPEC-0022-AC003
 - Pending coverage: CN-SPEC-0022-AC004
@@ -104,3 +112,4 @@ Out of scope:
 ## Revision Notes
 
 - 2026-07-07: Initial proposed spec for PR8.
+- 2026-07-10: Began implementation with a bounded thread-safe LRU FEN board cache, deterministic cache metrics, and regression coverage for reuse, capacity, and recency.
