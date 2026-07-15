@@ -3,8 +3,8 @@ import Testing
 
 struct LongSessionResourceBoundTests {
     @Test
-    func tenThousandGeneratedChallengesRetainAtMostOneSourceCycle() throws {
-        let challenges = makeChallenges(count: 37)
+    func tenThousandGeneratedChallengesRetainAtMostOneSourceCycle() {
+        let challenges = Self.makeChallenges(count: 37)
         let generator = TrainingChallengeGenerator(
             challenges: challenges,
             randomizer: SeededChallengeRandomizer(seed: 42),
@@ -31,7 +31,7 @@ struct LongSessionResourceBoundTests {
 
     @Test
     func cancellationPreventsFurtherGenerationWithoutAdvancingRetainedState() {
-        let challenges = makeChallenges(count: 12)
+        let challenges = Self.makeChallenges(count: 12)
         let generator = TrainingChallengeGenerator(
             challenges: challenges,
             randomizer: SeededChallengeRandomizer(seed: 7)
@@ -50,7 +50,7 @@ struct LongSessionResourceBoundTests {
 
     @Test
     func rejectedCandidatesRemainBoundedByAttemptBudget() {
-        let challenges = makeChallenges(count: 19)
+        let challenges = Self.makeChallenges(count: 19)
         let maximumAttempts = 5
         var predicateCalls = 0
         let generator = TrainingChallengeGenerator(
