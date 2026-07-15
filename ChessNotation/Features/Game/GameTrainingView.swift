@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct GameTrainingView: View {
     @Environment(AppSettings.self) private var appSettings
@@ -6,6 +7,7 @@ struct GameTrainingView: View {
     @State var viewModel: GameViewModel
     @State private var savedHistoryRecordID: UUID?
     @State private var historySaveError: String?
+    @State private var focusedKeyboardRegion: TrainingKeyboardFocusRegion = .answer
 
     let historyStore: NotationTrainingHistoryStoring
 
@@ -39,6 +41,11 @@ struct GameTrainingView: View {
         }
         .navigationTitle(viewModel.game.title)
         .navigationBarTitleDisplayMode(.inline)
+        .background {
+            ExternalKeyboardCaptureView { command in
+                handleExternalKeyboardCommand(command)
+            }
+        }
     }
 
     private var trainingContent: some View {
@@ -78,6 +85,7 @@ struct GameTrainingView: View {
                             }
                             .buttonStyle(.borderedProminent)
                             .tint(PremiumDesign.Accent.practice.color)
+                            .keyboardShortcut(.return, modifiers: [])
                             .accessibilityIdentifier("game.submitButton")
 
                             Button("Reveal") {
@@ -85,6 +93,7 @@ struct GameTrainingView: View {
                             }
                             .buttonStyle(.bordered)
                             .tint(PremiumDesign.Accent.learning.color)
+                            .keyboardShortcut("r", modifiers: .command)
                             .accessibilityIdentifier("game.revealButton")
                         }
                         .frame(maxWidth: .infinity, alignment: .trailing)
@@ -146,6 +155,7 @@ struct GameTrainingView: View {
             RoundedRectangle(cornerRadius: PremiumDesign.Radius.medium)
                 .stroke(PremiumDesign.stroke, lineWidth: 1)
         }
+        .accessibilityHint("Use an external keyboard to type notation, Return to submit, Delete to erase, and Command R to reveal.")
     }
 
     private var header: some View {
@@ -252,6 +262,114 @@ struct GameTrainingView: View {
             historySaveError = nil
         } catch {
             historySaveError = error.localizedDescription
+        }
+    }
+
+    private func handleExternalKeyboardCommand(_ command: ExternalKeyboardTrainingCommand) {
+        switch command {
+        case .moveFocusForward:
+            focusedKeyboardRegion.moveForward()
+        case .moveFocusBackward:
+            focusedKeyboardRegion.moveBackward()
+        default:
+            _ = viewModel.handleExternalKeyboardCommand(command)
+        }
+    }
+}
+
+private enum TrainingKeyboardFocusRegion: CaseIterable {
+    case answer
+    case primaryAction
+    case secondaryAction
+
+    mutating func moveForward() {
+        move(by: 1)
+    }
+
+    mutating func moveBackward() {
+        move(by: -1)
+    }
+
+    private mutating func move(by offset: Int) {
+        let regions = Self.allCases
+        guard let index = regions.firstIndex(of: self) else { return }
+        self = regions[(index + offset + regions.count) % regions.count]
+    }
+}
+
+private struct ExternalKeyboardCaptureView: UIViewRepresentable {
+    let onCommand: (ExternalKeyboardTrainingCommand) -> Void
+
+    func makeUIView(context: Context) -> KeyboardCaptureUIView {
+        let view = KeyboardCaptureUIView()
+        view.onCommand = onCommand
+        return view
+    }
+
+    func updateUIView(_ uiView: KeyboardCaptureUIView, context: Context) {
+        uiView.onCommand = onCommand
+        uiView.requestFocus()
+    }
+}
+
+private final class KeyboardCaptureUIView: UIView {
+    var onCommand: ((ExternalKeyboardTrainingCommand) -> Void)?
+
+    override var canBecomeFirstResponder: Bool { true }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        requestFocus()
+    }
+
+    func requestFocus() {
+        guard window != nil, !isFirstResponder else { return }
+        becomeFirstResponder()
+    }
+
+    override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        var handled = false
+
+        for press in presses {
+            guard let command = Self.command(for: press) else { continue }
+            onCommand?(command)
+            handled = true
+        }
+
+        if !handled {
+            super.pressesBegan(presses, with: event)
+        }
+    }
+
+    private static func command(for press: UIPress) -> ExternalKeyboardTrainingCommand? {
+        guard let key = press.key else { return nil }
+
+        if key.modifierFlags.contains(.command) {
+            switch key.charactersIgnoringModifiers.lowercased() {
+            case "r":
+                return .secondaryAction
+            case "\r":
+                return .submitPrimaryAction
+            case "\u{8}":
+                return .clearAnswer
+            default:
+                return nil
+            }
+        }
+
+        switch key.keyCode {
+        case .keyboardReturnOrEnter:
+            return .submitPrimaryAction
+        case .keyboardDeleteOrBackspace:
+            return .deleteBackward
+        case .keyboardTab:
+            return key.modifierFlags.contains(.shift) ? .moveFocusBackward : .moveFocusForward
+        default:
+            let characters = key.characters
+            guard characters.count == 1,
+                  characters.unicodeScalars.allSatisfy({ !CharacterSet.whitespacesAndNewlines.contains($0) })
+            else { return nil }
+            return .insertText(characters)
         }
     }
 }

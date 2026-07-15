@@ -127,6 +127,31 @@ final class PositionRecallReconstructionViewModel {
         }
     }
 
+    @discardableResult
+    func handleExternalKeyboardCommand(_ command: ExternalKeyboardTrainingCommand) -> Bool {
+        guard !isComplete else { return false }
+
+        switch command {
+        case .submitPrimaryAction:
+            switch phase {
+            case .studying:
+                hideNow()
+            case .answering:
+                submit()
+            case .finished:
+                advanceOrFinish()
+            }
+            return true
+        case .secondaryAction:
+            finish(reason: .userExited)
+            return true
+        case .moveFocusForward, .moveFocusBackward:
+            return true
+        case .insertText, .deleteBackward, .clearAnswer:
+            return false
+        }
+    }
+
     func playAgain() {
         guard let newSession = Self.makeSession(
             configuration: configuration,
@@ -185,8 +210,8 @@ final class PositionRecallReconstructionViewModel {
         return parts.joined(separator: ", ")
     }
 
-    private func finish() {
-        savedResult = savedResult ?? session.result()
+    private func finish(reason: TrainingFinishReason = .completed) {
+        savedResult = savedResult ?? session.result(reason: reason)
         isComplete = true
         canAdvanceToNextPrompt = false
     }
@@ -266,6 +291,7 @@ struct PositionRecallReconstructionView: View {
                     .accessibilityIdentifier("positionRecall.feedback")
                 Button(viewModel.canAdvanceToNextPrompt ? "Next" : "Finish") { viewModel.advanceOrFinish() }
                     .buttonStyle(.borderedProminent)
+                    .keyboardShortcut(.return, modifiers: [])
                     .accessibilityIdentifier(viewModel.canAdvanceToNextPrompt ? "positionRecall.next" : "positionRecall.finish")
             }
 
@@ -302,6 +328,7 @@ struct PositionRecallReconstructionView: View {
 
             Button("Play Again") { viewModel.playAgain() }
                 .buttonStyle(.borderedProminent)
+                .keyboardShortcut(.return, modifiers: [])
                 .accessibilityIdentifier("positionRecall.playAgain")
 
             if let saveError = viewModel.saveError {
@@ -395,6 +422,7 @@ struct PositionRecallReconstructionView: View {
         case .studying:
             Button("Hide now") { viewModel.hideNow() }
                 .buttonStyle(.bordered)
+                .keyboardShortcut(.return, modifiers: [])
                 .accessibilityIdentifier("positionRecall.hideNow")
         case .answering:
             VStack(spacing: 10) {
@@ -419,6 +447,7 @@ struct PositionRecallReconstructionView: View {
 
                 Button("Submit recall") { viewModel.submit() }
                     .buttonStyle(.borderedProminent)
+                    .keyboardShortcut(.return, modifiers: [])
                     .accessibilityIdentifier("positionRecall.submit")
             }
         case .finished:

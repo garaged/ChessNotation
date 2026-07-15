@@ -107,6 +107,9 @@ Out of scope:
 - Primary mini-game completion and feedback states include text and stable accessibility identifiers; symbols and colors are supplementary.
 - Dynamic Type reachability checks require primary flows to remain scrollable and prohibit explicit text-size caps, forced single-line critical content, minimum-scale shrinking, and fixed-height critical-action containers.
 - Reduce Motion coverage is enforced by a source audit that requires animation decisions to be gated by the system accessibility environment and requires visible or spoken feedback independent of haptics.
+- External keyboard notation entry is routed through a focused hardware-key capture that does not require the system software keyboard and preserves the custom `ChessNotationKeyboard` touch path.
+- External keyboard Return submits the current notation answer or the visible primary mini-game action; Delete removes the last notation character; Command-Delete clears notation input; Command-R reveals/skips the current notation move.
+- External keyboard command routing for Piece Movement and Position Recall uses the same view-model actions as touch controls for submit, next, finish, and user-exit cancellation.
 
 ## Coverage
 
@@ -132,7 +135,13 @@ Out of scope:
 - `ChessNotationTests/MiniGameStateAccessibilityTests.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013, CN-SPEC-0022-AC014, CN-SPEC-0022-AC019.
 - `ChessNotationTests/DynamicTypeReachabilityAuditTests.swift`: CN-SPEC-0022-AC015, CN-SPEC-0022-AC019.
 - `ChessNotationTests/ReducedMotionFeedbackAuditTests.swift`: CN-SPEC-0022-AC016, CN-SPEC-0022-AC019.
-- Pending coverage: CN-SPEC-0022-AC017
+- `ChessNotation/Features/Game/GameViewModel.swift`: CN-SPEC-0022-AC017.
+- `ChessNotation/Features/Game/GameTrainingView.swift`: CN-SPEC-0022-AC017.
+- `ChessNotation/Features/PieceMovement/PieceMovementFeature.swift`: CN-SPEC-0022-AC017.
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionView.swift`: CN-SPEC-0022-AC017.
+- `ChessNotationTests/GameViewModelIntegrationTests.swift`: CN-SPEC-0022-AC017, CN-SPEC-0022-AC019.
+- `ChessNotationTests/PieceMovementFeatureTests.swift`: CN-SPEC-0022-AC017, CN-SPEC-0022-AC019.
+- `ChessNotationTests/PositionRecallReconstructionViewModelTests.swift`: CN-SPEC-0022-AC017, CN-SPEC-0022-AC019.
 - Pending coverage: CN-SPEC-0022-AC018
 - Pending coverage: CN-SPEC-0022-AC020
 
@@ -155,3 +164,4 @@ Out of scope:
 - 2026-07-15: Added mini-game state accessibility regression coverage for Piece Movement source/blocker/enemy/selected states and Position Recall visible/masked/reconstructed states.
 - 2026-07-15: Added Dynamic Type reachability auditing for the primary Piece Movement and Position Recall flows, requiring scrollable containers and rejecting fixed-height or text-shrinking critical-action layouts.
 - 2026-07-15: Added reduced-motion and feedback-equivalence source auditing, requiring system Reduce Motion gating and non-haptic visible or spoken feedback.
+- 2026-07-15: Added external-keyboard command routing and regression coverage for notation answer entry/edit/submit/reveal, Piece Movement submit/next/finish/cancel, and Position Recall hide/submit/next/finish/cancel while preserving the custom on-screen notation keyboard path.

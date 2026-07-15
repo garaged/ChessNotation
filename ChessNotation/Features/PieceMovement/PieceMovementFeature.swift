@@ -185,6 +185,28 @@ final class PieceMovementViewModel {
         }
     }
 
+    @discardableResult
+    func handleExternalKeyboardCommand(_ command: ExternalKeyboardTrainingCommand) -> Bool {
+        guard !isFinished else { return false }
+
+        switch command {
+        case .submitPrimaryAction:
+            if presentation.feedback == nil {
+                submit()
+            } else {
+                advanceOrFinish()
+            }
+            return true
+        case .secondaryAction:
+            finish(reason: .userExited)
+            return true
+        case .moveFocusForward, .moveFocusBackward:
+            return true
+        case .insertText, .deleteBackward, .clearAnswer:
+            return false
+        }
+    }
+
     func playAgain() {
         guard let restartState = Self.makeInitialState(configuration: configuration, randomizer: randomizerFactory(), clock: clock) else { return }
         session = restartState.session
@@ -300,10 +322,12 @@ struct PieceMovementGameView: View {
                     .accessibilityIdentifier("pieceMovement.feedback")
                 Button(viewModel.canAdvanceToNextPrompt ? "Next" : "Finish") { viewModel.advanceOrFinish() }
                     .buttonStyle(.borderedProminent)
+                    .keyboardShortcut(.return, modifiers: [])
                     .accessibilityIdentifier(viewModel.canAdvanceToNextPrompt ? "pieceMovement.next" : "pieceMovement.finish")
             } else {
                 Button("Submit") { viewModel.submit() }
                     .buttonStyle(.borderedProminent)
+                    .keyboardShortcut(.return, modifiers: [])
                     .accessibilityIdentifier("pieceMovement.submit")
             }
         }
@@ -334,6 +358,7 @@ struct PieceMovementGameView: View {
 
             Button("Play Again") { viewModel.playAgain() }
                 .buttonStyle(.borderedProminent)
+                .keyboardShortcut(.return, modifiers: [])
                 .accessibilityIdentifier("pieceMovement.playAgain")
 
             if let saveError = viewModel.saveError {

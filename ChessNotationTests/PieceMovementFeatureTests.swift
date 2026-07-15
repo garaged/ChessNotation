@@ -113,6 +113,52 @@ struct PieceMovementFeatureTests {
     }
 
     @Test
+    func externalKeyboardPrimaryActionSubmitsAdvancesAndFinishes() throws {
+        let store = MemoryPieceMovementHistoryStore()
+        let configuration = PieceMovementConfiguration(pieces: [.king], difficulty: .beginner, orientation: .white, promptLimit: 2)
+        let viewModel = try #require(PieceMovementViewModel(
+            configuration: configuration,
+            randomizer: SeededChallengeRandomizer(seed: 4),
+            clock: TestMonotonicClock(),
+            historyStore: store
+        ))
+
+        #expect(viewModel.handleExternalKeyboardCommand(.submitPrimaryAction))
+        #expect(viewModel.inputLocked)
+        #expect(viewModel.canAdvanceToNextPrompt)
+
+        #expect(viewModel.handleExternalKeyboardCommand(.submitPrimaryAction))
+        #expect(!viewModel.inputLocked)
+        #expect(viewModel.presentation.progress == "Prompt 2 of 2")
+
+        #expect(viewModel.handleExternalKeyboardCommand(.submitPrimaryAction))
+        #expect(viewModel.inputLocked)
+        #expect(!viewModel.canAdvanceToNextPrompt)
+
+        #expect(viewModel.handleExternalKeyboardCommand(.submitPrimaryAction))
+        #expect(viewModel.isFinished)
+        #expect(viewModel.result?.finishReason == .completed)
+    }
+
+    @Test
+    func externalKeyboardSecondaryActionCancelsPieceMovement() throws {
+        let store = MemoryPieceMovementHistoryStore()
+        let configuration = PieceMovementConfiguration(pieces: [.king], difficulty: .beginner, orientation: .white, promptLimit: 2)
+        let viewModel = try #require(PieceMovementViewModel(
+            configuration: configuration,
+            randomizer: SeededChallengeRandomizer(seed: 4),
+            clock: TestMonotonicClock(),
+            historyStore: store
+        ))
+
+        #expect(viewModel.handleExternalKeyboardCommand(.secondaryAction))
+
+        #expect(viewModel.isFinished)
+        #expect(viewModel.result?.finishReason == .userExited)
+        #expect(store.results.count == 1)
+    }
+
+    @Test
     func playAgainResetsFinishedSession() throws {
         let store = MemoryPieceMovementHistoryStore()
         let configuration = PieceMovementConfiguration(pieces: [.king], difficulty: .beginner, orientation: .white, promptLimit: 1)

@@ -156,6 +156,61 @@ struct PositionRecallReconstructionViewModelTests {
     }
 
     @Test
+    func externalKeyboardPrimaryActionHidesSubmitsAdvancesAndFinishes() throws {
+        let clock = TestMonotonicClock(now: 50)
+        let viewModel = try #require(PositionRecallReconstructionViewModel(
+            configuration: PositionRecallReconstructionConfiguration(difficulty: .beginner, orientation: .white, promptLimit: 2, studyDuration: 30),
+            snapshots: [snapshot()],
+            randomizer: SeededChallengeRandomizer(seed: 9),
+            clock: clock,
+            historyStore: MemoryPositionRecallHistoryStore()
+        ))
+
+        #expect(viewModel.phase == .studying)
+        #expect(viewModel.handleExternalKeyboardCommand(.submitPrimaryAction))
+        #expect(viewModel.phase == .answering)
+
+        for piece in viewModel.prompt.expectedPieces {
+            viewModel.place(piece.piece, at: piece.square)
+        }
+
+        #expect(viewModel.handleExternalKeyboardCommand(.submitPrimaryAction))
+        #expect(viewModel.phase == .finished)
+        #expect(viewModel.canAdvanceToNextPrompt)
+
+        #expect(viewModel.handleExternalKeyboardCommand(.submitPrimaryAction))
+        #expect(viewModel.phase == .studying)
+        #expect(viewModel.progressText == "Prompt 2 of 2")
+
+        viewModel.hideNow()
+        for piece in viewModel.prompt.expectedPieces {
+            viewModel.place(piece.piece, at: piece.square)
+        }
+        viewModel.submit()
+
+        #expect(!viewModel.canAdvanceToNextPrompt)
+        #expect(viewModel.handleExternalKeyboardCommand(.submitPrimaryAction))
+        #expect(viewModel.isComplete)
+    }
+
+    @Test
+    func externalKeyboardSecondaryActionCompletesPositionRecallAsUserExit() throws {
+        let clock = TestMonotonicClock(now: 50)
+        let viewModel = try #require(PositionRecallReconstructionViewModel(
+            configuration: PositionRecallReconstructionConfiguration(difficulty: .beginner, orientation: .white, promptLimit: 2, studyDuration: 30),
+            snapshots: [snapshot()],
+            randomizer: SeededChallengeRandomizer(seed: 9),
+            clock: clock,
+            historyStore: MemoryPositionRecallHistoryStore()
+        ))
+
+        #expect(viewModel.handleExternalKeyboardCommand(.secondaryAction))
+
+        #expect(viewModel.isComplete)
+        #expect(viewModel.savedResult?.finishReason == .userExited)
+    }
+
+    @Test
     func playAgainResetsCompletedSession() throws {
         let clock = TestMonotonicClock(now: 60)
         let viewModel = try #require(PositionRecallReconstructionViewModel(
