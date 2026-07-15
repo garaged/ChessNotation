@@ -2,7 +2,7 @@
 
 Status: Proposed
 Owner: Project
-Last updated: 2026-07-10
+Last updated: 2026-07-15
 
 ## Intent
 
@@ -84,6 +84,11 @@ Out of scope:
 - Position Recall reconstruction history maximum record count: 5,000.
 - Corrupt or rejected Position Recall history is copied once to a sibling `.corrupt` evidence file and is not silently replaced by a later save.
 - Position Recall history reset removes the primary payload only; preserved corrupt evidence remains available for diagnosis or manual recovery.
+- Bundled game validation occurs after decoding and before results enter the shared cache.
+- Duplicate game IDs are rejected across the complete configured resource set, not only within one JSON file.
+- Chess coordinates must be lowercase algebraic squares from `a1` through `h8`; promotion coordinate suffixes remain valid when the coordinate begins with `from + to`.
+- FEN validation requires exactly eight placement ranks, each expanding to exactly eight files, using only legal piece symbols or empty-run digits.
+- Validation diagnostics expose issue category, game ID, move index, and field name only; they do not include full game records, SAN answers, titles, or file paths.
 
 ## Coverage
 
@@ -91,13 +96,12 @@ Out of scope:
 - `ChessNotationTests/FENCacheTests.swift`: CN-SPEC-0022-AC001.
 - `ChessNotation/Features/PositionRecall/PositionRecallReconstructionHistoryStore.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC008.
 - `ChessNotationTests/PositionRecallHistoryStoreHardeningTests.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC008, CN-SPEC-0022-AC019.
-- Pending coverage: CN-SPEC-0022-AC002
+- `ChessNotation/Services/GameLibraryService.swift`: CN-SPEC-0022-AC002, CN-SPEC-0022-AC009, CN-SPEC-0022-AC010.
+- `ChessNotationTests/BundledGameValidationTests.swift`: CN-SPEC-0022-AC009, CN-SPEC-0022-AC010, CN-SPEC-0022-AC019.
 - Pending coverage: CN-SPEC-0022-AC003
 - Pending coverage: CN-SPEC-0022-AC004
 - Pending coverage: CN-SPEC-0022-AC005
 - Pending coverage: CN-SPEC-0022-AC007
-- Pending coverage: CN-SPEC-0022-AC009
-- Pending coverage: CN-SPEC-0022-AC010
 - Pending coverage: CN-SPEC-0022-AC011
 - Pending coverage: CN-SPEC-0022-AC012
 - Pending coverage: CN-SPEC-0022-AC013
@@ -117,3 +121,4 @@ Out of scope:
 - 2026-07-07: Initial proposed spec for PR8.
 - 2026-07-10: Began implementation with a bounded thread-safe LRU FEN board cache, deterministic cache metrics, and regression coverage for reuse, capacity, and recency.
 - 2026-07-10: Hardened Position Recall reconstruction history with atomic bounded writes, corrupt-payload preservation, explicit reset, and regression coverage preventing silent data loss.
+- 2026-07-15: Added semantic validation for bundled game IDs, required strings, move numbers, coordinates, coordinate consistency, and FEN placement, with redacted diagnostics and regression fixtures.
