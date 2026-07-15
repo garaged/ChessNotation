@@ -45,9 +45,19 @@ enum GameLibraryError: LocalizedError {
     }
 }
 
+struct GameLibraryCacheMetrics: Equatable, Sendable {
+    let repositoryCount: Int
+    let hitCount: Int
+    let missCount: Int
+    let resourceDecodeCount: Int
+}
+
 struct BundledGameLibraryService: GameLibraryProviding {
     private static let lock = NSLock()
     private static var cache: [CacheKey: [NotationGame]] = [:]
+    private static var hitCount = 0
+    private static var missCount = 0
+    private static var resourceDecodeCount = 0
 
     private let resourceNames: [String]
     private let bundle: Bundle
@@ -63,9 +73,11 @@ struct BundledGameLibraryService: GameLibraryProviding {
 
         Self.lock.lock()
         if let cachedGames = Self.cache[cacheKey] {
+            Self.hitCount += 1
             Self.lock.unlock()
             return cachedGames
         }
+        Self.missCount += 1
         Self.lock.unlock()
 
         let games = try resourceNames.flatMap { resourceName in
@@ -75,7 +87,9 @@ struct BundledGameLibraryService: GameLibraryProviding {
                 throw GameLibraryError.missingResource(resourceName)
             }
             let data = try Data(contentsOf: url, options: [.mappedIfSafe])
-            return try Self.decodeGames(from: data, decoder: decoder, validate: false)
+            let decoded = try Self.decodeGames(from: data, decoder: decoder, validate: false)
+            Self.recordResourceDecode()
+            return decoded
         }
 
         try Self.validate(games)
@@ -85,6 +99,32 @@ struct BundledGameLibraryService: GameLibraryProviding {
         Self.lock.unlock()
 
         return games
+    }
+
+    static var cacheMetrics: GameLibraryCacheMetrics {
+        lock.lock()
+        defer { lock.unlock() }
+        return GameLibraryCacheMetrics(
+            repositoryCount: cache.count,
+            hitCount: hitCount,
+            missCount: missCount,
+            resourceDecodeCount: resourceDecodeCount
+        )
+    }
+
+    static func resetCacheForTesting() {
+        lock.lock()
+        defer { lock.unlock() }
+        cache.removeAll(keepingCapacity: true)
+        hitCount = 0
+        missCount = 0
+        resourceDecodeCount = 0
+    }
+
+    private static func recordResourceDecode() {
+        lock.lock()
+        resourceDecodeCount += 1
+        lock.unlock()
     }
 
     private struct CacheKey: Hashable {
