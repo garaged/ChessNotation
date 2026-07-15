@@ -46,4 +46,28 @@ final class HomeUITests: ChessNotationUITestCase {
         XCTAssertTrue(app.navigationBars["Instructions"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Choose A Mode"].exists)
     }
+
+    func testPieceMovementTileOpensGame() throws {
+        let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
+
+        let pieceMovementTile = scrollToHomeTile(identifier: "home.pieceMovementLink", title: "Piece Movement", in: app)
+        XCTAssertTrue(pieceMovementTile.waitForExistence(timeout: 5))
+        XCTAssertTrue(pieceMovementTile.isHittable)
+        pieceMovementTile.tap()
+
+        XCTAssertTrue(app.navigationBars["Piece Movement"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["pieceMovement.task"].waitForExistence(timeout: 5))
+    }
+
+    func testPositionRecallTileOpensGame() throws {
+        let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
+
+        let positionRecallTile = scrollToHomeTile(identifier: "home.positionRecallLink", title: "Position Recall", in: app)
+        XCTAssertTrue(positionRecallTile.waitForExistence(timeout: 5))
+        XCTAssertTrue(positionRecallTile.isHittable)
+        positionRecallTile.tap()
+
+        XCTAssertTrue(app.navigationBars["Position Recall"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["positionRecall.task"].waitForExistence(timeout: 5))
+    }
 }

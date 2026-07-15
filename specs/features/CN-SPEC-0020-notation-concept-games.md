@@ -42,6 +42,7 @@ Out of scope:
 - CN-SPEC-0020-FR015: Results must preserve game kind, difficulty, prompt categories, correctness, first-try/component mistakes or recall errors, latency, study duration, orientation, and finish reason.
 - CN-SPEC-0020-FR016: VoiceOver must support component construction and recall responses while ensuring hidden position information is not announced after study ends.
 - CN-SPEC-0020-FR017: Existing board, piece, FEN parsing, SAN normalization, settings, and history behavior must remain compatible.
+- CN-SPEC-0020-FR018: Home must present Position Recall as an image-based premium mini-game tile using `TilePositionRecall`, preserve `home.positionRecallLink`, and avoid generic chess glyph or symbol overlays when production artwork is available.
 
 ## Acceptance Criteria
 
@@ -60,6 +61,7 @@ Out of scope:
 - CN-SPEC-0020-AC013: Given completed SAN Builder and Position Recall sessions, when history is saved and restored, then all game-specific configuration and metrics are preserved.
 - CN-SPEC-0020-AC014: Given VoiceOver, when using SAN Builder or transitioning from study to hidden recall, then controls remain usable and concealed position data is not announced.
 - CN-SPEC-0020-AC015: Given repeated recall prompts from cached source positions, when a long session runs, then generation terminates within documented bounds and retained memory remains bounded.
+- CN-SPEC-0020-AC016: Given Home is displayed, when the Position Recall tile is inspected and selected, then it uses the production `TilePositionRecall` artwork, keeps its accessibility entry point, and opens the Position Recall game.
 
 ## Coverage
 
@@ -76,6 +78,9 @@ Out of scope:
 - `ChessNotation/Domain/PositionRecallReconstructionSession.swift`: CN-SPEC-0020-AC006, CN-SPEC-0020-AC007, CN-SPEC-0020-AC010, CN-SPEC-0020-AC013, CN-SPEC-0020-AC014
 - `ChessNotation/Features/PositionRecall/PositionRecallReconstructionHistoryStore.swift`: CN-SPEC-0020-AC013
 - `ChessNotation/Features/PositionRecall/PositionRecallReconstructionView.swift`: CN-SPEC-0020-AC006, CN-SPEC-0020-AC007, CN-SPEC-0020-AC010, CN-SPEC-0020-AC014
+- `ChessNotation/Features/Home/RestoredHomeView.swift`: CN-SPEC-0020-AC016
+- `ChessNotationTests/PremiumAssetTests.swift`: CN-SPEC-0020-AC016
+- `ChessNotationUITests/HomeUITests.swift`: CN-SPEC-0020-AC016
 
 ## Open Questions
 
@@ -89,3 +94,4 @@ Out of scope:
 - 2026-07-08: Added reconstruction session lifecycle, injected-clock study transitions, scoring, history, and `NotationConceptResult` conversion.
 - 2026-07-08: Added production-facing reconstruction SwiftUI/view-model support with hidden-answer VoiceOver protection and black-orientation mapping coverage.
 - 2026-07-08: Accepted after corrective simulator validation passed for concept, reconstruction domain, session, UI view-model, and notation variety suites.
+- 2026-07-10: Added production Home tile artwork and navigation coverage for Position Recall.

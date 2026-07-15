@@ -94,6 +94,21 @@ Out of scope:
 - Validation diagnostics expose issue category, game ID, move index, and field name only; they do not include full game records, SAN answers, titles, or file paths.
 - Timer refresh instrumentation counts refresh calls and timeout transitions only; gameplay score, prompt progress, FEN cache metrics, and library cache metrics must remain unchanged during non-terminal refreshes.
 - The timer refresh regression fixture uses 1,000 refreshes and avoids brittle wall-clock timing assertions.
+<<<<<<< HEAD
+=======
+- Long-session generation fixtures use 10,000 accepted prompts and 1,000 rejected/cancelled calls.
+- A generator may retain only its immutable source plus the current shrinking shuffled cycle; retained-cycle count must remain below source count after generation begins.
+- Rejected generation is bounded by the configured maximum-attempt count, and cancellation must prevent the shuffled bag from advancing.
+- Performance regression budgets use deterministic operation counts, explicit tolerance, and actionable remediation instead of simulator wall-clock thresholds.
+- The application target has no Swift Package product dependencies, third-party framework build entries, code-signing entitlements, sensitive usage-description keys, networking API markers, tracking APIs, analytics SDKs, advertising APIs, or account/authentication surfaces.
+- The privacy audit scans production Swift sources and the Xcode project so future capability additions require an intentional policy update.
+- Each mini-game board exposes one VoiceOver element per chess square with identifier `board.square.<coordinate>` and a label beginning with the actual algebraic coordinate.
+- Board orientation changes display order only; it does not change square identity, accessibility identifier, spoken coordinate, or tap-to-coordinate mapping.
+- Piece Movement spoken square state distinguishes source piece, friendly blocker, enemy piece, selected destination, and empty square without requiring color perception.
+- Position Recall spoken square state distinguishes visible, masked, and reconstructed pieces across study, answer, and result phases.
+- Primary mini-game completion and feedback states include text and stable accessibility identifiers; symbols and colors are supplementary.
+- Dynamic Type reachability checks require primary flows to remain scrollable and prohibit explicit text-size caps, forced single-line critical content, minimum-scale shrinking, and fixed-height critical-action containers.
+>>>>>>> origin/fix/mini-game-boards
 
 ## Coverage
 
@@ -106,13 +121,18 @@ Out of scope:
 - `ChessNotationTests/BundledGameValidationTests.swift`: CN-SPEC-0022-AC009, CN-SPEC-0022-AC010, CN-SPEC-0022-AC019.
 - `ChessNotation/Domain/TimedNotationVariants.swift`: CN-SPEC-0022-AC003.
 - `ChessNotationTests/TimerRefreshEfficiencyTests.swift`: CN-SPEC-0022-AC003, CN-SPEC-0022-AC019.
-- Pending coverage: CN-SPEC-0022-AC004
-- Pending coverage: CN-SPEC-0022-AC005
-- Pending coverage: CN-SPEC-0022-AC011
-- Pending coverage: CN-SPEC-0022-AC012
-- Pending coverage: CN-SPEC-0022-AC013
-- Pending coverage: CN-SPEC-0022-AC014
-- Pending coverage: CN-SPEC-0022-AC015
+- `ChessNotation/Domain/TrainingChallenge.swift`: CN-SPEC-0022-AC004.
+- `ChessNotationTests/LongSessionResourceBoundTests.swift`: CN-SPEC-0022-AC004.
+- `ChessNotation/Domain/PerformanceRegressionBudget.swift`: CN-SPEC-0022-AC005.
+- `ChessNotationTests/PerformanceRegressionBudgetTests.swift`: CN-SPEC-0022-AC005, CN-SPEC-0022-AC019.
+- `ChessNotation.xcodeproj/project.pbxproj`: CN-SPEC-0022-AC011.
+- `ChessNotationTests/PrivacySurfaceAuditTests.swift`: CN-SPEC-0022-AC011, CN-SPEC-0022-AC019.
+- `ChessNotation/Features/Game/MiniGameBoardView.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013.
+- `ChessNotation/Features/PieceMovement/PieceMovementFeature.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC014.
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionView.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013, CN-SPEC-0022-AC014.
+- `ChessNotationTests/BoardSquareAccessibilitySemanticsTests.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013, CN-SPEC-0022-AC019.
+- `ChessNotationTests/MiniGameStateAccessibilityTests.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013, CN-SPEC-0022-AC014, CN-SPEC-0022-AC019.
+- `ChessNotationTests/DynamicTypeReachabilityAuditTests.swift`: CN-SPEC-0022-AC015, CN-SPEC-0022-AC019.
 - Pending coverage: CN-SPEC-0022-AC016
 - Pending coverage: CN-SPEC-0022-AC017
 - Pending coverage: CN-SPEC-0022-AC018
@@ -130,3 +150,9 @@ Out of scope:
 - 2026-07-15: Added semantic validation for bundled game IDs, required strings, move numbers, coordinates, coordinate consistency, and FEN placement, with redacted diagnostics and regression fixtures.
 - 2026-07-15: Added version-1 Position Recall history envelopes, legacy array migration on save, and safe rejection/preservation of unsupported future schemas.
 - 2026-07-15: Added timer-refresh and library-cache instrumentation with a 1,000-refresh regression proving timer ticks do not trigger FEN parsing, library decoding, score changes, prompt progress, or duplicate completion.
+- 2026-07-15: Added bounded long-session generation and cancellation regression coverage using operation-count budgets instead of wall-clock assumptions.
+- 2026-07-15: Added reusable deterministic performance budgets with tolerance and actionable diagnostics.
+- 2026-07-15: Added a local-only privacy surface audit covering production source markers, package dependencies, linked frameworks, entitlements, and sensitive permission declarations.
+- 2026-07-15: Added shared VoiceOver board-square semantics with stable `board.square.<coordinate>` identifiers and orientation-invariant coordinate mapping.
+- 2026-07-15: Added mini-game state accessibility regression coverage for Piece Movement source/blocker/enemy/selected states and Position Recall visible/masked/reconstructed states.
+- 2026-07-15: Added Dynamic Type reachability auditing for the primary Piece Movement and Position Recall flows, requiring scrollable containers and rejecting fixed-height or text-shrinking critical-action layouts.

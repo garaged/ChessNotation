@@ -9,6 +9,8 @@ struct PremiumAssetTests {
             PremiumAssetName.notationTrainingTile,
             PremiumAssetName.timedNotationTile,
             PremiumAssetName.squareRecognitionTile,
+            PremiumAssetName.pieceMovementTile,
+            PremiumAssetName.positionRecallTile,
             PremiumAssetName.instructionsTile,
             PremiumAssetName.libraryRandomGame,
             PremiumAssetName.darkBoardTexture
