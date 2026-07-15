@@ -2,7 +2,7 @@
 
 Status: Proposed
 Owner: Project
-Last updated: 2026-07-07
+Last updated: 2026-07-15
 
 ## Intent
 
@@ -74,18 +74,44 @@ Out of scope:
 - CN-SPEC-0022-AC019: Given a reproducible defect fixed during implementation, when its PR is reviewed, then a regression test fails before the fix and passes with the fix whenever the behavior is testable.
 - CN-SPEC-0022-AC020: Given release documentation review, when the roadmap ships, then README, privacy/release notes, change log, and relevant specs accurately describe local-only behavior, migrations, modes, validation, and known limitations.
 
+## Policy Constants
+
+- FEN board cache capacity: 256 distinct normalized FEN strings.
+- `startpos` and the full standard starting-position FEN share one cache identity.
+- Cache eviction policy: least recently used.
+- Cache instrumentation is internal and exists for deterministic regression testing; production UI does not depend on cache metrics.
+- Position Recall reconstruction history maximum file size: 2 MiB.
+- Position Recall reconstruction history maximum record count: 5,000.
+- Position Recall reconstruction history current schema version: 1.
+- Legacy schema 0 is the unwrapped JSON result array and is migrated to the version-1 envelope on the next successful save.
+- Future schema versions are rejected and preserved rather than decoded with guessed defaults.
+- Corrupt or rejected Position Recall history is copied once to a sibling `.corrupt` evidence file and is not silently replaced by a later save.
+- Position Recall history reset removes the primary payload only; preserved corrupt evidence remains available for diagnosis or manual recovery.
+- Bundled game validation occurs after decoding and before results enter the shared cache.
+- Duplicate game IDs are rejected across the complete configured resource set, not only within one JSON file.
+- Chess coordinates must be lowercase algebraic squares from `a1` through `h8`; promotion coordinate suffixes remain valid when the coordinate begins with `from + to`.
+- FEN validation requires exactly eight placement ranks, each expanding to exactly eight files, using only legal piece symbols or empty-run digits.
+- Validation diagnostics expose issue category, game ID, move index, and field name only; they do not include full game records, SAN answers, titles, or file paths.
+- Timer refresh instrumentation counts refresh calls and timeout transitions only; gameplay score, prompt progress, FEN cache metrics, and library cache metrics must remain unchanged during non-terminal refreshes.
+- The timer refresh regression fixture uses 1,000 refreshes and avoids brittle wall-clock timing assertions.
+- Long-session generation fixtures use 10,000 accepted prompts and 1,000 rejected/cancelled calls.
+- A generator may retain only its immutable source plus the current shrinking shuffled cycle; retained-cycle count must remain below source count after generation begins.
+- Rejected generation is bounded by the configured maximum-attempt count, and cancellation must prevent the shuffled bag from advancing.
+
 ## Coverage
 
-- Pending coverage: CN-SPEC-0022-AC001
-- Pending coverage: CN-SPEC-0022-AC002
-- Pending coverage: CN-SPEC-0022-AC003
-- Pending coverage: CN-SPEC-0022-AC004
+- `ChessNotation/Services/FENParser.swift`: CN-SPEC-0022-AC001, CN-SPEC-0022-AC003.
+- `ChessNotationTests/FENCacheTests.swift`: CN-SPEC-0022-AC001.
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionHistoryStore.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC007, CN-SPEC-0022-AC008.
+- `ChessNotationTests/PositionRecallHistoryStoreHardeningTests.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC008, CN-SPEC-0022-AC019.
+- `ChessNotationTests/PositionRecallHistorySchemaTests.swift`: CN-SPEC-0022-AC007, CN-SPEC-0022-AC008, CN-SPEC-0022-AC019.
+- `ChessNotation/Services/GameLibraryService.swift`: CN-SPEC-0022-AC002, CN-SPEC-0022-AC003, CN-SPEC-0022-AC009, CN-SPEC-0022-AC010.
+- `ChessNotationTests/BundledGameValidationTests.swift`: CN-SPEC-0022-AC009, CN-SPEC-0022-AC010, CN-SPEC-0022-AC019.
+- `ChessNotation/Domain/TimedNotationVariants.swift`: CN-SPEC-0022-AC003.
+- `ChessNotationTests/TimerRefreshEfficiencyTests.swift`: CN-SPEC-0022-AC003, CN-SPEC-0022-AC019.
+- `ChessNotation/Domain/TrainingChallenge.swift`: CN-SPEC-0022-AC004.
+- `ChessNotationTests/LongSessionResourceBoundTests.swift`: CN-SPEC-0022-AC004.
 - Pending coverage: CN-SPEC-0022-AC005
-- Pending coverage: CN-SPEC-0022-AC006
-- Pending coverage: CN-SPEC-0022-AC007
-- Pending coverage: CN-SPEC-0022-AC008
-- Pending coverage: CN-SPEC-0022-AC009
-- Pending coverage: CN-SPEC-0022-AC010
 - Pending coverage: CN-SPEC-0022-AC011
 - Pending coverage: CN-SPEC-0022-AC012
 - Pending coverage: CN-SPEC-0022-AC013
@@ -94,7 +120,6 @@ Out of scope:
 - Pending coverage: CN-SPEC-0022-AC016
 - Pending coverage: CN-SPEC-0022-AC017
 - Pending coverage: CN-SPEC-0022-AC018
-- Pending coverage: CN-SPEC-0022-AC019
 - Pending coverage: CN-SPEC-0022-AC020
 
 ## Open Questions
@@ -104,3 +129,9 @@ Out of scope:
 ## Revision Notes
 
 - 2026-07-07: Initial proposed spec for PR8.
+- 2026-07-10: Began implementation with a bounded thread-safe LRU FEN board cache, deterministic cache metrics, and regression coverage for reuse, capacity, and recency.
+- 2026-07-10: Hardened Position Recall reconstruction history with atomic bounded writes, corrupt-payload preservation, explicit reset, and regression coverage preventing silent data loss.
+- 2026-07-15: Added semantic validation for bundled game IDs, required strings, move numbers, coordinates, coordinate consistency, and FEN placement, with redacted diagnostics and regression fixtures.
+- 2026-07-15: Added version-1 Position Recall history envelopes, legacy array migration on save, and safe rejection/preservation of unsupported future schemas.
+- 2026-07-15: Added timer-refresh and library-cache instrumentation with a 1,000-refresh regression proving timer ticks do not trigger FEN parsing, library decoding, score changes, prompt progress, or duplicate completion.
+- 2026-07-15: Added bounded long-session generation and cancellation regression coverage using operation-count budgets instead of wall-clock assumptions.
