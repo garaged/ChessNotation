@@ -1,16 +1,36 @@
 import SwiftUI
 
+nonisolated struct BoardSquareAccessibilitySemantics: Equatable, Sendable {
+    let coordinate: String
+    let detail: String?
+
+    init(square: ChessSquare, detail: String? = nil) {
+        coordinate = square.description
+        self.detail = detail?.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var label: String {
+        guard let detail, !detail.isEmpty else { return coordinate }
+        return "\(coordinate), \(detail)"
+    }
+
+    var identifier: String { "board.square.\(coordinate)" }
+}
+
 struct ThemedMiniGameBoard<Content: View>: View {
     @Environment(AppSettings.self) private var appSettings
 
     let orientation: BoardOrientationPolicy
+    let accessibilityDetail: (ChessSquare) -> String?
     let content: (ChessSquare, CGFloat, ChessVisualPalette) -> Content
 
     init(
         orientation: BoardOrientationPolicy,
+        accessibilityDetail: @escaping (ChessSquare) -> String? = { _ in nil },
         @ViewBuilder content: @escaping (ChessSquare, CGFloat, ChessVisualPalette) -> Content
     ) {
         self.orientation = orientation
+        self.accessibilityDetail = accessibilityDetail
         self.content = content
     }
 
@@ -27,6 +47,11 @@ struct ThemedMiniGameBoard<Content: View>: View {
                 LazyVGrid(columns: Array(repeating: GridItem(.fixed(squareSize), spacing: 0), count: 8), spacing: 0) {
                     ForEach(0..<64, id: \.self) { index in
                         if let square = SquareBoardMapping.square(forDisplayIndex: index, orientation: orientation) {
+                            let semantics = BoardSquareAccessibilitySemantics(
+                                square: square,
+                                detail: accessibilityDetail(square)
+                            )
+
                             ZStack {
                                 Rectangle()
                                     .fill(palette.squareStyle(isLight: isLightSquare(square)))
@@ -43,6 +68,9 @@ struct ThemedMiniGameBoard<Content: View>: View {
                                 }
                             }
                             .frame(width: squareSize, height: squareSize)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(semantics.label)
+                            .accessibilityIdentifier(semantics.identifier)
                         }
                     }
                 }
@@ -55,6 +83,8 @@ struct ThemedMiniGameBoard<Content: View>: View {
                 RoundedRectangle(cornerRadius: 14)
                     .stroke(palette.boardBorder, lineWidth: 1.2)
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("Chess board")
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
         .aspectRatio(1, contentMode: .fit)
