@@ -8,7 +8,7 @@ struct BoardSquareAccessibilitySemanticsTests {
 
         for rank in 0..<8 {
             for file in 0..<8 {
-                let square = ChessSquare(file: file, rank: rank)
+                let square = try #require(ChessSquare(file: file, rank: rank))
                 let semantics = BoardSquareAccessibilitySemantics(square: square)
 
                 #expect(semantics.label == square.description)
@@ -21,8 +21,8 @@ struct BoardSquareAccessibilitySemanticsTests {
     }
 
     @Test
-    func optionalDetailAddsMeaningWithoutChangingSquareIdentity() {
-        let square = ChessSquare(file: 4, rank: 3)
+    func optionalDetailAddsMeaningWithoutChangingSquareIdentity() throws {
+        let square = try #require(ChessSquare(file: 4, rank: 3))
         let plain = BoardSquareAccessibilitySemantics(square: square)
         let occupied = BoardSquareAccessibilitySemantics(square: square, detail: "white knight, selected")
 
@@ -32,8 +32,8 @@ struct BoardSquareAccessibilitySemanticsTests {
     }
 
     @Test
-    func blankDetailDoesNotProduceTrailingPunctuation() {
-        let square = ChessSquare(file: 0, rank: 0)
+    func blankDetailDoesNotProduceTrailingPunctuation() throws {
+        let square = try #require(ChessSquare(file: 0, rank: 0))
 
         #expect(BoardSquareAccessibilitySemantics(square: square, detail: "").label == "a1")
         #expect(BoardSquareAccessibilitySemantics(square: square, detail: "   ").label == "a1")
