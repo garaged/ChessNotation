@@ -92,17 +92,20 @@ Out of scope:
 - Chess coordinates must be lowercase algebraic squares from `a1` through `h8`; promotion coordinate suffixes remain valid when the coordinate begins with `from + to`.
 - FEN validation requires exactly eight placement ranks, each expanding to exactly eight files, using only legal piece symbols or empty-run digits.
 - Validation diagnostics expose issue category, game ID, move index, and field name only; they do not include full game records, SAN answers, titles, or file paths.
+- Timer refresh instrumentation counts refresh calls and timeout transitions only; gameplay score, prompt progress, FEN cache metrics, and library cache metrics must remain unchanged during non-terminal refreshes.
+- The timer refresh regression fixture uses 1,000 refreshes and avoids brittle wall-clock timing assertions.
 
 ## Coverage
 
-- `ChessNotation/Services/FENParser.swift`: CN-SPEC-0022-AC001.
+- `ChessNotation/Services/FENParser.swift`: CN-SPEC-0022-AC001, CN-SPEC-0022-AC003.
 - `ChessNotationTests/FENCacheTests.swift`: CN-SPEC-0022-AC001.
 - `ChessNotation/Features/PositionRecall/PositionRecallReconstructionHistoryStore.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC007, CN-SPEC-0022-AC008.
 - `ChessNotationTests/PositionRecallHistoryStoreHardeningTests.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC008, CN-SPEC-0022-AC019.
 - `ChessNotationTests/PositionRecallHistorySchemaTests.swift`: CN-SPEC-0022-AC007, CN-SPEC-0022-AC008, CN-SPEC-0022-AC019.
-- `ChessNotation/Services/GameLibraryService.swift`: CN-SPEC-0022-AC002, CN-SPEC-0022-AC009, CN-SPEC-0022-AC010.
+- `ChessNotation/Services/GameLibraryService.swift`: CN-SPEC-0022-AC002, CN-SPEC-0022-AC003, CN-SPEC-0022-AC009, CN-SPEC-0022-AC010.
 - `ChessNotationTests/BundledGameValidationTests.swift`: CN-SPEC-0022-AC009, CN-SPEC-0022-AC010, CN-SPEC-0022-AC019.
-- Pending coverage: CN-SPEC-0022-AC003
+- `ChessNotation/Domain/TimedNotationVariants.swift`: CN-SPEC-0022-AC003.
+- `ChessNotationTests/TimerRefreshEfficiencyTests.swift`: CN-SPEC-0022-AC003, CN-SPEC-0022-AC019.
 - Pending coverage: CN-SPEC-0022-AC004
 - Pending coverage: CN-SPEC-0022-AC005
 - Pending coverage: CN-SPEC-0022-AC011
@@ -126,3 +129,4 @@ Out of scope:
 - 2026-07-10: Hardened Position Recall reconstruction history with atomic bounded writes, corrupt-payload preservation, explicit reset, and regression coverage preventing silent data loss.
 - 2026-07-15: Added semantic validation for bundled game IDs, required strings, move numbers, coordinates, coordinate consistency, and FEN placement, with redacted diagnostics and regression fixtures.
 - 2026-07-15: Added version-1 Position Recall history envelopes, legacy array migration on save, and safe rejection/preservation of unsupported future schemas.
+- 2026-07-15: Added timer-refresh and library-cache instrumentation with a 1,000-refresh regression proving timer ticks do not trigger FEN parsing, library decoding, score changes, prompt progress, or duplicate completion.
