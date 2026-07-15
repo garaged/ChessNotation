@@ -8,12 +8,19 @@ protocol PositionRecallReconstructionHistoryStoring {
 enum PositionRecallHistoryStoreError: Error, Equatable {
     case fileTooLarge(actualBytes: Int, maximumBytes: Int)
     case tooManyRecords(actualCount: Int, maximumCount: Int)
+    case unsupportedSchemaVersion(actualVersion: Int, maximumSupportedVersion: Int)
     case corruptPayload
 }
 
 struct PositionRecallReconstructionHistoryStore: PositionRecallReconstructionHistoryStoring {
+    static let currentSchemaVersion = 1
     static let maximumFileSize = 2 * 1_024 * 1_024
     static let maximumRecordCount = 5_000
+
+    private struct HistoryEnvelope: Codable {
+        let schemaVersion: Int
+        let results: [PositionRecallSessionResult]
+    }
 
     private let fileURL: URL
     private let fileManager: FileManager
@@ -49,7 +56,25 @@ struct PositionRecallReconstructionHistoryStore: PositionRecallReconstructionHis
         let data = try Data(contentsOf: fileURL, options: [.mappedIfSafe])
         let results: [PositionRecallSessionResult]
         do {
-            results = try decoder.decode([PositionRecallSessionResult].self, from: data)
+            if let envelope = try? decoder.decode(HistoryEnvelope.self, from: data) {
+                guard envelope.schemaVersion <= Self.currentSchemaVersion else {
+                    preserveCorruptEvidenceIfNeeded()
+                    throw PositionRecallHistoryStoreError.unsupportedSchemaVersion(
+                        actualVersion: envelope.schemaVersion,
+                        maximumSupportedVersion: Self.currentSchemaVersion
+                    )
+                }
+                guard envelope.schemaVersion >= 1 else {
+                    preserveCorruptEvidenceIfNeeded()
+                    throw PositionRecallHistoryStoreError.corruptPayload
+                }
+                results = envelope.results
+            } else {
+                // Legacy schema 0 stored the history directly as a JSON array.
+                results = try decoder.decode([PositionRecallSessionResult].self, from: data)
+            }
+        } catch let error as PositionRecallHistoryStoreError {
+            throw error
         } catch {
             preserveCorruptEvidenceIfNeeded()
             throw PositionRecallHistoryStoreError.corruptPayload
@@ -78,7 +103,8 @@ struct PositionRecallReconstructionHistoryStore: PositionRecallReconstructionHis
         }
 
         results.append(result)
-        let data = try encoder.encode(results)
+        let envelope = HistoryEnvelope(schemaVersion: Self.currentSchemaVersion, results: results)
+        let data = try encoder.encode(envelope)
         guard data.count <= Self.maximumFileSize else {
             throw PositionRecallHistoryStoreError.fileTooLarge(
                 actualBytes: data.count,
