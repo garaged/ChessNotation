@@ -80,18 +80,22 @@ Out of scope:
 - `startpos` and the full standard starting-position FEN share one cache identity.
 - Cache eviction policy: least recently used.
 - Cache instrumentation is internal and exists for deterministic regression testing; production UI does not depend on cache metrics.
+- Position Recall reconstruction history maximum file size: 2 MiB.
+- Position Recall reconstruction history maximum record count: 5,000.
+- Corrupt or rejected Position Recall history is copied once to a sibling `.corrupt` evidence file and is not silently replaced by a later save.
+- Position Recall history reset removes the primary payload only; preserved corrupt evidence remains available for diagnosis or manual recovery.
 
 ## Coverage
 
 - `ChessNotation/Services/FENParser.swift`: CN-SPEC-0022-AC001.
 - `ChessNotationTests/FENCacheTests.swift`: CN-SPEC-0022-AC001.
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionHistoryStore.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC008.
+- `ChessNotationTests/PositionRecallHistoryStoreHardeningTests.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC008, CN-SPEC-0022-AC019.
 - Pending coverage: CN-SPEC-0022-AC002
 - Pending coverage: CN-SPEC-0022-AC003
 - Pending coverage: CN-SPEC-0022-AC004
 - Pending coverage: CN-SPEC-0022-AC005
-- Pending coverage: CN-SPEC-0022-AC006
 - Pending coverage: CN-SPEC-0022-AC007
-- Pending coverage: CN-SPEC-0022-AC008
 - Pending coverage: CN-SPEC-0022-AC009
 - Pending coverage: CN-SPEC-0022-AC010
 - Pending coverage: CN-SPEC-0022-AC011
@@ -102,7 +106,6 @@ Out of scope:
 - Pending coverage: CN-SPEC-0022-AC016
 - Pending coverage: CN-SPEC-0022-AC017
 - Pending coverage: CN-SPEC-0022-AC018
-- Pending coverage: CN-SPEC-0022-AC019
 - Pending coverage: CN-SPEC-0022-AC020
 
 ## Open Questions
@@ -113,3 +116,4 @@ Out of scope:
 
 - 2026-07-07: Initial proposed spec for PR8.
 - 2026-07-10: Began implementation with a bounded thread-safe LRU FEN board cache, deterministic cache metrics, and regression coverage for reuse, capacity, and recency.
+- 2026-07-10: Hardened Position Recall reconstruction history with atomic bounded writes, corrupt-payload preservation, explicit reset, and regression coverage preventing silent data loss.
