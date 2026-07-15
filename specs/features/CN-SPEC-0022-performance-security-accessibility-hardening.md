@@ -100,6 +100,12 @@ Out of scope:
 - Performance regression budgets use deterministic operation counts, explicit tolerance, and actionable remediation instead of simulator wall-clock thresholds.
 - The application target has no Swift Package product dependencies, third-party framework build entries, code-signing entitlements, sensitive usage-description keys, networking API markers, tracking APIs, analytics SDKs, advertising APIs, or account/authentication surfaces.
 - The privacy audit scans production Swift sources and the Xcode project so future capability additions require an intentional policy update.
+- Each mini-game board exposes one VoiceOver element per chess square with identifier `board.square.<coordinate>` and a label beginning with the actual algebraic coordinate.
+- Board orientation changes display order only; it does not change square identity, accessibility identifier, spoken coordinate, or tap-to-coordinate mapping.
+- Piece Movement spoken square state distinguishes source piece, friendly blocker, enemy piece, selected destination, and empty square without requiring color perception.
+- Position Recall spoken square state distinguishes visible, masked, and reconstructed pieces across study, answer, and result phases.
+- Primary mini-game completion and feedback states include text and stable accessibility identifiers; symbols and colors are supplementary.
+- Dynamic Type reachability checks require primary flows to remain scrollable and prohibit explicit text-size caps, forced single-line critical content, minimum-scale shrinking, and fixed-height critical-action containers.
 
 ## Coverage
 
@@ -118,10 +124,12 @@ Out of scope:
 - `ChessNotationTests/PerformanceRegressionBudgetTests.swift`: CN-SPEC-0022-AC005, CN-SPEC-0022-AC019.
 - `ChessNotation.xcodeproj/project.pbxproj`: CN-SPEC-0022-AC011.
 - `ChessNotationTests/PrivacySurfaceAuditTests.swift`: CN-SPEC-0022-AC011, CN-SPEC-0022-AC019.
-- Pending coverage: CN-SPEC-0022-AC012
-- Pending coverage: CN-SPEC-0022-AC013
-- Pending coverage: CN-SPEC-0022-AC014
-- Pending coverage: CN-SPEC-0022-AC015
+- `ChessNotation/Features/Game/MiniGameBoardView.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013.
+- `ChessNotation/Features/PieceMovement/PieceMovementFeature.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC014.
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionView.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013, CN-SPEC-0022-AC014.
+- `ChessNotationTests/BoardSquareAccessibilitySemanticsTests.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013, CN-SPEC-0022-AC019.
+- `ChessNotationTests/MiniGameStateAccessibilityTests.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013, CN-SPEC-0022-AC014, CN-SPEC-0022-AC019.
+- `ChessNotationTests/DynamicTypeReachabilityAuditTests.swift`: CN-SPEC-0022-AC015, CN-SPEC-0022-AC019.
 - Pending coverage: CN-SPEC-0022-AC016
 - Pending coverage: CN-SPEC-0022-AC017
 - Pending coverage: CN-SPEC-0022-AC018
@@ -142,3 +150,6 @@ Out of scope:
 - 2026-07-15: Added bounded long-session generation and cancellation regression coverage using operation-count budgets instead of wall-clock assumptions.
 - 2026-07-15: Added reusable deterministic performance budgets with tolerance and actionable diagnostics.
 - 2026-07-15: Added a local-only privacy surface audit covering production source markers, package dependencies, linked frameworks, entitlements, and sensitive permission declarations.
+- 2026-07-15: Added shared VoiceOver board-square semantics with stable `board.square.<coordinate>` identifiers and orientation-invariant coordinate mapping.
+- 2026-07-15: Added mini-game state accessibility regression coverage for Piece Movement source/blocker/enemy/selected states and Position Recall visible/masked/reconstructed states.
+- 2026-07-15: Added Dynamic Type reachability auditing for the primary Piece Movement and Position Recall flows, requiring scrollable containers and rejecting fixed-height or text-shrinking critical-action layouts.
