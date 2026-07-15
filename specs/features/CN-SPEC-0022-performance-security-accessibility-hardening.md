@@ -82,6 +82,9 @@ Out of scope:
 - Cache instrumentation is internal and exists for deterministic regression testing; production UI does not depend on cache metrics.
 - Position Recall reconstruction history maximum file size: 2 MiB.
 - Position Recall reconstruction history maximum record count: 5,000.
+- Position Recall reconstruction history current schema version: 1.
+- Legacy schema 0 is the unwrapped JSON result array and is migrated to the version-1 envelope on the next successful save.
+- Future schema versions are rejected and preserved rather than decoded with guessed defaults.
 - Corrupt or rejected Position Recall history is copied once to a sibling `.corrupt` evidence file and is not silently replaced by a later save.
 - Position Recall history reset removes the primary payload only; preserved corrupt evidence remains available for diagnosis or manual recovery.
 - Bundled game validation occurs after decoding and before results enter the shared cache.
@@ -94,14 +97,14 @@ Out of scope:
 
 - `ChessNotation/Services/FENParser.swift`: CN-SPEC-0022-AC001.
 - `ChessNotationTests/FENCacheTests.swift`: CN-SPEC-0022-AC001.
-- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionHistoryStore.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC008.
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionHistoryStore.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC007, CN-SPEC-0022-AC008.
 - `ChessNotationTests/PositionRecallHistoryStoreHardeningTests.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC008, CN-SPEC-0022-AC019.
+- `ChessNotationTests/PositionRecallHistorySchemaTests.swift`: CN-SPEC-0022-AC007, CN-SPEC-0022-AC008, CN-SPEC-0022-AC019.
 - `ChessNotation/Services/GameLibraryService.swift`: CN-SPEC-0022-AC002, CN-SPEC-0022-AC009, CN-SPEC-0022-AC010.
 - `ChessNotationTests/BundledGameValidationTests.swift`: CN-SPEC-0022-AC009, CN-SPEC-0022-AC010, CN-SPEC-0022-AC019.
 - Pending coverage: CN-SPEC-0022-AC003
 - Pending coverage: CN-SPEC-0022-AC004
 - Pending coverage: CN-SPEC-0022-AC005
-- Pending coverage: CN-SPEC-0022-AC007
 - Pending coverage: CN-SPEC-0022-AC011
 - Pending coverage: CN-SPEC-0022-AC012
 - Pending coverage: CN-SPEC-0022-AC013
@@ -122,3 +125,4 @@ Out of scope:
 - 2026-07-10: Began implementation with a bounded thread-safe LRU FEN board cache, deterministic cache metrics, and regression coverage for reuse, capacity, and recency.
 - 2026-07-10: Hardened Position Recall reconstruction history with atomic bounded writes, corrupt-payload preservation, explicit reset, and regression coverage preventing silent data loss.
 - 2026-07-15: Added semantic validation for bundled game IDs, required strings, move numbers, coordinates, coordinate consistency, and FEN placement, with redacted diagnostics and regression fixtures.
+- 2026-07-15: Added version-1 Position Recall history envelopes, legacy array migration on save, and safe rejection/preservation of unsupported future schemas.
