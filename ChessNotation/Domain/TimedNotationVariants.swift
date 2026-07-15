@@ -124,6 +124,11 @@ nonisolated struct TimedNotationResult: Hashable, Codable, Sendable {
     let sourceCategories: Set<NotationMoveCategory>
 }
 
+nonisolated struct TimedRefreshMetrics: Equatable, Sendable {
+    let refreshCount: Int
+    let timeoutTransitionCount: Int
+}
+
 final class TimedNotationSession {
     private let configuration: TimedNotationConfiguration
     private let clock: MonotonicTimeProviding
@@ -131,6 +136,8 @@ final class TimedNotationSession {
     private var deadline: TimeInterval
     private var inactiveStartedAt: TimeInterval?
     private var hasFinished = false
+    private var refreshCount = 0
+    private var timeoutTransitionCount = 0
 
     private(set) var score = 0
     private(set) var completedPrompts = 0
@@ -156,10 +163,19 @@ final class TimedNotationSession {
 
     var isFinished: Bool { hasFinished }
 
+    var refreshMetrics: TimedRefreshMetrics {
+        TimedRefreshMetrics(
+            refreshCount: refreshCount,
+            timeoutTransitionCount: timeoutTransitionCount
+        )
+    }
+
     @discardableResult
     func refresh() -> Bool {
+        refreshCount += 1
         guard !hasFinished else { return true }
         if clock.now >= deadline {
+            timeoutTransitionCount += 1
             finish(reason: .timedOut)
         }
         return hasFinished
