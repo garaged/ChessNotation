@@ -9,6 +9,7 @@ Run with the repository virtualenv when available:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,11 +32,11 @@ EXPECTED_PROFILE_KEYWORD = "srgb"
 ALLOWED_MODES = {"RGB"}
 
 REQUIRED_ASSETS = {
-    "notationTraining": "TileNotationTraining",
-    "timedTraining": "TileTimedNotation",
-    "boardSkills": "TileSquareRecognition",
-    "positionRecall": "TilePositionRecall",
-    "instructions": "TileInstructions",
+    "notationTrainingTile": "TileNotationTraining",
+    "timedNotationTile": "TileTimedNotation",
+    "squareRecognitionTile": "TileSquareRecognition",
+    "positionRecallTile": "TilePositionRecall",
+    "instructionsTile": "TileInstructions",
 }
 
 
@@ -61,10 +62,16 @@ def main() -> int:
         default="ChessNotation/Assets.xcassets",
         help="Path to Assets.xcassets from the repository root.",
     )
+    parser.add_argument(
+        "--premium-design-source",
+        default="ChessNotation/Features/Home/PremiumDesign.swift",
+        help="Swift source containing PremiumAssetName constants.",
+    )
     args = parser.parse_args()
 
     assets_root = Path(args.assets_root)
     failures: list[str] = []
+    failures.extend(validate_premium_asset_mapping(Path(args.premium_design_source)))
 
     image_names = list(REQUIRED_ASSETS.values())
     duplicates = sorted({name for name in image_names if image_names.count(name) > 1})
@@ -98,6 +105,33 @@ def main() -> int:
         return 1
 
     return 0
+
+
+def validate_premium_asset_mapping(source_path: Path) -> list[str]:
+    if not source_path.exists():
+        return [f"missing PremiumAssetName source: {source_path}"]
+
+    source = source_path.read_text(encoding="utf-8")
+    constants = dict(re.findall(r"static\s+let\s+(\w+)\s*=\s*\"([^\"]+)\"", source))
+    failures: list[str] = []
+    observed_values: list[str] = []
+
+    for constant_name, expected_value in REQUIRED_ASSETS.items():
+        actual_value = constants.get(constant_name)
+        if actual_value is None:
+            failures.append(f"missing PremiumAssetName.{constant_name}")
+            continue
+        observed_values.append(actual_value)
+        if actual_value != expected_value:
+            failures.append(
+                f"PremiumAssetName.{constant_name} expected {expected_value}, found {actual_value}"
+            )
+
+    duplicates = sorted({value for value in observed_values if observed_values.count(value) > 1})
+    for value in duplicates:
+        failures.append(f"duplicate PremiumAssetName tile mapping for {value}")
+
+    return failures
 
 
 def validate_asset(path: Path) -> tuple[AssetMetadata | None, list[str]]:

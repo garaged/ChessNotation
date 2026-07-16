@@ -48,6 +48,29 @@ class HomeTileAssetValidatorTests(unittest.TestCase):
         self.assertIsNone(metadata)
         self.assertEqual(failures, ["missing file"])
 
+    def test_premium_asset_mapping_mismatch_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "PremiumDesign.swift"
+            source.write_text(
+                """
+                enum PremiumAssetName {
+                    static let notationTrainingTile = "TileNotationTraining"
+                    static let timedNotationTile = "WrongTile"
+                    static let squareRecognitionTile = "TileSquareRecognition"
+                    static let positionRecallTile = "TilePositionRecall"
+                    static let instructionsTile = "TileInstructions"
+                }
+                """,
+                encoding="utf-8",
+            )
+
+            failures = validator.validate_premium_asset_mapping(source)
+
+            self.assertIn(
+                "PremiumAssetName.timedNotationTile expected TileTimedNotation, found WrongTile",
+                failures,
+            )
+
     def test_duplicate_required_mapping_fails_main(self):
         with tempfile.TemporaryDirectory() as directory:
             assets_root = Path(directory)
