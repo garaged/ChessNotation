@@ -6,8 +6,8 @@ struct HomeTileLayoutRegressionTests {
     func homeUsesExactlyFourSymmetricFamilyTiles() throws {
         let source = try homeSource()
         let trainingStart = try #require(source.range(of: "private var trainingFamilies"))
-        let helpStart = try #require(source.range(of: "private var helpSection"))
-        let trainingSource = source[trainingStart.lowerBound..<helpStart.lowerBound]
+        let familyTileHelperStart = try #require(source.range(of: "private func familyTile"))
+        let trainingSource = source[trainingStart.lowerBound..<familyTileHelperStart.lowerBound]
 
         #expect(trainingSource.contains("title: \"Notation Training\""))
         #expect(trainingSource.contains("title: \"Timed Training\""))
