@@ -3,50 +3,74 @@ import Testing
 
 struct HomeTileLayoutRegressionTests {
     @Test
-    func homeUsesResponsivePhoneAndIPadLayouts() throws {
+    func homeUsesExactlyFourSymmetricFamilyTiles() throws {
         let source = try homeSource()
+        let trainingStart = try #require(source.range(of: "private var trainingFamilies"))
+        let helpStart = try #require(source.range(of: "private var helpSection"))
+        let trainingSource = source[trainingStart.lowerBound..<helpStart.lowerBound]
 
-        #expect(source.contains("@Environment(\\.horizontalSizeClass)"))
-        #expect(source.contains("horizontalSizeClass == .regular"))
-        #expect(source.contains("count: 3"))
-        #expect(source.contains("let count = usesSingleColumn ? 1 : 2"))
-        #expect(source.contains("maximumContentWidth"))
-        #expect(!source.contains("GridItem(.adaptive(minimum:"))
+        #expect(trainingSource.contains("title: \"Notation Training\""))
+        #expect(trainingSource.contains("title: \"Timed Training\""))
+        #expect(trainingSource.contains("title: \"Board Skills\""))
+        #expect(trainingSource.contains("title: \"Position Recall\""))
+        #expect(trainingSource.components(separatedBy: "familyTile(").count - 1 == 4)
+        #expect(source.contains("count: familyColumnCount"))
+        #expect(source.contains("dynamicTypeSize.isAccessibilitySize ? 1 : 2"))
+        #expect(!source.contains("case horizontal"))
+        #expect(!source.contains("horizontalCardHeight"))
+        #expect(!source.contains("horizontalArtworkWidth"))
     }
 
     @Test
-    func compactMiniGamesUseNonCollidingHorizontalCards() throws {
+    func familyCardsUseOneSharedGeometryAndTypographyHierarchy() throws {
         let source = try homeSource()
 
-        #expect(source.contains("miniGameLinks(layout: .horizontal)"))
-        #expect(source.contains("horizontalArtworkWidth"))
-        #expect(source.contains("horizontalCardHeight"))
-        #expect(source.contains(".frame(maxWidth: .infinity)"))
+        #expect(source.contains("static let artworkHeight"))
+        #expect(source.contains("static let titleRegionHeight"))
+        #expect(source.contains("static let subtitleRegionHeight"))
+        #expect(source.contains("static let cardHeight"))
+        #expect(source.contains("minHeight: usesFlexibleHeight ? nil : HomeTileLayout.cardHeight"))
+        #expect(source.contains("maxHeight: usesFlexibleHeight ? nil : HomeTileLayout.cardHeight"))
+        #expect(source.contains(".font(.headline.weight(.semibold))"))
+        #expect(source.contains(".font(.caption)"))
         #expect(source.contains(".clipped()"))
     }
 
     @Test
-    func instructionsAreSecondaryInsteadOfMiniGameTile() throws {
+    func boardSkillsOwnsOnlyPlayableCoordinateAndMovementGames() throws {
         let source = try homeSource()
-        let miniGamesStart = try #require(source.range(of: "private var miniGamesMenu"))
-        let secondaryStart = try #require(source.range(of: "private var secondaryActions"))
-        let miniGamesSource = source[miniGamesStart.lowerBound..<secondaryStart.lowerBound]
+        let boardSkillsStart = try #require(source.range(of: "private struct BoardSkillsFamilyView"))
+        let pieceMovementStart = try #require(source.range(of: "private struct PieceMovementLauncherView"))
+        let boardSkillsSource = source[boardSkillsStart.lowerBound..<pieceMovementStart.lowerBound]
 
-        #expect(!miniGamesSource.contains("InstructionsView"))
-        #expect(source.contains("HomeSectionHeader(title: \"Help\""))
+        #expect(boardSkillsSource.contains("Square Recognition"))
+        #expect(boardSkillsSource.contains("Piece Movement"))
+        #expect(boardSkillsSource.contains("home.squareRecognitionLink"))
+        #expect(boardSkillsSource.contains("home.pieceMovementLink"))
+        #expect(!boardSkillsSource.contains("InstructionsView"))
+    }
+
+    @Test
+    func instructionsRemainSecondaryToGameplayFamilies() throws {
+        let source = try homeSource()
+        let trainingStart = try #require(source.range(of: "private var trainingFamilies"))
+        let helpStart = try #require(source.range(of: "private var helpSection"))
+        let trainingSource = source[trainingStart.lowerBound..<helpStart.lowerBound]
+
+        #expect(!trainingSource.contains("InstructionsView"))
         #expect(source.contains("HomeUtilityRow("))
         #expect(source.contains("accessibilityIdentifier(\"home.instructionsLink\")"))
     }
 
     @Test
-    func accessibilityTextDropsToOneColumnAndCanExpand() throws {
+    func accessibilityTextUsesOneColumnAndUnboundedVerticalGrowth() throws {
         let source = try homeSource()
 
-        #expect(source.contains("dynamicTypeSize.isAccessibilitySize"))
-        #expect(source.contains("usesSingleColumn"))
-        #expect(source.contains("usesFlexibleHeight ? nil"))
-        #expect(source.contains(".lineLimit(usesFlexibleHeight ? nil : 2)"))
-        #expect(source.contains(".lineLimit(usesFlexibleHeight ? nil : 3)"))
+        #expect(source.contains("dynamicTypeSize.isAccessibilitySize ? 1 : 2"))
+        #expect(source.contains("usesFlexibleHeight ? nil : 2"))
+        #expect(source.contains("usesFlexibleHeight ? nil : 3"))
+        #expect(source.contains("minHeight: usesFlexibleHeight ? nil"))
+        #expect(source.contains("maxHeight: usesFlexibleHeight ? nil"))
     }
 
     private func homeSource() throws -> String {
