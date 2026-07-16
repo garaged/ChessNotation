@@ -88,7 +88,7 @@ struct RestoredHomeView: View {
         VStack(alignment: .leading, spacing: 12) {
             HomeSectionHeader(title: "Training", subtitle: "Full-game notation practice from the bundled library.")
 
-            LazyVGrid(columns: tileColumns, spacing: 14) {
+            LazyVGrid(columns: tileColumns, spacing: HomeTileLayout.gridSpacing) {
                 NavigationLink {
                     GameLibraryView(libraryService: libraryService, launchMode: .practice)
                         .environment(appSettings)
@@ -131,7 +131,7 @@ struct RestoredHomeView: View {
             HomeSectionHeader(title: "Mini-games", subtitle: "Short drills for coordinates, movement, memory, and app help.")
                 .accessibilityIdentifier("home.miniGamesHeader")
 
-            LazyVGrid(columns: tileColumns, spacing: 14) {
+            LazyVGrid(columns: tileColumns, spacing: HomeTileLayout.gridSpacing) {
                 NavigationLink {
                     SquareRecognitionSetupView(historyStore: AppEnvironment.makeSquareRecognitionHistoryStore())
                         .environment(appSettings)
@@ -203,8 +203,20 @@ struct RestoredHomeView: View {
     }
 
     private var tileColumns: [GridItem] {
-        [GridItem(.adaptive(minimum: 158), spacing: 14)]
+        Array(
+            repeating: GridItem(.flexible(minimum: 0), spacing: HomeTileLayout.gridSpacing, alignment: .top),
+            count: HomeTileLayout.columnCount
+        )
     }
+}
+
+private enum HomeTileLayout {
+    static let columnCount = 2
+    static let gridSpacing: CGFloat = 14
+    static let artworkHeight: CGFloat = 96
+    static let regularTitleHeight: CGFloat = 42
+    static let regularSubtitleHeight: CGFloat = 45
+    static let regularCardHeight: CGFloat = 228
 }
 
 private struct PieceMovementLauncherView: View {
@@ -308,6 +320,8 @@ private struct HomeSectionHeader: View {
 }
 
 private struct HomeMenuTile: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     enum Texture {
         case board
         case speed
@@ -324,8 +338,12 @@ private struct HomeMenuTile: View {
     var showsFallbackIcon = true
     let accessibilityIdentifier: String
 
+    private var usesFlexibleTextHeight: Bool {
+        dynamicTypeSize.isAccessibilitySize
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             ZStack(alignment: .bottomTrailing) {
                 PremiumArtworkView(assetName: assetName, fallbackIdentifier: "premiumAssetFallback.\(assetName)") {
                     HomeMenuTexture(tint: tint, style: texture)
@@ -349,24 +367,32 @@ private struct HomeMenuTile: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 104)
+            .frame(height: HomeTileLayout.artworkHeight)
             .clipShape(RoundedRectangle(cornerRadius: 8))
 
             VStack(alignment: .leading, spacing: 5) {
                 Text(title)
                     .font(.headline.weight(.semibold))
                     .foregroundStyle(PremiumDesign.primaryText)
-                    .lineLimit(2)
+                    .lineLimit(usesFlexibleTextHeight ? nil : 2)
                     .fixedSize(horizontal: false, vertical: true)
+                    .frame(
+                        maxWidth: .infinity,
+                        minHeight: usesFlexibleTextHeight ? nil : HomeTileLayout.regularTitleHeight,
+                        alignment: .topLeading
+                    )
 
                 HStack(alignment: .bottom, spacing: 8) {
                     Text(subtitle)
                         .font(.caption)
                         .foregroundStyle(PremiumDesign.secondaryText)
-                        .lineLimit(3)
+                        .lineLimit(usesFlexibleTextHeight ? nil : 3)
                         .fixedSize(horizontal: false, vertical: true)
-
-                    Spacer(minLength: 8)
+                        .frame(
+                            maxWidth: .infinity,
+                            minHeight: usesFlexibleTextHeight ? nil : HomeTileLayout.regularSubtitleHeight,
+                            alignment: .topLeading
+                        )
 
                     Image(systemName: "arrow.right")
                         .font(.caption.weight(.bold))
@@ -378,7 +404,11 @@ private struct HomeMenuTile: View {
                 }
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 178, alignment: .topLeading)
+        .frame(
+            maxWidth: .infinity,
+            minHeight: usesFlexibleTextHeight ? nil : HomeTileLayout.regularCardHeight,
+            alignment: .topLeading
+        )
         .padding(14)
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -386,6 +416,7 @@ private struct HomeMenuTile: View {
             RoundedRectangle(cornerRadius: 8)
                 .stroke(tint.opacity(0.2), lineWidth: 1)
         }
+        .contentShape(RoundedRectangle(cornerRadius: 8))
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityLabel(title)
