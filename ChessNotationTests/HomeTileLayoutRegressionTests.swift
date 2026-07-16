@@ -22,21 +22,23 @@ struct HomeTileLayoutRegressionTests {
     }
 
     @Test
-    func familyCardsUseOneExactGeometryAndTypographyHierarchy() throws {
+    func familyCardsUseCompactExactGeometryAndUntruncatedCopy() throws {
         let source = try homeSource()
 
-        #expect(source.contains("static let gridSpacing: CGFloat = 18"))
-        #expect(source.contains("static let artworkHeight: CGFloat = 112"))
-        #expect(source.contains("static let titleRegionHeight: CGFloat = 24"))
-        #expect(source.contains("static let subtitleRegionHeight: CGFloat = 42"))
-        #expect(source.contains("static let cardHeight: CGFloat = 214"))
+        #expect(source.contains("static let gridSpacing: CGFloat = 20"))
+        #expect(source.contains("static let artworkHeight: CGFloat = 100"))
+        #expect(source.contains("static let titleRegionHeight: CGFloat = 22"))
+        #expect(source.contains("static let subtitleRegionHeight: CGFloat = 36"))
+        #expect(source.contains("static let cardHeight: CGFloat = 188"))
         #expect(source.contains("minHeight: usesFlexibleHeight ? nil : HomeLayout.cardHeight"))
         #expect(source.contains("maxHeight: usesFlexibleHeight ? nil : HomeLayout.cardHeight"))
         #expect(source.contains(".lineLimit(usesFlexibleHeight ? nil : 1)"))
         #expect(source.contains(".lineLimit(usesFlexibleHeight ? nil : 2)"))
-        #expect(source.contains(".font(.headline.weight(.semibold))"))
-        #expect(source.contains(".font(.caption)"))
-        #expect(source.contains(".clipped()"))
+        #expect(source.contains(".fixedSize(horizontal: false, vertical: true)"))
+        #expect(source.contains("Practice SAN from real games."))
+        #expect(source.contains("Build speed under a clock."))
+        #expect(source.contains("Learn squares and movement."))
+        #expect(source.contains("Rebuild positions from memory."))
     }
 
     @Test
@@ -45,13 +47,14 @@ struct HomeTileLayoutRegressionTests {
 
         #expect(source.contains("ToolbarItem(placement: .topBarTrailing)"))
         #expect(source.contains("static let topPadding: CGFloat = 12"))
-        #expect(source.contains("static let compactHeroHeight: CGFloat = 168"))
+        #expect(source.contains("static let compactHeroHeight: CGFloat = 156"))
+        #expect(source.contains("Color.black.opacity(0.82)"))
         #expect(!source.contains("ZStack(alignment: .topTrailing)"))
         #expect(!source.contains(".padding(.top, 30)"))
     }
 
     @Test
-    func boardSkillsUsesFamilyHierarchyInsteadOfHomeSizedTileGrid() throws {
+    func boardSkillsUsesPremiumQuickStartAndCompactEqualRows() throws {
         let source = try homeSource()
         let boardSkillsStart = try #require(source.range(of: "private struct BoardSkillsFamilyView"))
         let pieceMovementStart = try #require(source.range(of: "private struct PieceMovementLauncherView"))
@@ -59,6 +62,8 @@ struct HomeTileLayoutRegressionTests {
 
         #expect(boardSkillsSource.contains("FamilyQuickStartCard("))
         #expect(boardSkillsSource.components(separatedBy: "FamilyGameRow(").count - 1 == 2)
+        #expect(boardSkillsSource.contains("static let drillRowHeight: CGFloat = 100"))
+        #expect(boardSkillsSource.contains("static let quickStartHeight: CGFloat = 132"))
         #expect(boardSkillsSource.contains("Choose a drill"))
         #expect(boardSkillsSource.contains("boardSkills.quickStart"))
         #expect(boardSkillsSource.contains("home.squareRecognitionLink"))
@@ -69,14 +74,17 @@ struct HomeTileLayoutRegressionTests {
     }
 
     @Test
-    func instructionsRemainSecondaryToGameplayFamilies() throws {
+    func instructionsUseSinglePremiumFullWidthTileOutsideGameplayGrid() throws {
         let source = try homeSource()
         let trainingStart = try #require(source.range(of: "private var trainingFamilies"))
         let helpStart = try #require(source.range(of: "private var helpSection"))
         let trainingSource = source[trainingStart.lowerBound..<helpStart.lowerBound]
 
         #expect(!trainingSource.contains("InstructionsView"))
-        #expect(source.contains("HomeUtilityRow("))
+        #expect(source.contains("PremiumInstructionsTile()"))
+        #expect(source.contains("PremiumAssetName.instructionsTile"))
+        #expect(source.contains("static let instructionsHeight: CGFloat = 124"))
+        #expect(!source.contains("HomeUtilityRow("))
         #expect(source.contains("accessibilityIdentifier(\"home.instructionsLink\")"))
     }
 
