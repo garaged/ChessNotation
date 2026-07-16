@@ -15,6 +15,7 @@ final class HomeUITests: ChessNotationUITestCase {
         boardSkillsTile.tap()
 
         XCTAssertTrue(app.navigationBars["Board Skills"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["boardSkills.quickStart"].waitForExistence(timeout: 5))
 
         let squareRecognitionLink = app.buttons["home.squareRecognitionLink"]
         XCTAssertTrue(squareRecognitionLink.waitForExistence(timeout: 5))
@@ -26,6 +27,62 @@ final class HomeUITests: ChessNotationUITestCase {
 
         squareRecognitionLink.tap()
         XCTAssertTrue(app.buttons["squareRecognition.startButton"].waitForExistence(timeout: 5))
+    }
+
+    func testHomeFamilyCardsHaveEqualRenderedFramesAndPositiveGaps() throws {
+        let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
+        let tiles = [
+            app.buttons["home.notationTrainingTile"],
+            app.buttons["home.timedNotationTile"],
+            app.buttons["home.boardSkillsLink"],
+            app.buttons["home.positionRecallLink"]
+        ]
+
+        for tile in tiles {
+            XCTAssertTrue(tile.waitForExistence(timeout: 5))
+        }
+
+        let frames = tiles.map(\.frame)
+        let reference = try XCTUnwrap(frames.first)
+        for frame in frames.dropFirst() {
+            XCTAssertEqual(frame.width, reference.width, accuracy: 1, "Family-card widths must match")
+            XCTAssertEqual(frame.height, reference.height, accuracy: 1, "Family-card heights must match")
+        }
+
+        XCTAssertGreaterThan(frames[1].minX - frames[0].maxX, 0, "First-row cards must preserve a positive horizontal gap")
+        XCTAssertGreaterThan(frames[3].minX - frames[2].maxX, 0, "Second-row cards must preserve a positive horizontal gap")
+        XCTAssertGreaterThan(frames[2].minY - frames[0].maxY, 0, "Left-column cards must preserve a positive vertical gap")
+        XCTAssertGreaterThan(frames[3].minY - frames[1].maxY, 0, "Right-column cards must preserve a positive vertical gap")
+
+        for firstIndex in frames.indices {
+            for secondIndex in frames.indices where secondIndex > firstIndex {
+                XCTAssertFalse(
+                    frames[firstIndex].intersects(frames[secondIndex]),
+                    "Family cards \(firstIndex) and \(secondIndex) must never overlap"
+                )
+            }
+        }
+    }
+
+    func testBoardSkillsUsesQuickStartAndTwoAlignedCompactRows() throws {
+        let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
+        let boardSkillsTile = scrollToHomeTile(identifier: "home.boardSkillsLink", title: "Board Skills", in: app)
+        XCTAssertTrue(boardSkillsTile.waitForExistence(timeout: 5))
+        boardSkillsTile.tap()
+
+        let quickStart = app.buttons["boardSkills.quickStart"]
+        let squareRecognition = app.buttons["home.squareRecognitionLink"]
+        let pieceMovement = app.buttons["home.pieceMovementLink"]
+
+        XCTAssertTrue(quickStart.waitForExistence(timeout: 5))
+        XCTAssertTrue(squareRecognition.waitForExistence(timeout: 5))
+        XCTAssertTrue(pieceMovement.waitForExistence(timeout: 5))
+
+        XCTAssertGreaterThan(squareRecognition.frame.minY, quickStart.frame.maxY)
+        XCTAssertGreaterThan(pieceMovement.frame.minY, squareRecognition.frame.maxY)
+        XCTAssertEqual(squareRecognition.frame.width, pieceMovement.frame.width, accuracy: 1)
+        XCTAssertEqual(squareRecognition.frame.minX, pieceMovement.frame.minX, accuracy: 1)
+        XCTAssertFalse(squareRecognition.frame.intersects(pieceMovement.frame))
     }
 
     func testSettingsShowsAppVersion() throws {
