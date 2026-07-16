@@ -42,10 +42,22 @@ struct HomeTileLayoutRegressionTests {
     }
 
     @Test
-    func heroRespectsSafeAreaAndSettingsUsesToolbar() throws {
+    func positionRecallArtworkUsesNormalizedPerceivedScale() throws {
+        let source = try homeSource()
+
+        #expect(source.contains("static let positionRecallArtworkScale: CGFloat = 0.9"))
+        #expect(source.contains("artworkScale: HomeLayout.positionRecallArtworkScale"))
+        #expect(source.contains("var artworkScale: CGFloat = 1"))
+        #expect(source.contains(".scaleEffect(artworkScale)"))
+    }
+
+    @Test
+    func heroRespectsSafeAreaAndSettingsUsesOpaqueToolbar() throws {
         let source = try homeSource()
 
         #expect(source.contains("ToolbarItem(placement: .topBarTrailing)"))
+        #expect(source.contains(".toolbarBackground(PremiumDesign.backgroundTop, for: .navigationBar)"))
+        #expect(source.contains(".toolbarBackground(.visible, for: .navigationBar)"))
         #expect(source.contains("static let topPadding: CGFloat = 12"))
         #expect(source.contains("static let compactHeroHeight: CGFloat = 156"))
         #expect(source.contains("Color.black.opacity(0.82)"))
@@ -74,17 +86,21 @@ struct HomeTileLayoutRegressionTests {
     }
 
     @Test
-    func instructionsUseSinglePremiumFullWidthTileOutsideGameplayGrid() throws {
+    func instructionsUseCenteredSingleColumnFamilyCardGeometry() throws {
         let source = try homeSource()
         let trainingStart = try #require(source.range(of: "private var trainingFamilies"))
         let helpStart = try #require(source.range(of: "private var helpSection"))
         let trainingSource = source[trainingStart.lowerBound..<helpStart.lowerBound]
 
         #expect(!trainingSource.contains("InstructionsView"))
-        #expect(source.contains("PremiumInstructionsTile()"))
-        #expect(source.contains("PremiumAssetName.instructionsTile"))
-        #expect(source.contains("static let instructionsHeight: CGFloat = 124"))
-        #expect(!source.contains("HomeUtilityRow("))
+        #expect(source.contains("private var instructionsLink"))
+        #expect(source.contains("title: \"Instructions\""))
+        #expect(source.contains("assetName: PremiumAssetName.instructionsTile"))
+        #expect(source.contains("let cardWidth = max(0, (proxy.size.width - HomeLayout.gridSpacing) / 2)"))
+        #expect(source.contains("instructionsLink\n                            .frame(width: cardWidth)"))
+        #expect(source.contains(".frame(height: HomeLayout.cardHeight)"))
+        #expect(!source.contains("PremiumInstructionsTile"))
+        #expect(!source.contains("instructionsHeight"))
         #expect(source.contains("accessibilityIdentifier(\"home.instructionsLink\")"))
     }
 
@@ -93,6 +109,7 @@ struct HomeTileLayoutRegressionTests {
         let source = try homeSource()
 
         #expect(source.contains("dynamicTypeSize.isAccessibilitySize ? 1 : 2"))
+        #expect(source.contains("if dynamicTypeSize.isAccessibilitySize"))
         #expect(source.contains("usesFlexibleHeight ? nil : 1"))
         #expect(source.contains("usesFlexibleHeight ? nil : 2"))
         #expect(source.contains("minHeight: usesFlexibleHeight ? nil"))
