@@ -315,7 +315,7 @@ struct GameLibraryView: View {
         hasLoadedGames = true
 
         do {
-            let loadedGames = try libraryService.loadGames()
+            let loadedGames = try GameLibraryDisplayValidation.validatedGames(libraryService.loadGames())
             games = loadedGames
             loadError = nil
         } catch {

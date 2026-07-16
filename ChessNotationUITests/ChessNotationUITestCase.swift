@@ -56,6 +56,18 @@ class ChessNotationUITestCase: XCTestCase {
         return app.buttons[identifier]
     }
 
+    func libraryGame(identifier: String, in app: XCUIApplication) -> XCUIElement {
+        let fullIdentifier = "library.game.\(identifier)"
+        for _ in 0..<10 {
+            let candidate = app.buttons[fullIdentifier]
+            if candidate.waitForExistence(timeout: 1), candidate.isHittable {
+                return candidate
+            }
+            app.collectionViews["library.screen"].swipeUp()
+        }
+        return app.buttons[fullIdentifier]
+    }
+
     func enterMove(_ move: String, in app: XCUIApplication) {
         XCTAssertTrue(app.otherElements["ChessNotationKeyboard.Root"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.keyboards.element.exists)

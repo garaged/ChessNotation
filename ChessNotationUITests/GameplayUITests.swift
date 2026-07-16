@@ -6,7 +6,7 @@ final class GameplayUITests: ChessNotationUITestCase {
 
         openPracticeLibrary(in: app)
 
-        let operaGameButton = app.buttons["library.game.opera-game-1858"]
+        let operaGameButton = libraryGame(identifier: "opera-game-1858", in: app)
         XCTAssertTrue(operaGameButton.waitForExistence(timeout: 5))
         XCTAssertTrue(app.otherElements["library.thumbnail.opera-game-1858"].exists)
         operaGameButton.tap()
@@ -24,7 +24,7 @@ final class GameplayUITests: ChessNotationUITestCase {
 
         openPracticeLibrary(in: app)
 
-        let operaGameButton = app.buttons["library.game.opera-game-1858"]
+        let operaGameButton = libraryGame(identifier: "opera-game-1858", in: app)
         XCTAssertTrue(operaGameButton.waitForExistence(timeout: 5))
         operaGameButton.tap()
 
@@ -38,7 +38,7 @@ final class GameplayUITests: ChessNotationUITestCase {
 
         openPracticeLibrary(in: app)
 
-        let beginnerGame = app.buttons["library.game.mini-opera"]
+        let beginnerGame = libraryGame(identifier: "mini-opera", in: app)
         XCTAssertTrue(beginnerGame.waitForExistence(timeout: 5))
         beginnerGame.tap()
 

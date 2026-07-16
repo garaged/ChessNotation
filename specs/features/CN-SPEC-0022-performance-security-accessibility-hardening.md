@@ -88,7 +88,8 @@ Out of scope:
 - Corrupt or rejected Position Recall history is copied once to a sibling `.corrupt` evidence file and is not silently replaced by a later save.
 - Position Recall history reset removes the primary payload only; preserved corrupt evidence remains available for diagnosis or manual recovery.
 - Bundled game validation occurs after decoding and before results enter the shared cache.
-- Duplicate game IDs are rejected across the complete configured resource set, not only within one JSON file.
+- Duplicate game IDs inside one decoded payload are rejected as invalid content.
+- Duplicate game IDs across configured catalogs are omitted after the first occurrence, preserving valid sibling records and preventing duplicate SwiftUI list identities from crashing library display.
 - Chess coordinates must be lowercase algebraic squares from `a1` through `h8`; promotion coordinate suffixes remain valid when the coordinate begins with `from + to`.
 - FEN validation requires exactly eight placement ranks, each expanding to exactly eight files, using only legal piece symbols or empty-run digits.
 - Validation diagnostics expose issue category, game ID, move index, and field name only; they do not include full game records, SAN answers, titles, or file paths.
@@ -120,6 +121,10 @@ Out of scope:
 - `ChessNotationTests/PositionRecallHistorySchemaTests.swift`: CN-SPEC-0022-AC007, CN-SPEC-0022-AC008, CN-SPEC-0022-AC019.
 - `ChessNotation/Services/GameLibraryService.swift`: CN-SPEC-0022-AC002, CN-SPEC-0022-AC003, CN-SPEC-0022-AC009, CN-SPEC-0022-AC010.
 - `ChessNotationTests/BundledGameValidationTests.swift`: CN-SPEC-0022-AC009, CN-SPEC-0022-AC010, CN-SPEC-0022-AC019.
+- `ChessNotation/Features/Home/GameLibraryFiltering.swift`: CN-SPEC-0022-AC009.
+- `ChessNotation/Features/Home/HomeView.swift`: CN-SPEC-0022-AC009.
+- `ChessNotationTests/NotationServicesTests.swift`: CN-SPEC-0022-AC009, CN-SPEC-0022-AC019.
+- `ChessNotationUITests/GameplayUITests.swift`: CN-SPEC-0022-AC009, CN-SPEC-0022-AC019.
 - `ChessNotation/Domain/TimedNotationVariants.swift`: CN-SPEC-0022-AC003.
 - `ChessNotationTests/TimerRefreshEfficiencyTests.swift`: CN-SPEC-0022-AC003, CN-SPEC-0022-AC019.
 - `ChessNotation/Domain/TrainingChallenge.swift`: CN-SPEC-0022-AC004.
@@ -165,3 +170,4 @@ Out of scope:
 - 2026-07-15: Added Dynamic Type reachability auditing for the primary Piece Movement and Position Recall flows, requiring scrollable containers and rejecting fixed-height or text-shrinking critical-action layouts.
 - 2026-07-15: Added reduced-motion and feedback-equivalence source auditing, requiring system Reduce Motion gating and non-haptic visible or spoken feedback.
 - 2026-07-15: Added external-keyboard command routing and regression coverage for notation answer entry/edit/submit/reveal, Piece Movement submit/next/finish/cancel, and Position Recall hide/submit/next/finish/cancel while preserving the custom on-screen notation keyboard path.
+- 2026-07-15: Hardened overlapping bundled catalog loading by validating each payload, omitting later duplicate stable IDs before cache/display, and adding regression coverage that full-library gameplay UI still loads with duplicate Starter/Master catalog overlap.

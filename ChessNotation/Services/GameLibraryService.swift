@@ -80,18 +80,19 @@ struct BundledGameLibraryService: GameLibraryProviding {
         Self.missCount += 1
         Self.lock.unlock()
 
-        let games = try resourceNames.flatMap { resourceName in
+        let decodedResources = try resourceNames.map { resourceName in
             let evaluatedResourceName = "\(resourceName).evaluated"
             guard let url = bundle.url(forResource: evaluatedResourceName, withExtension: "json")
                 ?? bundle.url(forResource: resourceName, withExtension: "json") else {
                 throw GameLibraryError.missingResource(resourceName)
             }
             let data = try Data(contentsOf: url, options: [.mappedIfSafe])
-            let decoded = try Self.decodeGames(from: data, decoder: decoder, validate: false)
+            let decoded = try Self.decodeGames(from: data, decoder: decoder)
             Self.recordResourceDecode()
             return decoded
         }
 
+        let games = Self.uniquedByStableID(decodedResources.flatMap { $0 })
         try Self.validate(games)
 
         Self.lock.lock()
@@ -119,6 +120,20 @@ struct BundledGameLibraryService: GameLibraryProviding {
         hitCount = 0
         missCount = 0
         resourceDecodeCount = 0
+    }
+
+    static func uniquedByStableID(_ games: [NotationGame]) -> [NotationGame] {
+        var seenIDs: Set<String> = []
+        var uniqueGames: [NotationGame] = []
+        uniqueGames.reserveCapacity(games.count)
+
+        for game in games {
+            let gameID = game.id.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard seenIDs.insert(gameID).inserted else { continue }
+            uniqueGames.append(game)
+        }
+
+        return uniqueGames
     }
 
     private static func recordResourceDecode() {
