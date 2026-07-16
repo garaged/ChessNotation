@@ -178,7 +178,6 @@ struct RestoredHomeView: View {
                         texture: .board,
                         assetName: PremiumAssetName.positionRecallTile,
                         showsFallbackIcon: false,
-                        artworkScale: HomeLayout.positionRecallArtworkScale,
                         accessibilityIdentifier: "home.positionRecallLink"
                     )
                 }
@@ -196,7 +195,6 @@ struct RestoredHomeView: View {
         texture: HomeMenuTile.Texture,
         assetName: String,
         showsFallbackIcon: Bool = true,
-        artworkScale: CGFloat = 1,
         accessibilityIdentifier: String
     ) -> some View {
         HomeMenuTile(
@@ -207,7 +205,6 @@ struct RestoredHomeView: View {
             texture: texture,
             assetName: assetName,
             showsFallbackIcon: showsFallbackIcon,
-            artworkScale: artworkScale,
             accessibilityIdentifier: accessibilityIdentifier
         )
         .frame(maxWidth: .infinity)
@@ -269,11 +266,11 @@ private enum HomeLayout {
     static let regularHeroHeight: CGFloat = 204
     static let heroPadding: CGFloat = 18
     static let artworkHeight: CGFloat = 100
+    static let artworkAspectRatio: CGFloat = 8.0 / 5.0
     static let titleRegionHeight: CGFloat = 22
     static let subtitleRegionHeight: CGFloat = 36
     static let cardHeight: CGFloat = 188
     static let cardRadius: CGFloat = 16
-    static let positionRecallArtworkScale: CGFloat = 0.9
 }
 
 private enum FamilyScreenLayout {
@@ -603,7 +600,6 @@ private struct HomeMenuTile: View {
     let texture: Texture
     let assetName: String
     var showsFallbackIcon = true
-    var artworkScale: CGFloat = 1
     let accessibilityIdentifier: String
 
     private var usesFlexibleHeight: Bool {
@@ -612,9 +608,7 @@ private struct HomeMenuTile: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            artwork
-                .frame(maxWidth: .infinity)
-                .frame(height: HomeLayout.artworkHeight)
+            artworkRegion
 
             Text(title)
                 .font(.headline.weight(.semibold))
@@ -670,6 +664,22 @@ private struct HomeMenuTile: View {
         .accessibilityIdentifier(accessibilityIdentifier)
     }
 
+    private var artworkRegion: some View {
+        GeometryReader { proxy in
+            let artworkWidth = min(
+                proxy.size.width,
+                HomeLayout.artworkHeight * HomeLayout.artworkAspectRatio
+            )
+            let artworkHeight = artworkWidth / HomeLayout.artworkAspectRatio
+
+            artwork
+                .frame(width: artworkWidth, height: artworkHeight)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: HomeLayout.artworkHeight)
+    }
+
     private var artwork: some View {
         ZStack(alignment: .bottomTrailing) {
             Color.black.opacity(0.16)
@@ -680,7 +690,6 @@ private struct HomeMenuTile: View {
             ) {
                 HomeMenuTexture(tint: tint, style: texture)
             }
-            .scaleEffect(artworkScale)
 
             LinearGradient(
                 colors: [.clear, Color.black.opacity(0.28)],

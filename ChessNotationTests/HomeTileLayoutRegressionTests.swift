@@ -42,13 +42,15 @@ struct HomeTileLayoutRegressionTests {
     }
 
     @Test
-    func positionRecallArtworkUsesNormalizedPerceivedScale() throws {
+    func familyArtworkUsesSharedEightByFiveViewportWithoutPerCardScale() throws {
         let source = try homeSource()
 
-        #expect(source.contains("static let positionRecallArtworkScale: CGFloat = 0.9"))
-        #expect(source.contains("artworkScale: HomeLayout.positionRecallArtworkScale"))
-        #expect(source.contains("var artworkScale: CGFloat = 1"))
-        #expect(source.contains(".scaleEffect(artworkScale)"))
+        #expect(source.contains("static let artworkAspectRatio: CGFloat = 8.0 / 5.0"))
+        #expect(source.contains("HomeLayout.artworkHeight * HomeLayout.artworkAspectRatio"))
+        #expect(source.contains("let artworkHeight = artworkWidth / HomeLayout.artworkAspectRatio"))
+        #expect(!source.contains("positionRecallArtworkScale"))
+        #expect(!source.contains("artworkScale:"))
+        #expect(!source.contains(".scaleEffect(artworkScale)"))
     }
 
     @Test
