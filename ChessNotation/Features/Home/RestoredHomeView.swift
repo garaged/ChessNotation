@@ -2,6 +2,8 @@ import SwiftUI
 
 struct RestoredHomeView: View {
     @Environment(AppSettings.self) private var appSettings
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var isShowingAppearanceSettings = false
 
     private let libraryService: GameLibraryProviding
@@ -14,41 +16,60 @@ struct RestoredHomeView: View {
         NavigationStack {
             ZStack(alignment: .topTrailing) {
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 22) {
+                    VStack(alignment: .leading, spacing: 24) {
                         hero
                         primaryTrainingMenu
                         miniGamesMenu
+                        secondaryActions
                     }
-                    .padding(.horizontal, 18)
+                    .frame(maxWidth: HomeTileLayout.maximumContentWidth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, horizontalPadding)
                     .padding(.top, 18)
-                    .padding(.bottom, 28)
+                    .padding(.bottom, 32)
                 }
                 .premiumScreenBackground()
 
-                Button {
-                    isShowingAppearanceSettings = true
-                } label: {
-                    Label("Settings", systemImage: "slider.horizontal.3")
-                        .labelStyle(.iconOnly)
-                        .font(.headline.weight(.semibold))
-                        .foregroundStyle(PremiumDesign.primaryText)
-                        .frame(width: 42, height: 42)
-                        .background(PremiumDesign.elevatedSurface)
-                        .clipShape(Circle())
-                        .overlay {
-                            Circle()
-                                .stroke(PremiumDesign.stroke, lineWidth: 1)
-                        }
-                }
-                .padding(.top, 30)
-                .padding(.trailing, 30)
-                .accessibilityIdentifier("home.appearanceButton")
+                settingsButton
             }
             .sheet(isPresented: $isShowingAppearanceSettings) {
                 AppearanceSettingsView()
                     .environment(appSettings)
             }
         }
+    }
+
+    private var settingsButton: some View {
+        Button {
+            isShowingAppearanceSettings = true
+        } label: {
+            Label("Settings", systemImage: "slider.horizontal.3")
+                .labelStyle(.iconOnly)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(PremiumDesign.primaryText)
+                .frame(width: 42, height: 42)
+                .background(PremiumDesign.elevatedSurface)
+                .clipShape(Circle())
+                .overlay {
+                    Circle()
+                        .stroke(PremiumDesign.stroke, lineWidth: 1)
+                }
+        }
+        .padding(.top, 30)
+        .padding(.trailing, horizontalPadding + 12)
+        .accessibilityIdentifier("home.appearanceButton")
+    }
+
+    private var horizontalPadding: CGFloat {
+        horizontalSizeClass == .regular ? 28 : 18
+    }
+
+    private var usesSingleColumn: Bool {
+        dynamicTypeSize.isAccessibilitySize
+    }
+
+    private var usesRegularWidthLayout: Bool {
+        horizontalSizeClass == .regular && !usesSingleColumn
     }
 
     private var hero: some View {
@@ -75,7 +96,7 @@ struct RestoredHomeView: View {
             }
             .padding(18)
         }
-        .frame(maxWidth: .infinity, minHeight: 210, alignment: .bottomLeading)
+        .frame(maxWidth: .infinity, minHeight: usesRegularWidthLayout ? 250 : 210, alignment: .bottomLeading)
         .clipShape(RoundedRectangle(cornerRadius: PremiumDesign.Radius.large))
         .overlay {
             RoundedRectangle(cornerRadius: PremiumDesign.Radius.large)
@@ -88,7 +109,7 @@ struct RestoredHomeView: View {
         VStack(alignment: .leading, spacing: 12) {
             HomeSectionHeader(title: "Training", subtitle: "Full-game notation practice from the bundled library.")
 
-            LazyVGrid(columns: tileColumns, spacing: HomeTileLayout.gridSpacing) {
+            LazyVGrid(columns: trainingColumns, spacing: HomeTileLayout.gridSpacing) {
                 NavigationLink {
                     GameLibraryView(libraryService: libraryService, launchMode: .practice)
                         .environment(appSettings)
@@ -100,9 +121,11 @@ struct RestoredHomeView: View {
                         tint: PremiumDesign.Accent.practice.color,
                         texture: .board,
                         assetName: PremiumAssetName.notationTrainingTile,
+                        layout: .vertical,
                         accessibilityIdentifier: "home.notationTrainingTile"
                     )
                 }
+                .frame(maxWidth: .infinity)
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("home.notationTrainingTile")
 
@@ -117,106 +140,137 @@ struct RestoredHomeView: View {
                         tint: PremiumDesign.Accent.timed.color,
                         texture: .speed,
                         assetName: PremiumAssetName.timedNotationTile,
+                        layout: .vertical,
                         accessibilityIdentifier: "home.timedNotationTile"
                     )
                 }
+                .frame(maxWidth: .infinity)
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("home.timedNotationTile")
             }
         }
     }
 
+    @ViewBuilder
     private var miniGamesMenu: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HomeSectionHeader(title: "Mini-games", subtitle: "Short drills for coordinates, movement, memory, and app help.")
+            HomeSectionHeader(title: "Mini-games", subtitle: "Short playable drills for coordinates, movement, and memory.")
                 .accessibilityIdentifier("home.miniGamesHeader")
 
-            LazyVGrid(columns: tileColumns, spacing: HomeTileLayout.gridSpacing) {
-                NavigationLink {
-                    SquareRecognitionSetupView(historyStore: AppEnvironment.makeSquareRecognitionHistoryStore())
-                        .environment(appSettings)
-                } label: {
-                    HomeMenuTile(
-                        title: "Square Recognition",
-                        subtitle: "Tap coordinates by sight.",
-                        systemImage: "scope",
-                        tint: PremiumDesign.Accent.square.color,
-                        texture: .target,
-                        assetName: PremiumAssetName.squareRecognitionTile,
-                        accessibilityIdentifier: "home.squareRecognitionLink"
-                    )
+            if usesRegularWidthLayout {
+                LazyVGrid(columns: miniGameColumns, spacing: HomeTileLayout.gridSpacing) {
+                    miniGameLinks(layout: .vertical)
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("home.squareRecognitionLink")
-
-                NavigationLink {
-                    PieceMovementLauncherView()
-                } label: {
-                    HomeMenuTile(
-                        title: "Piece Movement",
-                        subtitle: "Select every geometric destination.",
-                        systemImage: "arrow.up.left.and.arrow.down.right",
-                        tint: PremiumDesign.Accent.learning.color,
-                        texture: .board,
-                        assetName: PremiumAssetName.pieceMovementTile,
-                        showsFallbackIcon: false,
-                        accessibilityIdentifier: "home.pieceMovementLink"
-                    )
+            } else {
+                VStack(spacing: HomeTileLayout.gridSpacing) {
+                    miniGameLinks(layout: .horizontal)
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("home.pieceMovementLink")
-
-                NavigationLink {
-                    PositionRecallLauncherView()
-                } label: {
-                    HomeMenuTile(
-                        title: "Position Recall",
-                        subtitle: "Study, hide, and rebuild the board.",
-                        systemImage: "brain.head.profile",
-                        tint: PremiumDesign.Accent.timed.color,
-                        texture: .target,
-                        assetName: PremiumAssetName.positionRecallTile,
-                        showsFallbackIcon: false,
-                        accessibilityIdentifier: "home.positionRecallLink"
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("home.positionRecallLink")
-
-                NavigationLink {
-                    InstructionsView()
-                } label: {
-                    HomeMenuTile(
-                        title: "Instructions",
-                        subtitle: "Learn modes, notation, and settings.",
-                        systemImage: "book.pages",
-                        tint: PremiumDesign.Accent.neutral.color,
-                        texture: .book,
-                        assetName: PremiumAssetName.instructionsTile,
-                        accessibilityIdentifier: "home.instructionsLink"
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("home.instructionsLink")
             }
         }
     }
 
-    private var tileColumns: [GridItem] {
+    @ViewBuilder
+    private func miniGameLinks(layout: HomeMenuTile.Layout) -> some View {
+        NavigationLink {
+            SquareRecognitionSetupView(historyStore: AppEnvironment.makeSquareRecognitionHistoryStore())
+                .environment(appSettings)
+        } label: {
+            HomeMenuTile(
+                title: "Square Recognition",
+                subtitle: "Tap coordinates by sight.",
+                systemImage: "scope",
+                tint: PremiumDesign.Accent.square.color,
+                texture: .target,
+                assetName: PremiumAssetName.squareRecognitionTile,
+                layout: layout,
+                accessibilityIdentifier: "home.squareRecognitionLink"
+            )
+        }
+        .frame(maxWidth: .infinity)
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("home.squareRecognitionLink")
+
+        NavigationLink {
+            PieceMovementLauncherView()
+        } label: {
+            HomeMenuTile(
+                title: "Piece Movement",
+                subtitle: "Select every geometric destination.",
+                systemImage: "arrow.up.left.and.arrow.down.right",
+                tint: PremiumDesign.Accent.learning.color,
+                texture: .board,
+                assetName: PremiumAssetName.pieceMovementTile,
+                showsFallbackIcon: false,
+                layout: layout,
+                accessibilityIdentifier: "home.pieceMovementLink"
+            )
+        }
+        .frame(maxWidth: .infinity)
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("home.pieceMovementLink")
+
+        NavigationLink {
+            PositionRecallLauncherView()
+        } label: {
+            HomeMenuTile(
+                title: "Position Recall",
+                subtitle: "Study, hide, and rebuild the board.",
+                systemImage: "brain.head.profile",
+                tint: PremiumDesign.Accent.timed.color,
+                texture: .target,
+                assetName: PremiumAssetName.positionRecallTile,
+                showsFallbackIcon: false,
+                layout: layout,
+                accessibilityIdentifier: "home.positionRecallLink"
+            )
+        }
+        .frame(maxWidth: .infinity)
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("home.positionRecallLink")
+    }
+
+    private var secondaryActions: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HomeSectionHeader(title: "Help", subtitle: "Learn the modes, notation rules, and app controls.")
+
+            NavigationLink {
+                InstructionsView()
+            } label: {
+                HomeUtilityRow(
+                    title: "Instructions",
+                    subtitle: "Open the ChessNotation guide.",
+                    systemImage: "book.pages"
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("home.instructionsLink")
+        }
+    }
+
+    private var trainingColumns: [GridItem] {
+        let count = usesSingleColumn ? 1 : 2
+        return Array(
+            repeating: GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: HomeTileLayout.gridSpacing, alignment: .top),
+            count: count
+        )
+    }
+
+    private var miniGameColumns: [GridItem] {
         Array(
-            repeating: GridItem(.flexible(minimum: 0), spacing: HomeTileLayout.gridSpacing, alignment: .top),
-            count: HomeTileLayout.columnCount
+            repeating: GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: HomeTileLayout.gridSpacing, alignment: .top),
+            count: 3
         )
     }
 }
 
 private enum HomeTileLayout {
-    static let columnCount = 2
-    static let gridSpacing: CGFloat = 14
-    static let artworkHeight: CGFloat = 96
-    static let regularTitleHeight: CGFloat = 42
-    static let regularSubtitleHeight: CGFloat = 45
-    static let regularCardHeight: CGFloat = 228
+    static let gridSpacing: CGFloat = 16
+    static let maximumContentWidth: CGFloat = 1080
+    static let verticalArtworkHeight: CGFloat = 112
+    static let horizontalArtworkWidth: CGFloat = 112
+    static let horizontalArtworkHeight: CGFloat = 88
+    static let verticalCardHeight: CGFloat = 224
+    static let horizontalCardHeight: CGFloat = 116
 }
 
 private struct PieceMovementLauncherView: View {
@@ -319,6 +373,51 @@ private struct HomeSectionHeader: View {
     }
 }
 
+private struct HomeUtilityRow: View {
+    let title: String
+    let subtitle: String
+    let systemImage: String
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: systemImage)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(PremiumDesign.Accent.neutral.color)
+                .frame(width: 42, height: 42)
+                .background(PremiumDesign.Accent.neutral.color.opacity(0.14))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(PremiumDesign.primaryText)
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(PremiumDesign.secondaryText)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Image(systemName: "chevron.right")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(PremiumDesign.secondaryText)
+                .accessibilityHidden(true)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(PremiumDesign.stroke, lineWidth: 1)
+        }
+        .contentShape(RoundedRectangle(cornerRadius: 14))
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityLabel(title)
+        .accessibilityHint(subtitle)
+    }
+}
+
 private struct HomeMenuTile: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -329,6 +428,11 @@ private struct HomeMenuTile: View {
         case book
     }
 
+    enum Layout {
+        case vertical
+        case horizontal
+    }
+
     let title: String
     let subtitle: String
     let systemImage: String
@@ -336,92 +440,123 @@ private struct HomeMenuTile: View {
     let texture: Texture
     let assetName: String
     var showsFallbackIcon = true
+    let layout: Layout
     let accessibilityIdentifier: String
 
-    private var usesFlexibleTextHeight: Bool {
+    private var usesFlexibleHeight: Bool {
         dynamicTypeSize.isAccessibilitySize
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ZStack(alignment: .bottomTrailing) {
-                PremiumArtworkView(assetName: assetName, fallbackIdentifier: "premiumAssetFallback.\(assetName)") {
-                    HomeMenuTexture(tint: tint, style: texture)
-                }
-
-                LinearGradient(
-                    colors: [.clear, Color.black.opacity(0.3)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-
-                if showsFallbackIcon && !PremiumAssetAvailability.hasImage(named: assetName) {
-                    Image(systemName: systemImage)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.9))
-                        .frame(width: 34, height: 34)
-                        .background(tint.opacity(0.86))
-                        .clipShape(Circle())
-                        .shadow(color: tint.opacity(0.22), radius: 8, x: 0, y: 5)
-                        .padding(10)
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: HomeTileLayout.artworkHeight)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-
-            VStack(alignment: .leading, spacing: 5) {
-                Text(title)
-                    .font(.headline.weight(.semibold))
-                    .foregroundStyle(PremiumDesign.primaryText)
-                    .lineLimit(usesFlexibleTextHeight ? nil : 2)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(
-                        maxWidth: .infinity,
-                        minHeight: usesFlexibleTextHeight ? nil : HomeTileLayout.regularTitleHeight,
-                        alignment: .topLeading
-                    )
-
-                HStack(alignment: .bottom, spacing: 8) {
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(PremiumDesign.secondaryText)
-                        .lineLimit(usesFlexibleTextHeight ? nil : 3)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(
-                            maxWidth: .infinity,
-                            minHeight: usesFlexibleTextHeight ? nil : HomeTileLayout.regularSubtitleHeight,
-                            alignment: .topLeading
-                        )
-
-                    Image(systemName: "arrow.right")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(tint)
-                        .frame(width: 26, height: 26)
-                        .background(tint.opacity(0.14))
-                        .clipShape(Circle())
-                        .accessibilityHidden(true)
-                }
+        Group {
+            switch layout {
+            case .vertical:
+                verticalBody
+            case .horizontal:
+                horizontalBody
             }
         }
-        .frame(
-            maxWidth: .infinity,
-            minHeight: usesFlexibleTextHeight ? nil : HomeTileLayout.regularCardHeight,
-            alignment: .topLeading
-        )
-        .padding(14)
+        .frame(maxWidth: .infinity)
         .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay {
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(tint.opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(tint.opacity(0.24), lineWidth: 1)
         }
-        .contentShape(RoundedRectangle(cornerRadius: 8))
+        .contentShape(RoundedRectangle(cornerRadius: 14))
+        .clipped()
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityLabel(title)
         .accessibilityHint(subtitle)
         .accessibilityIdentifier(accessibilityIdentifier)
+    }
+
+    private var verticalBody: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            artwork
+                .frame(maxWidth: .infinity)
+                .frame(height: HomeTileLayout.verticalArtworkHeight)
+
+            Text(title)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(PremiumDesign.primaryText)
+                .lineLimit(usesFlexibleHeight ? nil : 2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(PremiumDesign.secondaryText)
+                .lineLimit(usesFlexibleHeight ? nil : 3)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Spacer(minLength: 0)
+
+            arrow
+                .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(14)
+        .frame(height: usesFlexibleHeight ? nil : HomeTileLayout.verticalCardHeight, alignment: .topLeading)
+    }
+
+    private var horizontalBody: some View {
+        HStack(spacing: 14) {
+            artwork
+                .frame(width: HomeTileLayout.horizontalArtworkWidth, height: HomeTileLayout.horizontalArtworkHeight)
+                .layoutPriority(1)
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text(title)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(PremiumDesign.primaryText)
+                    .lineLimit(usesFlexibleHeight ? nil : 2)
+
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(PremiumDesign.secondaryText)
+                    .lineLimit(usesFlexibleHeight ? nil : 3)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            arrow
+        }
+        .padding(14)
+        .frame(height: usesFlexibleHeight ? nil : HomeTileLayout.horizontalCardHeight, alignment: .leading)
+    }
+
+    private var artwork: some View {
+        ZStack(alignment: .bottomTrailing) {
+            PremiumArtworkView(assetName: assetName, fallbackIdentifier: "premiumAssetFallback.\(assetName)") {
+                HomeMenuTexture(tint: tint, style: texture)
+            }
+
+            LinearGradient(
+                colors: [.clear, Color.black.opacity(0.3)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+
+            if showsFallbackIcon && !PremiumAssetAvailability.hasImage(named: assetName) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .frame(width: 34, height: 34)
+                    .background(tint.opacity(0.86))
+                    .clipShape(Circle())
+                    .padding(10)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    private var arrow: some View {
+        Image(systemName: "arrow.right")
+            .font(.caption.weight(.bold))
+            .foregroundStyle(tint)
+            .frame(width: 28, height: 28)
+            .background(tint.opacity(0.14))
+            .clipShape(Circle())
+            .accessibilityHidden(true)
     }
 }
 
