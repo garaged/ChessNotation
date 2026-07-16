@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2026-07-15
+
+### Added
+- External keyboard command routing for notation answer entry/edit/submit/reveal and primary mini-game submit/next/finish flows.
+- Regression coverage for external keyboard notation, Piece Movement, and Position Recall command behavior.
+- CN-SPEC-0022 release validation traceability covering performance, security, accessibility, bundled-data, and UI smoke coverage.
+
+### Changed
+- Bundled game loading now validates each payload, omits later duplicate stable game IDs across overlapping catalogs, and keeps valid sibling records playable.
+- Documentation now states local-only privacy behavior, persistence schema and corruption recovery behavior, bounded cache/history policies, accessibility behavior, keyboard support, known limits, and exact validation results.
+
+### Fixed
+- Prevented duplicate game IDs across configured catalogs from breaking library loading or SwiftUI list identity.
+
 ## [2.0.2] - 2026-06-28
 
 ### Added

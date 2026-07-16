@@ -1,6 +1,6 @@
 # CN-SPEC-0022: Performance, Security, and Accessibility Hardening
 
-Status: Proposed
+Status: Accepted
 Owner: Project
 Last updated: 2026-07-15
 
@@ -111,6 +111,8 @@ Out of scope:
 - External keyboard notation entry is routed through a focused hardware-key capture that does not require the system software keyboard and preserves the custom `ChessNotationKeyboard` touch path.
 - External keyboard Return submits the current notation answer or the visible primary mini-game action; Delete removes the last notation character; Command-Delete clears notation input; Command-R reveals/skips the current notation move.
 - External keyboard command routing for Piece Movement and Position Recall uses the same view-model actions as touch controls for submit, next, finish, and user-exit cancellation.
+- Release validation on 2026-07-15 passed `make spec-check`, the targeted CN-SPEC-0022 hardening batch, the complete `ChessNotationTests` unit/integration target through Xcode, and critical UI suites split by suite through Xcode.
+- The requested shell `xcodebuild test -project ChessNotation.xcodeproj -scheme ChessNotation -destination 'platform=iOS Simulator,name=iPhone 16'` did not complete in the sandbox because `xcodebuild` exited 70 with no matching iPhone 16 simulator destination available.
 
 ## Coverage
 
@@ -147,8 +149,12 @@ Out of scope:
 - `ChessNotationTests/GameViewModelIntegrationTests.swift`: CN-SPEC-0022-AC017, CN-SPEC-0022-AC019.
 - `ChessNotationTests/PieceMovementFeatureTests.swift`: CN-SPEC-0022-AC017, CN-SPEC-0022-AC019.
 - `ChessNotationTests/PositionRecallReconstructionViewModelTests.swift`: CN-SPEC-0022-AC017, CN-SPEC-0022-AC019.
-- Pending coverage: CN-SPEC-0022-AC018
-- Pending coverage: CN-SPEC-0022-AC020
+- `README.md`: CN-SPEC-0022-AC018, CN-SPEC-0022-AC020.
+- `PRIVACY.md`: CN-SPEC-0022-AC020.
+- `CHANGELOG.md`: CN-SPEC-0022-AC020.
+- `RELEASE_DESCRIPTION.md`: CN-SPEC-0022-AC020.
+- `RELEASE_CHECKLIST.md`: CN-SPEC-0022-AC018, CN-SPEC-0022-AC020.
+- Xcode validation artifacts recorded in this revision note: CN-SPEC-0022-AC018.
 
 ## Open Questions
 
@@ -171,3 +177,6 @@ Out of scope:
 - 2026-07-15: Added reduced-motion and feedback-equivalence source auditing, requiring system Reduce Motion gating and non-haptic visible or spoken feedback.
 - 2026-07-15: Added external-keyboard command routing and regression coverage for notation answer entry/edit/submit/reveal, Piece Movement submit/next/finish/cancel, and Position Recall hide/submit/next/finish/cancel while preserving the custom on-screen notation keyboard path.
 - 2026-07-15: Hardened overlapping bundled catalog loading by validating each payload, omitting later duplicate stable IDs before cache/display, and adding regression coverage that full-library gameplay UI still loads with duplicate Starter/Master catalog overlap.
+- 2026-07-15: Completed release documentation updates across README, Privacy, Changelog, Release Description, and Release Checklist for local-only behavior, persistence migration/corruption handling, bounded cache/history policies, supported modes, accessibility, keyboard support, known limitations, and exact validation results.
+- 2026-07-15: Recorded AC018 validation results: `make spec-check` passed; Xcode targeted CN-SPEC-0022 hardening batch passed 54 tests; Xcode `ChessNotationTests` passed 264 tests; critical UI suites split by suite passed 12 tests; shell `xcodebuild test -project ChessNotation.xcodeproj -scheme ChessNotation -destination 'platform=iOS Simulator,name=iPhone 16'` was unrun because the sandboxed shell reported no matching iPhone 16 simulator destination and exited 70.
+- 2026-07-15: Marked CN-SPEC-0022 Accepted after AC017, AC018, and AC020 coverage and validation were completed or explicitly explained.
