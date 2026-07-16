@@ -24,6 +24,7 @@ In scope:
 - Placement of Settings, History/Insights, and Instructions outside the primary gameplay grid.
 - Stable ordering, adaptive layout, accessibility, navigation behavior, and regression constraints.
 - Rules preventing future catalog entries from automatically becoming additional home tiles.
+- Explicit visual symmetry, equal card geometry, collision prevention, and responsive behavior on common iPhone and iPad sizes.
 
 Out of scope:
 
@@ -48,6 +49,16 @@ Settings, History/Insights, and Instructions are secondary destinations:
 - Settings remains available through the existing settings control.
 - History/Insights may be shown as a compact secondary action or summary card, not as a fifth primary game tile.
 - Instructions/Help must be available through a secondary action, toolbar item, settings/help area, or family-specific help link, not as a primary gameplay tile.
+
+### Home visual contract
+
+- The four primary family cards must render in one shared card component with identical width, height, artwork region, title region, subtitle region, padding, corner radius, typography hierarchy, border treatment, and action-indicator placement at normal Dynamic Type sizes.
+- Compact-width layouts must use a two-column, two-row family grid. They must not replace family cards with long horizontal rows.
+- Regular-width layouts must preserve the same two-by-two family geometry inside a centered maximum content width so cards do not become excessively wide on iPad.
+- Accessibility Dynamic Type sizes may switch to one column and grow vertically, but all family cards must still use the same component and styling.
+- No card may overlap, touch, clip into, or visually intrude into another card. Grid spacing must remain explicit and positive in both axes.
+- Card copy must fit within documented title and subtitle line budgets at normal Dynamic Type sizes. Truncation may not hide the family name.
+- Partial gameplay rows are forbidden on Home. A playable subgame belongs inside its owning family screen rather than becoming an unmatched top-level tile.
 
 ## Family Membership
 
@@ -125,6 +136,10 @@ Quick Start must never silently choose an advanced or destructive configuration.
 - CN-SPEC-0026-FR022: Deep links or external routes targeting an existing direct game must continue to resolve directly or through a documented compatible setup without forcing the user through Home.
 - CN-SPEC-0026-FR023: Family screens must not duplicate game scoring, lifecycle, validation, persistence, or timing rules.
 - CN-SPEC-0026-FR024: A future fifth home family requires an explicit accepted information-architecture spec; catalog growth alone is insufficient.
+- CN-SPEC-0026-FR025: The four Home family cards must use one shared vertical card component and identical normal-size geometry; horizontal family-card variants are prohibited.
+- CN-SPEC-0026-FR026: Home must render the four family cards as a complete two-column by two-row grid on compact and regular width devices, except at accessibility Dynamic Type sizes where one-column vertical expansion is permitted.
+- CN-SPEC-0026-FR027: The Home family grid must use explicit horizontal and vertical spacing and a bounded maximum content width so cards never collide and remain proportionate on iPad.
+- CN-SPEC-0026-FR028: Square Recognition and Piece Movement must be presented inside Board Skills, while Instructions remains outside the gameplay grid.
 
 ## Acceptance Criteria
 
@@ -142,16 +157,19 @@ Quick Start must never silently choose an advanced or destructive configuration.
 - CN-SPEC-0026-AC012: Given existing direct-game deep links and accessibility identifiers, when the new hierarchy is introduced, then they resolve through explicit compatibility mappings and existing regression tests remain valid or receive intentional equivalent assertions.
 - CN-SPEC-0026-AC013: Given repeated SwiftUI rendering of Home and family screens, when state updates occur, then no game engine construction, FEN/SAN parsing, bundled-library indexing, or history loading is triggered solely by tile metadata rendering.
 - CN-SPEC-0026-AC014: Given a proposed fifth primary family or direct game tile, when presentation validation runs without an accepted superseding spec, then the configuration is rejected.
+- CN-SPEC-0026-AC015: Given normal Dynamic Type on a compact iPhone and regular-width iPad, when the four Home family cards render, then all four have equal measured width and height, matching artwork/title/subtitle regions, matching typography, and matching action-indicator placement.
+- CN-SPEC-0026-AC016: Given the Home family grid at supported widths, when card frames are inspected, then each row and column preserves the configured positive spacing and no pair of cards intersects or touches.
+- CN-SPEC-0026-AC017: Given the production Home hierarchy, when gameplay and utility destinations are enumerated, then Square Recognition and Piece Movement appear only under Board Skills and Instructions appears only as a secondary Help action.
 
 ## Planned Coverage
 
 - `ChessNotationTests/GameFamilyCatalogTests.swift`: CN-SPEC-0026-AC001, AC002, AC003, AC004, AC013, AC014.
 - `ChessNotationTests/GameRouteResolverTests.swift`: CN-SPEC-0026-AC004, AC006, AC007, AC008, AC009, AC012.
 - `ChessNotationTests/GameFamilyViewModelTests.swift`: CN-SPEC-0026-AC005, AC006, AC007, AC008, AC009.
-- `ChessNotationUITests/HomeUITests.swift`: CN-SPEC-0026-AC001, AC004, AC010, AC011, AC012.
+- `ChessNotationUITests/HomeUITests.swift`: CN-SPEC-0026-AC001, AC004, AC010, AC011, AC012, AC017.
 - `ChessNotationUITests/GameFamilyNavigationUITests.swift`: CN-SPEC-0026-AC005, AC006, AC007, AC008, AC009, AC010, AC011.
 - `ChessNotationTests/PremiumAssetTests.swift`: CN-SPEC-0026-AC010.
-- `ChessNotationTests/HomeTileLayoutRegressionTests.swift`: CN-SPEC-0026-AC010 partial compact-width tile symmetry and Dynamic Type expansion coverage.
+- `ChessNotationTests/HomeTileLayoutRegressionTests.swift`: CN-SPEC-0026-AC001, AC010, AC015, AC016, AC017 source-level geometry and hierarchy regression coverage.
 - Planned source owners: typed family metadata in Domain, family route resolution in App, and focused family screens under `ChessNotation/Features/Home` or a dedicated `Features/GameCatalog` area.
 
 ## Implementation Constraints
@@ -164,6 +182,8 @@ Quick Start must never silently choose an advanced or destructive configuration.
 - Preserve direct routes for tests, deep links, and compatible quick starts.
 - Implement catalog/family validation tests before replacing current home navigation.
 - Add family screens incrementally so current games remain launchable during implementation.
+- Do not introduce horizontal Home family cards as a compact-width workaround.
+- Do not treat equal minimum heights as symmetry; normal-size family cards must use equal explicit geometry.
 
 ## Implementation Sequence
 
@@ -185,3 +205,4 @@ Quick Start must never silently choose an advanced or destructive configuration.
 
 - 2026-07-10: Initial proposed information-architecture contract defining four stable home families and complete family-level navigation.
 - 2026-07-15: Normalized current home tiles to a stable two-column compact-width grid with equal title, subtitle, artwork, and card regions while preserving unrestricted vertical expansion at accessibility Dynamic Type sizes.
+- 2026-07-15: Replaced the rejected mixed horizontal-card layout with an explicit symmetric four-family 2x2 Home grid, moved Square Recognition and Piece Movement under Board Skills, retained Instructions as a secondary Help action, bounded iPad content width, and added measurable equal-geometry and collision-prevention requirements.
