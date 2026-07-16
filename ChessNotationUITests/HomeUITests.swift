@@ -1,20 +1,28 @@
 import XCTest
 
 final class HomeUITests: ChessNotationUITestCase {
-    func testHomeTilesNavigateToLibraryAndSquareRecognition() throws {
+    func testHomeShowsFourFamiliesAndBoardSkillsOpensSquareRecognition() throws {
         let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
 
         XCTAssertTrue(homeTile(identifier: "home.notationTrainingTile", title: "Notation Training", in: app).waitForExistence(timeout: 5))
-        XCTAssertTrue(homeTile(identifier: "home.timedNotationTile", title: "Timed Notation", in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(homeTile(identifier: "home.timedNotationTile", title: "Timed Training", in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(homeTile(identifier: "home.boardSkillsLink", title: "Board Skills", in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(homeTile(identifier: "home.positionRecallLink", title: "Position Recall", in: app).waitForExistence(timeout: 5))
         XCTAssertFalse(app.segmentedControls["library.levelFilter"].exists)
 
-        let squareRecognitionLink = scrollToHomeTile(identifier: "home.squareRecognitionLink", title: "Square Recognition", in: app)
+        let boardSkillsTile = scrollToHomeTile(identifier: "home.boardSkillsLink", title: "Board Skills", in: app)
+        XCTAssertTrue(boardSkillsTile.isHittable)
+        boardSkillsTile.tap()
+
+        XCTAssertTrue(app.navigationBars["Board Skills"].waitForExistence(timeout: 5))
+
+        let squareRecognitionLink = app.buttons["home.squareRecognitionLink"]
         XCTAssertTrue(squareRecognitionLink.waitForExistence(timeout: 5))
         XCTAssertTrue(squareRecognitionLink.isHittable)
 
-        XCTAssertTrue(scrollToHomeTile(identifier: "home.pieceMovementLink", title: "Piece Movement", in: app).waitForExistence(timeout: 5))
-        XCTAssertTrue(scrollToHomeTile(identifier: "home.positionRecallLink", title: "Position Recall", in: app).waitForExistence(timeout: 5))
-        XCTAssertTrue(scrollToHomeTile(identifier: "home.instructionsLink", title: "Instructions", in: app).waitForExistence(timeout: 5))
+        let pieceMovementLink = app.buttons["home.pieceMovementLink"]
+        XCTAssertTrue(pieceMovementLink.waitForExistence(timeout: 5))
+        XCTAssertTrue(pieceMovementLink.isHittable)
 
         squareRecognitionLink.tap()
         XCTAssertTrue(app.buttons["squareRecognition.startButton"].waitForExistence(timeout: 5))
@@ -35,22 +43,26 @@ final class HomeUITests: ChessNotationUITestCase {
         XCTAssertTrue(versionText.label.hasPrefix("Version "))
     }
 
-    func testInstructionsTileOpensInstructions() throws {
+    func testInstructionsSecondaryActionOpensInstructions() throws {
         let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
 
-        let instructionsTile = scrollToHomeTile(identifier: "home.instructionsLink", title: "Instructions", in: app)
-        XCTAssertTrue(instructionsTile.waitForExistence(timeout: 5))
-        XCTAssertTrue(instructionsTile.isHittable)
-        instructionsTile.tap()
+        let instructionsLink = scrollToHomeTile(identifier: "home.instructionsLink", title: "Instructions", in: app)
+        XCTAssertTrue(instructionsLink.waitForExistence(timeout: 5))
+        XCTAssertTrue(instructionsLink.isHittable)
+        instructionsLink.tap()
 
         XCTAssertTrue(app.navigationBars["Instructions"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Choose A Mode"].exists)
     }
 
-    func testPieceMovementTileOpensGame() throws {
+    func testPieceMovementOpensFromBoardSkills() throws {
         let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
 
-        let pieceMovementTile = scrollToHomeTile(identifier: "home.pieceMovementLink", title: "Piece Movement", in: app)
+        let boardSkillsTile = scrollToHomeTile(identifier: "home.boardSkillsLink", title: "Board Skills", in: app)
+        XCTAssertTrue(boardSkillsTile.waitForExistence(timeout: 5))
+        boardSkillsTile.tap()
+
+        let pieceMovementTile = app.buttons["home.pieceMovementLink"]
         XCTAssertTrue(pieceMovementTile.waitForExistence(timeout: 5))
         XCTAssertTrue(pieceMovementTile.isHittable)
         pieceMovementTile.tap()
