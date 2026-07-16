@@ -14,22 +14,28 @@ struct RestoredHomeView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .topTrailing) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
-                        hero
-                        trainingFamilies
-                        helpSection
-                    }
-                    .frame(maxWidth: HomeTileLayout.maximumContentWidth)
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, horizontalPadding)
-                    .padding(.top, 18)
-                    .padding(.bottom, 32)
+            ScrollView {
+                VStack(alignment: .leading, spacing: HomeLayout.sectionSpacing) {
+                    hero
+                    trainingFamilies
+                    helpSection
                 }
-                .premiumScreenBackground()
-
-                settingsButton
+                .frame(maxWidth: HomeLayout.maximumContentWidth)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, horizontalPadding)
+                .padding(.top, HomeLayout.topPadding)
+                .padding(.bottom, HomeLayout.bottomPadding)
+            }
+            .premiumScreenBackground()
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isShowingAppearanceSettings = true
+                    } label: {
+                        Label("Settings", systemImage: "slider.horizontal.3")
+                    }
+                    .accessibilityIdentifier("home.appearanceButton")
+                }
             }
             .sheet(isPresented: $isShowingAppearanceSettings) {
                 AppearanceSettingsView()
@@ -39,7 +45,7 @@ struct RestoredHomeView: View {
     }
 
     private var horizontalPadding: CGFloat {
-        horizontalSizeClass == .regular ? 32 : 18
+        horizontalSizeClass == .regular ? HomeLayout.regularHorizontalPadding : HomeLayout.compactHorizontalPadding
     }
 
     private var familyColumnCount: Int {
@@ -50,31 +56,11 @@ struct RestoredHomeView: View {
         Array(
             repeating: GridItem(
                 .flexible(minimum: 0, maximum: .infinity),
-                spacing: HomeTileLayout.gridSpacing,
+                spacing: HomeLayout.gridSpacing,
                 alignment: .top
             ),
             count: familyColumnCount
         )
-    }
-
-    private var settingsButton: some View {
-        Button {
-            isShowingAppearanceSettings = true
-        } label: {
-            Label("Settings", systemImage: "slider.horizontal.3")
-                .labelStyle(.iconOnly)
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(PremiumDesign.primaryText)
-                .frame(width: 42, height: 42)
-                .background(PremiumDesign.elevatedSurface)
-                .clipShape(Circle())
-                .overlay {
-                    Circle().stroke(PremiumDesign.stroke, lineWidth: 1)
-                }
-        }
-        .padding(.top, 30)
-        .padding(.trailing, horizontalPadding + 12)
-        .accessibilityIdentifier("home.appearanceButton")
     }
 
     private var hero: some View {
@@ -84,43 +70,42 @@ struct RestoredHomeView: View {
                 fallbackIdentifier: "premiumAssetFallback.homeHero"
             ) {
                 HomeMenuTexture(tint: PremiumDesign.Accent.brand.color, style: .board)
-                    .overlay {
-                        LinearGradient(
-                            colors: [.clear, PremiumDesign.backgroundBottom.opacity(0.78)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    }
             }
 
-            VStack(alignment: .leading, spacing: 10) {
-                Text("ChessNotation")
-                    .font(.largeTitle.weight(.bold))
-                    .foregroundStyle(PremiumDesign.primaryText)
+            LinearGradient(
+                colors: [.clear, Color.black.opacity(0.72)],
+                startPoint: .center,
+                endPoint: .bottom
+            )
 
+            VStack(alignment: .leading, spacing: 6) {
+                Text("ChessNotation")
+                    .font(.title.weight(.bold))
+                    .foregroundStyle(.white)
                 Text("Train faster, read better, play smarter.")
                     .font(.subheadline)
-                    .foregroundStyle(PremiumDesign.secondaryText)
+                    .foregroundStyle(.white.opacity(0.82))
             }
-            .padding(18)
+            .padding(HomeLayout.heroPadding)
         }
-        .frame(maxWidth: .infinity, minHeight: horizontalSizeClass == .regular ? 250 : 210, alignment: .bottomLeading)
+        .frame(maxWidth: .infinity)
+        .frame(height: horizontalSizeClass == .regular ? HomeLayout.regularHeroHeight : HomeLayout.compactHeroHeight)
         .clipShape(RoundedRectangle(cornerRadius: PremiumDesign.Radius.large))
         .overlay {
             RoundedRectangle(cornerRadius: PremiumDesign.Radius.large)
-                .stroke(PremiumDesign.Accent.brand.color.opacity(0.18), lineWidth: 1)
+                .stroke(PremiumDesign.Accent.brand.color.opacity(0.2), lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
     }
 
     private var trainingFamilies: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: HomeLayout.headerToContentSpacing) {
             HomeSectionHeader(
                 title: "Training",
                 subtitle: "Choose a focused family and continue from there."
             )
 
-            LazyVGrid(columns: familyColumns, spacing: HomeTileLayout.gridSpacing) {
+            LazyVGrid(columns: familyColumns, spacing: HomeLayout.gridSpacing) {
                 NavigationLink {
                     GameLibraryView(libraryService: libraryService, launchMode: .practice)
                         .environment(appSettings)
@@ -216,7 +201,7 @@ struct RestoredHomeView: View {
     }
 
     private var helpSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: HomeLayout.headerToContentSpacing) {
             HomeSectionHeader(
                 title: "Help",
                 subtitle: "Learn notation rules, modes, and app controls."
@@ -237,80 +222,202 @@ struct RestoredHomeView: View {
     }
 }
 
-private enum HomeTileLayout {
-    static let gridSpacing: CGFloat = 16
-    static let maximumContentWidth: CGFloat = 820
-    static let artworkHeight: CGFloat = 104
-    static let titleRegionHeight: CGFloat = 44
-    static let subtitleRegionHeight: CGFloat = 50
-    static let cardHeight: CGFloat = 242
+private enum HomeLayout {
+    static let gridSpacing: CGFloat = 18
+    static let sectionSpacing: CGFloat = 28
+    static let headerToContentSpacing: CGFloat = 12
+    static let compactHorizontalPadding: CGFloat = 20
+    static let regularHorizontalPadding: CGFloat = 32
+    static let topPadding: CGFloat = 12
+    static let bottomPadding: CGFloat = 36
+    static let maximumContentWidth: CGFloat = 760
+    static let compactHeroHeight: CGFloat = 168
+    static let regularHeroHeight: CGFloat = 220
+    static let heroPadding: CGFloat = 18
+    static let artworkHeight: CGFloat = 112
+    static let titleRegionHeight: CGFloat = 24
+    static let subtitleRegionHeight: CGFloat = 42
+    static let cardHeight: CGFloat = 214
+}
+
+private enum FamilyScreenLayout {
+    static let maximumContentWidth: CGFloat = 680
+    static let horizontalPadding: CGFloat = 20
+    static let sectionSpacing: CGFloat = 24
+    static let cardRadius: CGFloat = 16
+    static let artworkSize: CGFloat = 76
 }
 
 private struct BoardSkillsFamilyView: View {
     @Environment(AppSettings.self) private var appSettings
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
-    private var columns: [GridItem] {
-        Array(
-            repeating: GridItem(.flexible(minimum: 0), spacing: 16, alignment: .top),
-            count: dynamicTypeSize.isAccessibilitySize ? 1 : 2
-        )
-    }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Board Skills")
-                        .font(.largeTitle.weight(.bold))
-                    Text("Improve coordinate recognition and understand how each piece moves.")
-                        .font(.subheadline)
-                        .foregroundStyle(PremiumDesign.secondaryText)
-                }
-
-                LazyVGrid(columns: columns, spacing: 16) {
-                    NavigationLink {
-                        SquareRecognitionSetupView(historyStore: AppEnvironment.makeSquareRecognitionHistoryStore())
-                            .environment(appSettings)
-                    } label: {
-                        HomeMenuTile(
-                            title: "Square Recognition",
-                            subtitle: "Tap coordinates quickly and accurately.",
-                            systemImage: "scope",
-                            tint: PremiumDesign.Accent.square.color,
-                            texture: .target,
-                            assetName: PremiumAssetName.squareRecognitionTile,
-                            accessibilityIdentifier: "home.squareRecognitionLink"
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("home.squareRecognitionLink")
-
-                    NavigationLink {
-                        PieceMovementLauncherView()
-                    } label: {
-                        HomeMenuTile(
-                            title: "Piece Movement",
-                            subtitle: "Select every legal geometric destination.",
-                            systemImage: "arrow.up.left.and.arrow.down.right",
-                            tint: PremiumDesign.Accent.learning.color,
-                            texture: .board,
-                            assetName: PremiumAssetName.pieceMovementTile,
-                            showsFallbackIcon: false,
-                            accessibilityIdentifier: "home.pieceMovementLink"
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("home.pieceMovementLink")
-                }
+            VStack(alignment: .leading, spacing: FamilyScreenLayout.sectionSpacing) {
+                familyHeader
+                quickStart
+                drillChoices
             }
-            .frame(maxWidth: 820)
+            .frame(maxWidth: FamilyScreenLayout.maximumContentWidth)
             .frame(maxWidth: .infinity)
-            .padding(20)
+            .padding(.horizontal, FamilyScreenLayout.horizontalPadding)
+            .padding(.vertical, 20)
         }
         .premiumScreenBackground()
         .navigationTitle("Board Skills")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var familyHeader: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Board Skills")
+                .font(.title.weight(.bold))
+                .foregroundStyle(PremiumDesign.primaryText)
+            Text("Build coordinate fluency and understand how pieces move without crowding the board.")
+                .font(.subheadline)
+                .foregroundStyle(PremiumDesign.secondaryText)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var quickStart: some View {
+        NavigationLink {
+            SquareRecognitionSetupView(historyStore: AppEnvironment.makeSquareRecognitionHistoryStore())
+                .environment(appSettings)
+        } label: {
+            FamilyQuickStartCard(
+                title: "Quick Start",
+                subtitle: "Begin Square Recognition with the recommended setup.",
+                systemImage: "scope",
+                tint: PremiumDesign.Accent.square.color
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("boardSkills.quickStart")
+    }
+
+    private var drillChoices: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Choose a drill")
+                .font(.title3.weight(.bold))
+                .foregroundStyle(PremiumDesign.primaryText)
+
+            NavigationLink {
+                SquareRecognitionSetupView(historyStore: AppEnvironment.makeSquareRecognitionHistoryStore())
+                    .environment(appSettings)
+            } label: {
+                FamilyGameRow(
+                    title: "Square Recognition",
+                    subtitle: "Find coordinates quickly and accurately.",
+                    assetName: PremiumAssetName.squareRecognitionTile,
+                    systemImage: "scope",
+                    tint: PremiumDesign.Accent.square.color
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("home.squareRecognitionLink")
+
+            NavigationLink {
+                PieceMovementLauncherView()
+            } label: {
+                FamilyGameRow(
+                    title: "Piece Movement",
+                    subtitle: "Identify every legal geometric destination.",
+                    assetName: PremiumAssetName.pieceMovementTile,
+                    systemImage: "arrow.up.left.and.arrow.down.right",
+                    tint: PremiumDesign.Accent.learning.color
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("home.pieceMovementLink")
+        }
+    }
+}
+
+private struct FamilyQuickStartCard: View {
+    let title: String
+    let subtitle: String
+    let systemImage: String
+    let tint: Color
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: systemImage)
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(width: 50, height: 50)
+                .background(tint)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(PremiumDesign.primaryText)
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(PremiumDesign.secondaryText)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Image(systemName: "play.fill")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(tint)
+                .accessibilityHidden(true)
+        }
+        .padding(16)
+        .background(tint.opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius))
+        .overlay {
+            RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius)
+                .stroke(tint.opacity(0.34), lineWidth: 1)
+        }
+        .contentShape(RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius))
+    }
+}
+
+private struct FamilyGameRow: View {
+    let title: String
+    let subtitle: String
+    let assetName: String
+    let systemImage: String
+    let tint: Color
+
+    var body: some View {
+        HStack(spacing: 14) {
+            PremiumArtworkView(assetName: assetName, fallbackIdentifier: "premiumAssetFallback.\(assetName)") {
+                ZStack {
+                    tint.opacity(0.14)
+                    Image(systemName: systemImage)
+                        .font(.title2.weight(.semibold))
+                        .foregroundStyle(tint)
+                }
+            }
+            .frame(width: FamilyScreenLayout.artworkSize, height: FamilyScreenLayout.artworkSize)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(PremiumDesign.primaryText)
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(PremiumDesign.secondaryText)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Image(systemName: "chevron.right")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(tint)
+                .accessibilityHidden(true)
+        }
+        .padding(14)
+        .background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius))
+        .overlay {
+            RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius)
+                .stroke(PremiumDesign.stroke, lineWidth: 1)
+        }
+        .contentShape(RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius))
     }
 }
 
@@ -448,7 +555,8 @@ private struct HomeUtilityRow: View {
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay {
-            RoundedRectangle(cornerRadius: 14).stroke(PremiumDesign.stroke, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(PremiumDesign.stroke, lineWidth: 1)
         }
         .contentShape(RoundedRectangle(cornerRadius: 14))
         .accessibilityElement(children: .combine)
@@ -482,47 +590,46 @@ private struct HomeMenuTile: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             artwork
                 .frame(maxWidth: .infinity)
-                .frame(height: HomeTileLayout.artworkHeight)
+                .frame(height: HomeLayout.artworkHeight)
 
             Text(title)
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(PremiumDesign.primaryText)
-                .lineLimit(usesFlexibleHeight ? nil : 2)
+                .lineLimit(usesFlexibleHeight ? nil : 1)
                 .frame(
                     maxWidth: .infinity,
-                    minHeight: usesFlexibleHeight ? nil : HomeTileLayout.titleRegionHeight,
+                    minHeight: usesFlexibleHeight ? nil : HomeLayout.titleRegionHeight,
                     alignment: .topLeading
                 )
 
-            Text(subtitle)
-                .font(.caption)
-                .foregroundStyle(PremiumDesign.secondaryText)
-                .lineLimit(usesFlexibleHeight ? nil : 3)
-                .frame(
-                    maxWidth: .infinity,
-                    minHeight: usesFlexibleHeight ? nil : HomeTileLayout.subtitleRegionHeight,
-                    alignment: .topLeading
-                )
+            HStack(alignment: .bottom, spacing: 8) {
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(PremiumDesign.secondaryText)
+                    .lineLimit(usesFlexibleHeight ? nil : 2)
+                    .frame(
+                        maxWidth: .infinity,
+                        minHeight: usesFlexibleHeight ? nil : HomeLayout.subtitleRegionHeight,
+                        alignment: .topLeading
+                    )
 
-            Spacer(minLength: 0)
-
-            Image(systemName: "arrow.right")
-                .font(.caption.weight(.bold))
-                .foregroundStyle(tint)
-                .frame(width: 28, height: 28)
-                .background(tint.opacity(0.14))
-                .clipShape(Circle())
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .accessibilityHidden(true)
+                Image(systemName: "arrow.right")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(tint)
+                    .frame(width: 28, height: 28)
+                    .background(tint.opacity(0.14))
+                    .clipShape(Circle())
+                    .accessibilityHidden(true)
+            }
         }
         .padding(12)
         .frame(
             maxWidth: .infinity,
-            minHeight: usesFlexibleHeight ? nil : HomeTileLayout.cardHeight,
-            maxHeight: usesFlexibleHeight ? nil : HomeTileLayout.cardHeight,
+            minHeight: usesFlexibleHeight ? nil : HomeLayout.cardHeight,
+            maxHeight: usesFlexibleHeight ? nil : HomeLayout.cardHeight,
             alignment: .topLeading
         )
         .background(Color(.secondarySystemBackground))
