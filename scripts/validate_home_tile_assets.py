@@ -9,13 +9,14 @@ Run with the repository virtualenv when available:
 from __future__ import annotations
 
 import argparse
+import io
 import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 try:
-    from PIL import Image
+    from PIL import Image, ImageCms
 except ImportError:  # pragma: no cover - exercised by local setup, not tests.
     print(
         "Pillow is required. Run `.venv/bin/python -m pip install Pillow` "
@@ -181,9 +182,12 @@ def color_profile_name(image: Image.Image) -> str:
         # inspectable metadata while still requiring an sRGB-compatible name.
         profile = image.info.get("icc_profile")
         if isinstance(profile, bytes):
-            profile_text = profile.decode("latin1", errors="ignore").lower()
-            if "srgb" in profile_text:
-                return "sRGB ICC"
+            try:
+                profile_name = ImageCms.getProfileName(ImageCms.ImageCmsProfile(io.BytesIO(profile))).strip()
+            except ImageCms.PyCMSError:
+                return "embedded ICC"
+            if "srgb" in profile_name.lower():
+                return profile_name
             return "embedded ICC"
         return "embedded ICC"
     if "srgb" in image.info:

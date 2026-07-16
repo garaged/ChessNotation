@@ -6,18 +6,25 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
-from PIL import Image
+from PIL import Image, ImageCms
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import validate_home_tile_assets as validator
 
 
+SRGB_PROFILE_BYTES = ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
+
+
 class HomeTileAssetValidatorTests(unittest.TestCase):
     def test_valid_asset_passes(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "Tile.png"
-            Image.new("RGB", (1600, 1000), (12, 34, 56)).save(path, format="PNG", icc_profile=b"sRGB")
+            Image.new("RGB", (1600, 1000), (12, 34, 56)).save(
+                path,
+                format="PNG",
+                icc_profile=SRGB_PROFILE_BYTES,
+            )
 
             metadata, failures = validator.validate_asset(path)
 
@@ -27,7 +34,11 @@ class HomeTileAssetValidatorTests(unittest.TestCase):
     def test_wrong_dimensions_fail(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "Tile.png"
-            Image.new("RGB", (1422, 1106), (12, 34, 56)).save(path, format="PNG", icc_profile=b"sRGB")
+            Image.new("RGB", (1422, 1106), (12, 34, 56)).save(
+                path,
+                format="PNG",
+                icc_profile=SRGB_PROFILE_BYTES,
+            )
 
             _, failures = validator.validate_asset(path)
 
@@ -36,7 +47,11 @@ class HomeTileAssetValidatorTests(unittest.TestCase):
     def test_alpha_fails(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "Tile.png"
-            Image.new("RGBA", (1600, 1000), (12, 34, 56, 255)).save(path, format="PNG", icc_profile=b"sRGB")
+            Image.new("RGBA", (1600, 1000), (12, 34, 56, 255)).save(
+                path,
+                format="PNG",
+                icc_profile=SRGB_PROFILE_BYTES,
+            )
 
             _, failures = validator.validate_asset(path)
 
@@ -79,7 +94,7 @@ class HomeTileAssetValidatorTests(unittest.TestCase):
             Image.new("RGB", (1600, 1000), (12, 34, 56)).save(
                 imageset / "Shared.png",
                 format="PNG",
-                icc_profile=b"sRGB",
+                icc_profile=SRGB_PROFILE_BYTES,
             )
 
             with patch.object(validator, "REQUIRED_ASSETS", {"one": "Shared", "two": "Shared"}):

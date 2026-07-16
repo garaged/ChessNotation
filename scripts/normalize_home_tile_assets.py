@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import shutil
 import sys
 import tempfile
@@ -81,7 +82,8 @@ def main() -> int:
             f"{result.source_size[0]}x{result.source_size[1]} -> "
             f"{result.output_path} {result.output_size[0]}x{result.output_size[1]} "
             f"profileScale={result.profile.foreground_width_ratio:.2f} "
-            f"center={result.profile.optical_center} {action}"
+            f"center={result.profile.optical_center} "
+            f"{'unchanged' if not result.changed else action}"
         )
 
     if not args.dry_run:
@@ -99,6 +101,7 @@ class NormalizationResult:
     output_path: Path
     source_size: tuple[int, int]
     output_size: tuple[int, int]
+    changed: bool
 
 
 def normalize_all(dry_run: bool = False, output_dir: Path | None = None) -> list[NormalizationResult]:
@@ -112,6 +115,7 @@ def normalize_all(dry_run: bool = False, output_dir: Path | None = None) -> list
         raise NormalizationError("duplicate output mapping: " + ", ".join(str(path) for path in duplicate_paths))
 
     backup_dir = Path(tempfile.mkdtemp(prefix="ChessNotation-home-tile-originals-"))
+    preserved_originals = False
     results: list[NormalizationResult] = []
 
     for profile in PROFILES:
@@ -123,13 +127,19 @@ def normalize_all(dry_run: bool = False, output_dir: Path | None = None) -> list
         with Image.open(source_path) as source:
             source.load()
             source_size = source.size
+            already_normalized = is_production_normalized(source)
             normalized = normalize_image(source, profile)
 
-        if not dry_run and output_dir is None:
+        changed = not already_normalized if dry_run else False
+        if not dry_run and output_dir is None and not already_normalized:
             shutil.copy2(source_path, backup_dir / source_path.name)
+            preserved_originals = True
 
         if not dry_run:
-            write_if_changed(normalized, output_path)
+            if output_dir is None and already_normalized:
+                changed = False
+            else:
+                changed = write_if_changed(normalized, output_path)
 
         results.append(
             NormalizationResult(
@@ -138,10 +148,11 @@ def normalize_all(dry_run: bool = False, output_dir: Path | None = None) -> list
                 output_path=output_path,
                 source_size=source_size,
                 output_size=normalized.size,
+                changed=changed,
             )
         )
 
-    if not dry_run and output_dir is None:
+    if not dry_run and output_dir is None and preserved_originals:
         print(f"Temporary originals preserved at: {backup_dir}")
 
     return results
@@ -158,7 +169,7 @@ def normalize_image(source: Image.Image, profile: TileProfile) -> Image.Image:
     canvas = background.copy()
     paste_x = int(round(profile.optical_center[0] - foreground.width / 2))
     paste_y = int(round(profile.optical_center[1] - foreground.height / 2))
-    canvas.paste(foreground, (paste_x, paste_y))
+    canvas.paste(foreground, (paste_x, paste_y), make_feathered_mask(foreground.size))
     return canvas.convert("RGB")
 
 
@@ -198,7 +209,16 @@ def make_foreground(image: Image.Image, width_ratio: float) -> Image.Image:
     return image.resize(target_size, Image.Resampling.LANCZOS)
 
 
-def write_if_changed(image: Image.Image, path: Path) -> None:
+def make_feathered_mask(size: tuple[int, int]) -> Image.Image:
+    width, height = size
+    feather = max(24, min(width, height) // 14)
+    mask = Image.new("L", size, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.rectangle((feather, feather, width - feather, height - feather), fill=255)
+    return mask.filter(ImageFilter.GaussianBlur(radius=feather / 2))
+
+
+def write_if_changed(image: Image.Image, path: Path) -> bool:
     path.parent.mkdir(parents=True, exist_ok=True)
     existing_hash = file_hash(path) if path.exists() else None
     temp_path = path.with_suffix(path.suffix + ".tmp")
@@ -206,8 +226,9 @@ def write_if_changed(image: Image.Image, path: Path) -> None:
     new_hash = file_hash(temp_path)
     if existing_hash == new_hash:
         temp_path.unlink()
-        return
+        return False
     temp_path.replace(path)
+    return True
 
 
 def write_contact_sheets(paths: list[Path], output_dir: Path) -> None:
@@ -261,6 +282,21 @@ def file_hash(path: Path) -> str:
 
 def is_rgb_without_alpha(image: Image.Image) -> bool:
     return image.mode == "RGB" and image.size == CANVAS_SIZE
+
+
+def is_production_normalized(image: Image.Image) -> bool:
+    return is_rgb_without_alpha(image) and has_srgb_profile(image)
+
+
+def has_srgb_profile(image: Image.Image) -> bool:
+    profile = image.info.get("icc_profile")
+    if isinstance(profile, bytes):
+        try:
+            name = ImageCms.getProfileName(ImageCms.ImageCmsProfile(io.BytesIO(profile)))
+            return "srgb" in name.lower()
+        except ImageCms.PyCMSError:
+            return False
+    return bool(image.info.get("srgb"))
 
 
 class NormalizationError(Exception):
