@@ -62,8 +62,8 @@ struct HomeTileLayoutRegressionTests {
 
         #expect(boardSkillsSource.contains("FamilyQuickStartCard("))
         #expect(boardSkillsSource.components(separatedBy: "FamilyGameRow(").count - 1 == 2)
-        #expect(boardSkillsSource.contains("static let drillRowHeight: CGFloat = 100"))
-        #expect(boardSkillsSource.contains("static let quickStartHeight: CGFloat = 132"))
+        #expect(source.contains("static let drillRowHeight: CGFloat = 100"))
+        #expect(source.contains("static let quickStartHeight: CGFloat = 132"))
         #expect(boardSkillsSource.contains("Choose a drill"))
         #expect(boardSkillsSource.contains("boardSkills.quickStart"))
         #expect(boardSkillsSource.contains("home.squareRecognitionLink"))
