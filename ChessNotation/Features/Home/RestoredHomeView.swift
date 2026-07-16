@@ -37,6 +37,8 @@ struct RestoredHomeView: View {
                     .accessibilityIdentifier("home.appearanceButton")
                 }
             }
+            .toolbarBackground(PremiumDesign.backgroundTop, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .sheet(isPresented: $isShowingAppearanceSettings) {
                 AppearanceSettingsView()
                     .environment(appSettings)
@@ -176,6 +178,7 @@ struct RestoredHomeView: View {
                         texture: .board,
                         assetName: PremiumAssetName.positionRecallTile,
                         showsFallbackIcon: false,
+                        artworkScale: HomeLayout.positionRecallArtworkScale,
                         accessibilityIdentifier: "home.positionRecallLink"
                     )
                 }
@@ -193,6 +196,7 @@ struct RestoredHomeView: View {
         texture: HomeMenuTile.Texture,
         assetName: String,
         showsFallbackIcon: Bool = true,
+        artworkScale: CGFloat = 1,
         accessibilityIdentifier: String
     ) -> some View {
         HomeMenuTile(
@@ -203,6 +207,7 @@ struct RestoredHomeView: View {
             texture: texture,
             assetName: assetName,
             showsFallbackIcon: showsFallbackIcon,
+            artworkScale: artworkScale,
             accessibilityIdentifier: accessibilityIdentifier
         )
         .frame(maxWidth: .infinity)
@@ -215,14 +220,39 @@ struct RestoredHomeView: View {
                 subtitle: "Learn notation rules, modes, and app controls."
             )
 
-            NavigationLink {
-                InstructionsView()
-            } label: {
-                PremiumInstructionsTile()
+            if dynamicTypeSize.isAccessibilitySize {
+                instructionsLink
+            } else {
+                GeometryReader { proxy in
+                    let cardWidth = max(0, (proxy.size.width - HomeLayout.gridSpacing) / 2)
+                    HStack(spacing: 0) {
+                        Spacer(minLength: 0)
+                        instructionsLink
+                            .frame(width: cardWidth)
+                        Spacer(minLength: 0)
+                    }
+                }
+                .frame(height: HomeLayout.cardHeight)
             }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("home.instructionsLink")
         }
+    }
+
+    private var instructionsLink: some View {
+        NavigationLink {
+            InstructionsView()
+        } label: {
+            HomeMenuTile(
+                title: "Instructions",
+                subtitle: "Learn notation rules and controls.",
+                systemImage: "book.pages",
+                tint: PremiumDesign.Accent.neutral.color,
+                texture: .book,
+                assetName: PremiumAssetName.instructionsTile,
+                accessibilityIdentifier: "home.instructionsLink"
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("home.instructionsLink")
     }
 }
 
@@ -243,7 +273,7 @@ private enum HomeLayout {
     static let subtitleRegionHeight: CGFloat = 36
     static let cardHeight: CGFloat = 188
     static let cardRadius: CGFloat = 16
-    static let instructionsHeight: CGFloat = 124
+    static let positionRecallArtworkScale: CGFloat = 0.9
 }
 
 private enum FamilyScreenLayout {
@@ -556,59 +586,6 @@ private struct HomeSectionHeader: View {
     }
 }
 
-private struct PremiumInstructionsTile: View {
-    var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            PremiumArtworkView(
-                assetName: PremiumAssetName.instructionsTile,
-                fallbackIdentifier: "premiumAssetFallback.\(PremiumAssetName.instructionsTile)"
-            ) {
-                HomeMenuTexture(tint: PremiumDesign.Accent.neutral.color, style: .book)
-            }
-
-            LinearGradient(
-                colors: [.clear, Color.black.opacity(0.86)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-
-            HStack(alignment: .bottom, spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Instructions")
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(.white)
-                    Text("Notation rules, training modes, and app controls.")
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.86))
-                        .lineLimit(2)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                Image(systemName: "arrow.right")
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 36, height: 36)
-                    .background(.ultraThinMaterial)
-                    .clipShape(Circle())
-                    .accessibilityHidden(true)
-            }
-            .padding(16)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: HomeLayout.instructionsHeight)
-        .clipShape(RoundedRectangle(cornerRadius: HomeLayout.cardRadius))
-        .overlay {
-            RoundedRectangle(cornerRadius: HomeLayout.cardRadius)
-                .stroke(PremiumDesign.Accent.neutral.color.opacity(0.28), lineWidth: 1)
-        }
-        .contentShape(RoundedRectangle(cornerRadius: HomeLayout.cardRadius))
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isButton)
-        .accessibilityLabel("Instructions")
-        .accessibilityHint("Open the ChessNotation guide.")
-    }
-}
-
 private struct HomeMenuTile: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -626,6 +603,7 @@ private struct HomeMenuTile: View {
     let texture: Texture
     let assetName: String
     var showsFallbackIcon = true
+    var artworkScale: CGFloat = 1
     let accessibilityIdentifier: String
 
     private var usesFlexibleHeight: Bool {
@@ -694,12 +672,15 @@ private struct HomeMenuTile: View {
 
     private var artwork: some View {
         ZStack(alignment: .bottomTrailing) {
+            Color.black.opacity(0.16)
+
             PremiumArtworkView(
                 assetName: assetName,
                 fallbackIdentifier: "premiumAssetFallback.\(assetName)"
             ) {
                 HomeMenuTexture(tint: tint, style: texture)
             }
+            .scaleEffect(artworkScale)
 
             LinearGradient(
                 colors: [.clear, Color.black.opacity(0.28)],
