@@ -2,7 +2,7 @@
 
 Status: Proposed
 Owner: Project
-Last updated: 2026-07-10
+Last updated: 2026-07-15
 
 ## Intent
 
@@ -151,6 +151,7 @@ Quick Start must never silently choose an advanced or destructive configuration.
 - `ChessNotationUITests/HomeUITests.swift`: CN-SPEC-0026-AC001, AC004, AC010, AC011, AC012.
 - `ChessNotationUITests/GameFamilyNavigationUITests.swift`: CN-SPEC-0026-AC005, AC006, AC007, AC008, AC009, AC010, AC011.
 - `ChessNotationTests/PremiumAssetTests.swift`: CN-SPEC-0026-AC010.
+- `ChessNotationTests/HomeTileLayoutRegressionTests.swift`: CN-SPEC-0026-AC010 partial compact-width tile symmetry and Dynamic Type expansion coverage.
 - Planned source owners: typed family metadata in Domain, family route resolution in App, and focused family screens under `ChessNotation/Features/Home` or a dedicated `Features/GameCatalog` area.
 
 ## Implementation Constraints
@@ -183,3 +184,4 @@ Quick Start must never silently choose an advanced or destructive configuration.
 ## Revision Notes
 
 - 2026-07-10: Initial proposed information-architecture contract defining four stable home families and complete family-level navigation.
+- 2026-07-15: Normalized current home tiles to a stable two-column compact-width grid with equal title, subtitle, artwork, and card regions while preserving unrestricted vertical expansion at accessibility Dynamic Type sizes.
