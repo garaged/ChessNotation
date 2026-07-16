@@ -22,31 +22,49 @@ struct HomeTileLayoutRegressionTests {
     }
 
     @Test
-    func familyCardsUseOneSharedGeometryAndTypographyHierarchy() throws {
+    func familyCardsUseOneExactGeometryAndTypographyHierarchy() throws {
         let source = try homeSource()
 
-        #expect(source.contains("static let artworkHeight"))
-        #expect(source.contains("static let titleRegionHeight"))
-        #expect(source.contains("static let subtitleRegionHeight"))
-        #expect(source.contains("static let cardHeight"))
-        #expect(source.contains("minHeight: usesFlexibleHeight ? nil : HomeTileLayout.cardHeight"))
-        #expect(source.contains("maxHeight: usesFlexibleHeight ? nil : HomeTileLayout.cardHeight"))
+        #expect(source.contains("static let gridSpacing: CGFloat = 18"))
+        #expect(source.contains("static let artworkHeight: CGFloat = 112"))
+        #expect(source.contains("static let titleRegionHeight: CGFloat = 24"))
+        #expect(source.contains("static let subtitleRegionHeight: CGFloat = 42"))
+        #expect(source.contains("static let cardHeight: CGFloat = 214"))
+        #expect(source.contains("minHeight: usesFlexibleHeight ? nil : HomeLayout.cardHeight"))
+        #expect(source.contains("maxHeight: usesFlexibleHeight ? nil : HomeLayout.cardHeight"))
+        #expect(source.contains(".lineLimit(usesFlexibleHeight ? nil : 1)"))
+        #expect(source.contains(".lineLimit(usesFlexibleHeight ? nil : 2)"))
         #expect(source.contains(".font(.headline.weight(.semibold))"))
         #expect(source.contains(".font(.caption)"))
         #expect(source.contains(".clipped()"))
     }
 
     @Test
-    func boardSkillsOwnsOnlyPlayableCoordinateAndMovementGames() throws {
+    func heroRespectsSafeAreaAndSettingsUsesToolbar() throws {
+        let source = try homeSource()
+
+        #expect(source.contains("ToolbarItem(placement: .topBarTrailing)"))
+        #expect(source.contains("static let topPadding: CGFloat = 12"))
+        #expect(source.contains("static let compactHeroHeight: CGFloat = 168"))
+        #expect(!source.contains("ZStack(alignment: .topTrailing)"))
+        #expect(!source.contains(".padding(.top, 30)"))
+    }
+
+    @Test
+    func boardSkillsUsesFamilyHierarchyInsteadOfHomeSizedTileGrid() throws {
         let source = try homeSource()
         let boardSkillsStart = try #require(source.range(of: "private struct BoardSkillsFamilyView"))
         let pieceMovementStart = try #require(source.range(of: "private struct PieceMovementLauncherView"))
         let boardSkillsSource = source[boardSkillsStart.lowerBound..<pieceMovementStart.lowerBound]
 
-        #expect(boardSkillsSource.contains("Square Recognition"))
-        #expect(boardSkillsSource.contains("Piece Movement"))
+        #expect(boardSkillsSource.contains("FamilyQuickStartCard("))
+        #expect(boardSkillsSource.components(separatedBy: "FamilyGameRow(").count - 1 == 2)
+        #expect(boardSkillsSource.contains("Choose a drill"))
+        #expect(boardSkillsSource.contains("boardSkills.quickStart"))
         #expect(boardSkillsSource.contains("home.squareRecognitionLink"))
         #expect(boardSkillsSource.contains("home.pieceMovementLink"))
+        #expect(!boardSkillsSource.contains("LazyVGrid"))
+        #expect(!boardSkillsSource.contains("HomeMenuTile("))
         #expect(!boardSkillsSource.contains("InstructionsView"))
     }
 
@@ -67,8 +85,8 @@ struct HomeTileLayoutRegressionTests {
         let source = try homeSource()
 
         #expect(source.contains("dynamicTypeSize.isAccessibilitySize ? 1 : 2"))
+        #expect(source.contains("usesFlexibleHeight ? nil : 1"))
         #expect(source.contains("usesFlexibleHeight ? nil : 2"))
-        #expect(source.contains("usesFlexibleHeight ? nil : 3"))
         #expect(source.contains("minHeight: usesFlexibleHeight ? nil"))
         #expect(source.contains("maxHeight: usesFlexibleHeight ? nil"))
     }
