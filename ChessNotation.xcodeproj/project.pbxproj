@@ -48,13 +48,6 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		3536BE732F9CF2AF00F413D1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		3536BE822F9CF2B000F413D1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -100,7 +93,6 @@
 			buildConfigurationList = 3536BE992F9CF2B000F413D1 /* Build configuration list for PBXNativeTarget "ChessNotation" */;
 			buildPhases = (
 				3536BE722F9CF2AF00F413D1 /* Sources */,
-				3536BE732F9CF2B000F413D1 /* Frameworks */,
 				3536BE742F9CF2AF00F413D1 /* Resources */,
 			);
 			buildRules = (
