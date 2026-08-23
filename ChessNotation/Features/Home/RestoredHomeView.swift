@@ -87,25 +87,35 @@ struct RestoredHomeView: View {
                     .font(.title.weight(.bold))
                     .foregroundStyle(.white)
                     .lineLimit(1)
+                    .minimumScaleFactor(dynamicTypeSize.isAccessibilitySize ? 0.62 : 1)
                 Text("Train faster, read better, play smarter.")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.white.opacity(0.88))
-                    .lineLimit(1)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? 2 : 1)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(HomeLayout.heroPadding)
         }
         .frame(maxWidth: .infinity)
-        .frame(
-            height: horizontalSizeClass == .regular
-                ? HomeLayout.regularHeroHeight
-                : HomeLayout.compactHeroHeight
-        )
+        .frame(height: heroHeight)
         .clipShape(RoundedRectangle(cornerRadius: PremiumDesign.Radius.large))
         .overlay {
             RoundedRectangle(cornerRadius: PremiumDesign.Radius.large)
                 .stroke(PremiumDesign.Accent.brand.color.opacity(0.24), lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
+    }
+
+    private var heroHeight: CGFloat {
+        if dynamicTypeSize.isAccessibilitySize {
+            return horizontalSizeClass == .regular
+                ? HomeLayout.accessibilityRegularHeroHeight
+                : HomeLayout.accessibilityCompactHeroHeight
+        }
+
+        return horizontalSizeClass == .regular
+            ? HomeLayout.regularHeroHeight
+            : HomeLayout.compactHeroHeight
     }
 
     private var trainingFamilies: some View {
@@ -264,6 +274,8 @@ private enum HomeLayout {
     static let maximumContentWidth: CGFloat = 740
     static let compactHeroHeight: CGFloat = 156
     static let regularHeroHeight: CGFloat = 204
+    static let accessibilityCompactHeroHeight: CGFloat = 176
+    static let accessibilityRegularHeroHeight: CGFloat = 224
     static let heroPadding: CGFloat = 18
     static let artworkHeight: CGFloat = 100
     static let artworkAspectRatio: CGFloat = 9.0 / 7.0
@@ -371,6 +383,8 @@ private struct BoardSkillsFamilyView: View {
 }
 
 private struct FamilyQuickStartCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     let title: String
     let subtitle: String
     let assetName: String
@@ -405,7 +419,8 @@ private struct FamilyQuickStartCard: View {
                     Text(subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.white.opacity(0.86))
-                        .lineLimit(2)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -420,7 +435,10 @@ private struct FamilyQuickStartCard: View {
             .padding(16)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: FamilyScreenLayout.quickStartHeight)
+        .frame(
+            minHeight: FamilyScreenLayout.quickStartHeight,
+            maxHeight: dynamicTypeSize.isAccessibilitySize ? nil : FamilyScreenLayout.quickStartHeight
+        )
         .clipShape(RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius))
         .overlay {
             RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius)
@@ -431,6 +449,8 @@ private struct FamilyQuickStartCard: View {
 }
 
 private struct FamilyGameRow: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     let title: String
     let subtitle: String
     let assetName: String
@@ -457,11 +477,13 @@ private struct FamilyGameRow: View {
                 Text(title)
                     .font(.headline.weight(.semibold))
                     .foregroundStyle(PremiumDesign.primaryText)
-                    .lineLimit(1)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(subtitle)
                     .font(.subheadline)
                     .foregroundStyle(PremiumDesign.secondaryText)
-                    .lineLimit(2)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -471,8 +493,12 @@ private struct FamilyGameRow: View {
                 .accessibilityHidden(true)
         }
         .padding(.horizontal, 14)
+        .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 14 : 0)
         .frame(maxWidth: .infinity)
-        .frame(height: FamilyScreenLayout.drillRowHeight)
+        .frame(
+            minHeight: FamilyScreenLayout.drillRowHeight,
+            maxHeight: dynamicTypeSize.isAccessibilitySize ? nil : FamilyScreenLayout.drillRowHeight
+        )
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius))
         .overlay {

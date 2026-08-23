@@ -9,9 +9,9 @@ Release target: `3.0.1` build `1`
 
 This record tracks CN-SPEC-0026 and CN-SPEC-0027 rendered validation for Home and Board Skills.
 
-Automated source, asset, build, and Xcode-runner checks passed on 2026-08-23. The required full device screenshot matrix remains unrun in this environment because command-line `xcodebuild` cannot access CoreSimulator devices from the sandbox and no rendered screenshot artifact was available from the Xcode MCP runner.
+Automated source, asset, build, and Xcode-runner checks passed on 2026-08-23. Manually captured screenshots were inspected from `docs/manual-testing/screenshots/home-board-skills/2026-08-23/`.
 
-Do not mark CN-SPEC-0026 or CN-SPEC-0027 Accepted from this record alone. The specs require inspected rendered screenshots across the device matrix.
+Default Dynamic Type screenshots pass the Home and Board Skills rendered acceptance checks. The accessibility Dynamic Type screenshots exposed text clipping in the Home hero and Board Skills drill hierarchy. A code fix has been applied after the captured screenshots, so the accessibility cases must be recaptured and reinspected before CN-SPEC-0026 or CN-SPEC-0027 can be marked Accepted.
 
 ## Baseline Commands
 
@@ -43,50 +43,50 @@ Do not mark CN-SPEC-0026 or CN-SPEC-0027 Accepted from this record alone. The sp
 
 | ID | Simulator/Device | Orientation | Dynamic Type | Command Used | Result | Screenshot Path | Defects Found | Severity | Fix Commit |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| HBV-001 | iPhone SE-class | Portrait | Default | Not run | UNRUN | N/A | Screenshot capture unavailable in current environment. | N/A | N/A |
-| HBV-002 | iPhone 16-class | Portrait | Default | Shell `xcodebuild` requested; MCP tests run | UNRUN | N/A | Shell simulator destination unavailable; MCP tests passed but no screenshot artifact was available to inspect. | N/A | N/A |
-| HBV-003 | Pro Max-class | Portrait | Default | Not run | UNRUN | N/A | Screenshot capture unavailable in current environment. | N/A | N/A |
-| HBV-004 | iPad | Portrait | Default | Not run | UNRUN | N/A | Screenshot capture unavailable in current environment. | N/A | N/A |
-| HBV-005 | iPad | Landscape | Default | Not run | UNRUN | N/A | Screenshot capture unavailable in current environment. | N/A | N/A |
-| HBV-006 | iPhone 16-class | Portrait | Accessibility size | Not run | UNRUN | N/A | Screenshot capture unavailable in current environment. | N/A | N/A |
+| HBV-001 | iPhone SE-class | Portrait | Default | Manual simulator screenshot | PASS | `docs/manual-testing/screenshots/home-board-skills/2026-08-23/home-iphone-se-portrait-default.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-iphone-se-portrait-default.png` | None found. | N/A | N/A |
+| HBV-002 | iPhone 16-class | Portrait | Default | Manual simulator screenshot; MCP tests run | PASS | `docs/manual-testing/screenshots/home-board-skills/2026-08-23/home-iphone-16-portrait-default.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-iphone-16-portrait-default.png` | None found. | N/A | N/A |
+| HBV-003 | Pro Max-class | Portrait | Default | Manual simulator screenshot | PASS | `docs/manual-testing/screenshots/home-board-skills/2026-08-23/home-iphone-pro-max-portrait-default.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-iphone-pro-max-portrait-default.png` | None found. | N/A | N/A |
+| HBV-004 | iPad | Portrait | Default | Manual simulator screenshot | PASS | `docs/manual-testing/screenshots/home-board-skills/2026-08-23/home-ipad-portrait-default.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-ipad-portrait-default.png` | None found. | N/A | N/A |
+| HBV-005 | iPad | Landscape | Default | Manual simulator screenshot | PASS | `docs/manual-testing/screenshots/home-board-skills/2026-08-23/home-ipad-landscape-default.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-ipad-landscape-default.png` | None found. | N/A | N/A |
+| HBV-006 | iPhone 16-class | Portrait | Accessibility size | Manual simulator screenshot | FAIL | `docs/manual-testing/screenshots/home-board-skills/2026-08-23/home-iphone-16-portrait-accessibility.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-iphone-16-portrait-accessibility.png` | Home hero title/subtitle truncate; Board Skills Quick Start and drill row text truncate. Fixed in working tree; recapture required. | High | Pending |
 
 ## Home Acceptance Checklist
 
 | Check | Automated Status | Visual Status | Evidence |
 | --- | --- | --- | --- |
-| Exactly four gameplay family cards | PASS | UNRUN | Home UI and source tests. |
-| Complete 2x2 grid at normal Dynamic Type | PASS | UNRUN | Home UI frame assertions. |
-| One column at accessibility Dynamic Type | PASS | UNRUN | Source regression guardrails. |
-| Identical family card width and height | PASS | UNRUN | Home UI frame assertions. |
-| Identical artwork viewport | PASS | UNRUN | Source regression guardrails. |
-| Consistent perceived artwork scale | PARTIAL | UNRUN | Source normalization validated; subjective screenshot review still required. |
-| No card intersection or touching | PASS | UNRUN | Home UI frame assertions. |
-| Visible horizontal and vertical gutters | PASS | UNRUN | Home UI frame assertions; screenshot review still required. |
-| No clipped or ellipsized important copy | PASS | UNRUN | Source line-limit guardrails; screenshot review still required. |
-| Hero below navigation/status safe area | PASS | UNRUN | Source guardrails; screenshot review still required. |
-| Settings does not float over hero | PASS | UNRUN | Toolbar source guardrails; screenshot review still required. |
-| Bounded centered width on iPad | PARTIAL | UNRUN | Source max-width guardrail; iPad screenshot review required. |
-| Position Recall not disproportionately zoomed | PARTIAL | UNRUN | Source scale override removed; subjective screenshot review required. |
-| Instructions outside grid, centered, same shape | PASS | UNRUN | Home UI frame assertions. |
+| Exactly four gameplay family cards | PASS | PASS | Home UI and source tests; inspected screenshots. |
+| Complete 2x2 grid at normal Dynamic Type | PASS | PASS | Home UI frame assertions; inspected default Dynamic Type screenshots. |
+| One column at accessibility Dynamic Type | PASS | PASS | Accessibility screenshot shows one-column layout. |
+| Identical family card width and height | PASS | PASS | Home UI frame assertions; inspected screenshots. |
+| Identical artwork viewport | PASS | PASS | Source regression guardrails; inspected screenshots. |
+| Consistent perceived artwork scale | PARTIAL | PASS | Source normalization validated; inspected screenshots show no disproportionate Position Recall zoom. |
+| No card intersection or touching | PASS | PASS | Home UI frame assertions; inspected screenshots. |
+| Visible horizontal and vertical gutters | PASS | PASS | Home UI frame assertions; inspected screenshots. |
+| No clipped or ellipsized important copy | PASS | FAIL | Accessibility screenshot shows hero title/subtitle truncation; fixed after capture and needs recapture. |
+| Hero below navigation/status safe area | PASS | PASS | Inspected screenshots. |
+| Settings does not float over hero | PASS | PASS | Inspected screenshots. |
+| Bounded centered width on iPad | PARTIAL | PASS | Source max-width guardrail; inspected iPad screenshots. |
+| Position Recall not disproportionately zoomed | PARTIAL | PASS | Source scale override removed; inspected screenshots. |
+| Instructions outside grid, centered, same shape | PASS | PASS | Home UI frame assertions; inspected screenshots including help-view captures. |
 
 ## Board Skills Acceptance Checklist
 
 | Check | Automated Status | Visual Status | Evidence |
 | --- | --- | --- | --- |
-| Family summary is concise | PASS | UNRUN | Source audit. |
-| Quick Start is clearly primary | PASS | UNRUN | Source hierarchy and Home UI tests; screenshot review still required. |
-| Quick Start launches Square Recognition | PASS | UNRUN | Home UI tests. |
-| Choose a drill hierarchy is clear | PASS | UNRUN | Source audit; screenshot review still required. |
-| Square Recognition and Piece Movement rows share width/height | PASS | UNRUN | Home UI frame assertions. |
-| Rows align leading edges and preserve positive spacing | PASS | UNRUN | Home UI frame assertions. |
-| Rows have matching artwork dimensions | PASS | UNRUN | Source shared `FamilyGameRow`. |
-| Rows have no clipping or intersection | PASS | UNRUN | Home UI frame assertions; screenshot review still required for clipping. |
-| No duplicate Home-style grid | PASS | UNRUN | Source regression guardrails. |
-| Bounded width on iPad | PARTIAL | UNRUN | Source max-width guardrail; iPad screenshot review required. |
-| Dynamic Type remains usable | PARTIAL | UNRUN | Source uses semantic fonts; screenshot review required. |
+| Family summary is concise | PASS | PASS | Source audit; inspected screenshots. |
+| Quick Start is clearly primary | PASS | PASS | Source hierarchy, Home UI tests, inspected screenshots. |
+| Quick Start launches Square Recognition | PASS | PASS | Home UI tests. |
+| Choose a drill hierarchy is clear | PASS | PASS | Source audit; inspected screenshots. |
+| Square Recognition and Piece Movement rows share width/height | PASS | PASS | Home UI frame assertions; inspected default screenshots. |
+| Rows align leading edges and preserve positive spacing | PASS | PASS | Home UI frame assertions; inspected screenshots. |
+| Rows have matching artwork dimensions | PASS | PASS | Source shared `FamilyGameRow`; inspected screenshots. |
+| Rows have no clipping or intersection | PASS | FAIL | Accessibility screenshot shows Quick Start and drill row text truncation; fixed after capture and needs recapture. |
+| No duplicate Home-style grid | PASS | PASS | Source regression guardrails; inspected screenshots. |
+| Bounded width on iPad | PARTIAL | PASS | Source max-width guardrail; inspected iPad screenshots. |
+| Dynamic Type remains usable | PARTIAL | FAIL | Accessibility screenshot shows text truncation; fixed after capture and needs recapture. |
 
 ## Decision
 
 CN-SPEC-0026 and CN-SPEC-0027 remain `Proposed`.
 
-Reason: automated evidence is strong, but the required rendered screenshot matrix was not completed or inspected in this environment.
+Reason: automated evidence is strong and default-size rendered screenshots passed, but accessibility Dynamic Type rendered screenshots failed. The accessibility layout fix must be validated with fresh screenshots before acceptance.
