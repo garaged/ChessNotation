@@ -64,6 +64,51 @@ final class HomeUITests: ChessNotationUITestCase {
         }
     }
 
+    func testInstructionsMatchesFamilyCardGeometryAndIsCentered() throws {
+        let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
+
+        let positionRecall = scrollToHomeTile(
+            identifier: "home.positionRecallLink",
+            title: "Position Recall",
+            in: app
+        )
+        XCTAssertTrue(positionRecall.waitForExistence(timeout: 5))
+
+        let instructions = scrollToHomeTile(
+            identifier: "home.instructionsLink",
+            title: "Instructions",
+            in: app
+        )
+        XCTAssertTrue(instructions.waitForExistence(timeout: 5))
+
+        XCTAssertEqual(
+            instructions.frame.width,
+            positionRecall.frame.width,
+            accuracy: 1,
+            "Instructions must use one family-card column width"
+        )
+        XCTAssertEqual(
+            instructions.frame.height,
+            positionRecall.frame.height,
+            accuracy: 1,
+            "Instructions must use the same card height as family cards"
+        )
+
+        let window = app.windows.element(boundBy: 0)
+        XCTAssertTrue(window.exists)
+        XCTAssertEqual(
+            instructions.frame.midX,
+            window.frame.midX,
+            accuracy: 1,
+            "Instructions must be centered in its own single-card row"
+        )
+        XCTAssertGreaterThan(
+            instructions.frame.minY,
+            positionRecall.frame.maxY,
+            "Instructions must remain below and outside the primary 2x2 gameplay grid"
+        )
+    }
+
     func testBoardSkillsUsesQuickStartAndTwoAlignedCompactRows() throws {
         let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
         let boardSkillsTile = scrollToHomeTile(identifier: "home.boardSkillsLink", title: "Board Skills", in: app)
@@ -81,6 +126,7 @@ final class HomeUITests: ChessNotationUITestCase {
         XCTAssertGreaterThan(squareRecognition.frame.minY, quickStart.frame.maxY)
         XCTAssertGreaterThan(pieceMovement.frame.minY, squareRecognition.frame.maxY)
         XCTAssertEqual(squareRecognition.frame.width, pieceMovement.frame.width, accuracy: 1)
+        XCTAssertEqual(squareRecognition.frame.height, pieceMovement.frame.height, accuracy: 1)
         XCTAssertEqual(squareRecognition.frame.minX, pieceMovement.frame.minX, accuracy: 1)
         XCTAssertFalse(squareRecognition.frame.intersects(pieceMovement.frame))
     }
