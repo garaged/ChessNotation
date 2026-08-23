@@ -126,74 +126,96 @@ struct RestoredHomeView: View {
             )
 
             LazyVGrid(columns: familyColumns, spacing: HomeLayout.gridSpacing) {
-                NavigationLink {
-                    GameLibraryView(libraryService: libraryService, launchMode: .practice)
-                        .environment(appSettings)
-                } label: {
-                    familyTile(
-                        title: "Notation Training",
-                        subtitle: "Practice SAN from real games.",
-                        systemImage: "pencil.and.list.clipboard",
-                        tint: PremiumDesign.Accent.practice.color,
-                        texture: .board,
-                        assetName: PremiumAssetName.notationTrainingTile,
-                        accessibilityIdentifier: "home.notationTrainingTile"
-                    )
+                ForEach(GameFamilyCatalog.productionFamilies, id: \.id) { family in
+                    NavigationLink {
+                        familyDestination(for: family)
+                    } label: {
+                        let visual = familyVisuals(for: family.id)
+                        familyTile(
+                            title: family.title,
+                            subtitle: family.purpose,
+                            systemImage: visual.systemImage,
+                            tint: visual.tint,
+                            texture: visual.texture,
+                            assetName: visual.assetName,
+                            showsFallbackIcon: family.id != .positionRecall,
+                            accessibilityIdentifier: visual.accessibilityIdentifier
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier(familyVisuals(for: family.id).accessibilityIdentifier)
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("home.notationTrainingTile")
-
-                NavigationLink {
-                    GameLibraryView(libraryService: libraryService, launchMode: .timed)
-                        .environment(appSettings)
-                } label: {
-                    familyTile(
-                        title: "Timed Training",
-                        subtitle: "Build speed under a clock.",
-                        systemImage: "timer",
-                        tint: PremiumDesign.Accent.timed.color,
-                        texture: .speed,
-                        assetName: PremiumAssetName.timedNotationTile,
-                        accessibilityIdentifier: "home.timedNotationTile"
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("home.timedNotationTile")
-
-                NavigationLink {
-                    BoardSkillsFamilyView()
-                        .environment(appSettings)
-                } label: {
-                    familyTile(
-                        title: "Board Skills",
-                        subtitle: "Learn squares and movement.",
-                        systemImage: "checkerboard.rectangle",
-                        tint: PremiumDesign.Accent.square.color,
-                        texture: .target,
-                        assetName: PremiumAssetName.squareRecognitionTile,
-                        accessibilityIdentifier: "home.boardSkillsLink"
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("home.boardSkillsLink")
-
-                NavigationLink {
-                    PositionRecallLauncherView()
-                } label: {
-                    familyTile(
-                        title: "Position Recall",
-                        subtitle: "Rebuild positions from memory.",
-                        systemImage: "brain.head.profile",
-                        tint: PremiumDesign.Accent.learning.color,
-                        texture: .board,
-                        assetName: PremiumAssetName.positionRecallTile,
-                        showsFallbackIcon: false,
-                        accessibilityIdentifier: "home.positionRecallLink"
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("home.positionRecallLink")
             }
+        }
+    }
+
+    @ViewBuilder
+    private func familyDestination(for family: TrainingFamily) -> some View {
+        switch family.id {
+        case .notationTraining:
+            NotationTrainingFamilyView(
+                family: family,
+                libraryService: libraryService,
+                historyStore: AppEnvironment.makeNotationTrainingHistoryStore()
+            )
+            .environment(appSettings)
+        case .timedTraining:
+            TimedTrainingFamilyView(
+                family: family,
+                libraryService: libraryService,
+                historyStore: AppEnvironment.makeNotationTrainingHistoryStore()
+            )
+            .environment(appSettings)
+        case .boardSkills:
+            BoardSkillsFamilyView(family: family)
+                .environment(appSettings)
+        case .positionRecall:
+            PositionRecallFamilyView(family: family)
+        }
+    }
+
+    private func familyVisuals(
+        for id: TrainingFamilyID
+    ) -> (
+        systemImage: String,
+        tint: Color,
+        texture: HomeMenuTile.Texture,
+        assetName: String,
+        accessibilityIdentifier: String
+    ) {
+        switch id {
+        case .notationTraining:
+            return (
+                "pencil.and.list.clipboard",
+                PremiumDesign.Accent.practice.color,
+                .board,
+                PremiumAssetName.notationTrainingTile,
+                "home.notationTrainingTile"
+            )
+        case .timedTraining:
+            return (
+                "timer",
+                PremiumDesign.Accent.timed.color,
+                .speed,
+                PremiumAssetName.timedNotationTile,
+                "home.timedNotationTile"
+            )
+        case .boardSkills:
+            return (
+                "checkerboard.rectangle",
+                PremiumDesign.Accent.square.color,
+                .target,
+                PremiumAssetName.squareRecognitionTile,
+                "home.boardSkillsLink"
+            )
+        case .positionRecall:
+            return (
+                "brain.head.profile",
+                PremiumDesign.Accent.learning.color,
+                .board,
+                PremiumAssetName.positionRecallTile,
+                "home.positionRecallLink"
+            )
         }
     }
 
@@ -292,27 +314,171 @@ private enum FamilyScreenLayout {
     static let cardRadius: CGFloat = 16
     static let artworkSize: CGFloat = 72
     static let drillRowHeight: CGFloat = 100
+    static let accessibilityDrillRowHeight: CGFloat = 348
     static let quickStartHeight: CGFloat = 132
+}
+
+private struct NotationTrainingFamilyView: View {
+    @Environment(AppSettings.self) private var appSettings
+
+    let family: TrainingFamily
+    let libraryService: GameLibraryProviding
+    let historyStore: NotationTrainingHistoryStoring
+
+    var body: some View {
+        FamilyScreenScaffold(title: family.title) {
+            FamilySummaryView(title: "Read and write SAN", subtitle: family.purpose)
+
+            NavigationLink {
+                GameLibraryView(
+                    libraryService: libraryService,
+                    launchMode: .practice,
+                    historyStore: historyStore
+                )
+                .environment(appSettings)
+            } label: {
+                FamilyQuickStartCard(
+                    title: "Quick Start",
+                    subtitle: "Open the full-game library and start untimed notation training.",
+                    assetName: PremiumAssetName.notationTrainingTile,
+                    systemImage: "play.fill",
+                    tint: PremiumDesign.Accent.practice.color
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("notationFamily.quickStart")
+
+            VStack(alignment: .leading, spacing: 12) {
+                FamilySectionTitle("Choose a notation drill")
+
+                ForEach(family.entries, id: \.id) { entry in
+                    if entry.id == .fullGame {
+                        NavigationLink {
+                            GameLibraryView(
+                                libraryService: libraryService,
+                                launchMode: .practice,
+                                historyStore: historyStore
+                            )
+                            .environment(appSettings)
+                        } label: {
+                            FamilyGameRow(
+                                title: entry.title,
+                                subtitle: entry.purpose,
+                                assetName: PremiumAssetName.notationTrainingTile,
+                                systemImage: "pencil.and.list.clipboard",
+                                tint: PremiumDesign.Accent.practice.color
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("notationFamily.fullGame")
+                    } else {
+                        FamilyUnavailableRow(entry: entry, tint: PremiumDesign.Accent.practice.color)
+                    }
+                }
+            }
+
+            FamilySecondaryActions {
+                NavigationLink {
+                    NotationTrainingHistoryView(launchMode: .practice, historyStore: historyStore)
+                } label: {
+                    Label("Notation history", systemImage: "chart.xyaxis.line")
+                }
+                .accessibilityIdentifier("notationFamily.history")
+            }
+        }
+    }
+}
+
+private struct TimedTrainingFamilyView: View {
+    @Environment(AppSettings.self) private var appSettings
+
+    let family: TrainingFamily
+    let libraryService: GameLibraryProviding
+    let historyStore: NotationTrainingHistoryStoring
+
+    var body: some View {
+        FamilyScreenScaffold(title: family.title) {
+            FamilySummaryView(title: "Clocked notation practice", subtitle: family.purpose)
+
+            NavigationLink {
+                GameLibraryView(
+                    libraryService: libraryService,
+                    launchMode: .timed,
+                    historyStore: historyStore
+                )
+                .environment(appSettings)
+            } label: {
+                FamilyQuickStartCard(
+                    title: "Quick Start",
+                    subtitle: "Open the timed library and choose a classic duration.",
+                    assetName: PremiumAssetName.timedNotationTile,
+                    systemImage: "timer",
+                    tint: PremiumDesign.Accent.timed.color
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("timedFamily.quickStart")
+
+            VStack(alignment: .leading, spacing: 12) {
+                FamilySectionTitle("Choose timed training")
+
+                ForEach(family.entries, id: \.id) { entry in
+                    if entry.id == .classicTimed {
+                        NavigationLink {
+                            GameLibraryView(
+                                libraryService: libraryService,
+                                launchMode: .timed,
+                                historyStore: historyStore
+                            )
+                            .environment(appSettings)
+                        } label: {
+                            FamilyGameRow(
+                                title: entry.title,
+                                subtitle: entry.purpose,
+                                assetName: PremiumAssetName.timedNotationTile,
+                                systemImage: "timer",
+                                tint: PremiumDesign.Accent.timed.color
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("timedFamily.classicTimed")
+                    } else {
+                        FamilyUnavailableRow(entry: entry, tint: PremiumDesign.Accent.timed.color)
+                    }
+                }
+            }
+
+            FamilySecondaryActions {
+                NavigationLink {
+                    NotationTrainingHistoryView(launchMode: .timed, historyStore: historyStore)
+                } label: {
+                    Label("Timed history", systemImage: "chart.xyaxis.line")
+                }
+                .accessibilityIdentifier("timedFamily.history")
+            }
+        }
+    }
 }
 
 private struct BoardSkillsFamilyView: View {
     @Environment(AppSettings.self) private var appSettings
 
+    let family: TrainingFamily
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: FamilyScreenLayout.sectionSpacing) {
-                familySummary
-                quickStart
-                drillChoices
+        FamilyScreenScaffold(title: family.title) {
+            familySummary
+            quickStart
+            drillChoices
+            FamilySecondaryActions {
+                NavigationLink {
+                    SquareRecognitionHistoryView(historyStore: AppEnvironment.makeSquareRecognitionHistoryStore())
+                } label: {
+                    Label("Square Recognition history", systemImage: "chart.xyaxis.line")
+                }
+                .accessibilityIdentifier("boardSkills.squareRecognitionHistory")
             }
-            .frame(maxWidth: FamilyScreenLayout.maximumContentWidth)
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, FamilyScreenLayout.horizontalPadding)
-            .padding(.vertical, 20)
         }
-        .premiumScreenBackground()
-        .navigationTitle("Board Skills")
-        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var familySummary: some View {
@@ -379,6 +545,129 @@ private struct BoardSkillsFamilyView: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("home.pieceMovementLink")
         }
+    }
+}
+
+private struct PositionRecallFamilyView: View {
+    let family: TrainingFamily
+
+    var body: some View {
+        FamilyScreenScaffold(title: family.title) {
+            FamilySummaryView(title: "Memory reconstruction", subtitle: family.purpose)
+
+            NavigationLink {
+                PositionRecallLauncherView()
+            } label: {
+                FamilyQuickStartCard(
+                    title: "Quick Start",
+                    subtitle: "Study a beginner position, then rebuild every piece.",
+                    assetName: PremiumAssetName.positionRecallTile,
+                    systemImage: "brain.head.profile",
+                    tint: PremiumDesign.Accent.learning.color
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("positionRecallFamily.quickStart")
+
+            VStack(alignment: .leading, spacing: 12) {
+                FamilySectionTitle("Choose a recall drill")
+
+                ForEach(family.entries, id: \.id) { entry in
+                    if entry.id == .reconstruction {
+                        NavigationLink {
+                            PositionRecallLauncherView()
+                        } label: {
+                            FamilyGameRow(
+                                title: entry.title,
+                                subtitle: entry.purpose,
+                                assetName: PremiumAssetName.positionRecallTile,
+                                systemImage: "square.grid.3x3",
+                                tint: PremiumDesign.Accent.learning.color
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("positionRecallFamily.reconstruction")
+                    } else {
+                        FamilyUnavailableRow(entry: entry, tint: PremiumDesign.Accent.learning.color)
+                    }
+                }
+            }
+
+            FamilySecondaryActions {
+                NavigationLink {
+                    PositionRecallHistoryView(historyStore: PositionRecallReconstructionHistoryStore())
+                } label: {
+                    Label("Position Recall history", systemImage: "chart.xyaxis.line")
+                }
+                .accessibilityIdentifier("positionRecallFamily.history")
+            }
+        }
+    }
+}
+
+private struct FamilyScreenScaffold<Content: View>: View {
+    let title: String
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: FamilyScreenLayout.sectionSpacing) {
+                content
+            }
+            .frame(maxWidth: FamilyScreenLayout.maximumContentWidth)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, FamilyScreenLayout.horizontalPadding)
+            .padding(.vertical, 20)
+        }
+        .premiumScreenBackground()
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct FamilySummaryView: View {
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(PremiumDesign.primaryText)
+            Text(subtitle)
+                .font(.subheadline)
+                .foregroundStyle(PremiumDesign.secondaryText)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct FamilySectionTitle: View {
+    let title: String
+
+    init(_ title: String) {
+        self.title = title
+    }
+
+    var body: some View {
+        Text(title)
+            .font(.title3.weight(.bold))
+            .foregroundStyle(PremiumDesign.primaryText)
+    }
+}
+
+private struct FamilySecondaryActions<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            FamilySectionTitle("History")
+            VStack(spacing: 10) {
+                content
+            }
+            .buttonStyle(.bordered)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -496,7 +785,9 @@ private struct FamilyGameRow: View {
         .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 14 : 0)
         .frame(maxWidth: .infinity)
         .frame(
-            minHeight: FamilyScreenLayout.drillRowHeight,
+            minHeight: dynamicTypeSize.isAccessibilitySize
+                ? FamilyScreenLayout.accessibilityDrillRowHeight
+                : FamilyScreenLayout.drillRowHeight,
             maxHeight: dynamicTypeSize.isAccessibilitySize ? nil : FamilyScreenLayout.drillRowHeight
         )
         .background(Color(.secondarySystemBackground))
@@ -506,6 +797,56 @@ private struct FamilyGameRow: View {
                 .stroke(tint.opacity(0.22), lineWidth: 1)
         }
         .contentShape(RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius))
+    }
+}
+
+private struct FamilyUnavailableRow: View {
+    let entry: TrainingGameEntry
+    let tint: Color
+
+    private var unavailableText: (reason: String, recoveryAction: String) {
+        if case let .unavailable(reason, recoveryAction) = entry.availability {
+            return (reason, recoveryAction)
+        }
+        return ("Unavailable in this release.", "Choose another game in this family.")
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: "clock.badge")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(tint)
+                .frame(width: FamilyScreenLayout.artworkSize, height: FamilyScreenLayout.artworkSize)
+                .background(tint.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(entry.title)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(PremiumDesign.primaryText)
+                Text(entry.purpose)
+                    .font(.subheadline)
+                    .foregroundStyle(PremiumDesign.secondaryText)
+                Text("\(unavailableText.reason) \(unavailableText.recoveryAction)")
+                    .font(.caption)
+                    .foregroundStyle(PremiumDesign.mutedText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity)
+        .background(Color(.secondarySystemBackground).opacity(0.72))
+        .clipShape(RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius))
+        .overlay {
+            RoundedRectangle(cornerRadius: FamilyScreenLayout.cardRadius)
+                .stroke(tint.opacity(0.14), lineWidth: 1)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(entry.title), unavailable")
+        .accessibilityHint(unavailableText.recoveryAction)
+        .accessibilityIdentifier("family.unavailable.\(entry.id.rawValue)")
     }
 }
 
@@ -527,6 +868,93 @@ private struct PieceMovementLauncherView: View {
                 systemImage: "exclamationmark.triangle",
                 description: Text("No movement prompts could be generated.")
             )
+        }
+    }
+}
+
+private struct PositionRecallHistoryView: View {
+    let historyStore: PositionRecallReconstructionHistoryStoring
+
+    @State private var results: [PositionRecallSessionResult] = []
+    @State private var loadError: String?
+
+    var body: some View {
+        List {
+            if results.isEmpty, loadError == nil {
+                ContentUnavailableView(
+                    "No Results",
+                    systemImage: "clock.arrow.circlepath",
+                    description: Text("Completed reconstruction drills will appear here.")
+                )
+            } else {
+                Section("Summary") {
+                    metricRow("Sessions", "\(results.count)")
+                    metricRow("Average accuracy", averageAccuracy.formatted(.percent.precision(.fractionLength(0))))
+                    metricRow("Best streak", "\(results.map(\.bestStreak).max() ?? 0)")
+                }
+
+                Section("Sessions") {
+                    ForEach(Array(results.enumerated()), id: \.offset) { index, result in
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Text("Reconstruction \(index + 1)")
+                                    .font(.headline)
+                                Spacer()
+                                Text(accuracy(for: result).formatted(.percent.precision(.fractionLength(0))))
+                                    .font(.headline.monospacedDigit())
+                            }
+                            HStack {
+                                Label("\(result.exactCount)/\(result.promptCount)", systemImage: "checklist")
+                                Label("Best \(result.bestStreak)", systemImage: "flame")
+                            }
+                            .font(.caption)
+                            .foregroundStyle(PremiumDesign.secondaryText)
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+            }
+
+            if let loadError {
+                Text(loadError)
+                    .foregroundStyle(PremiumDesign.Accent.danger.color)
+            }
+        }
+        .listStyle(.insetGrouped)
+        .premiumScreenBackground()
+        .navigationTitle("Position Recall History")
+        .task {
+            loadHistory()
+        }
+    }
+
+    private var averageAccuracy: Double {
+        guard !results.isEmpty else { return 0 }
+        return results.map(accuracy(for:)).reduce(0, +) / Double(results.count)
+    }
+
+    private func accuracy(for result: PositionRecallSessionResult) -> Double {
+        guard result.promptCount > 0 else { return 0 }
+        return Double(result.exactCount) / Double(result.promptCount)
+    }
+
+    private func loadHistory() {
+        do {
+            results = try historyStore.loadResults()
+            loadError = nil
+        } catch {
+            results = []
+            loadError = error.localizedDescription
+        }
+    }
+
+    private func metricRow(_ title: String, _ value: String) -> some View {
+        HStack {
+            Text(title)
+                .foregroundStyle(PremiumDesign.primaryText)
+            Spacer()
+            Text(value)
+                .foregroundStyle(PremiumDesign.secondaryText)
         }
     }
 }

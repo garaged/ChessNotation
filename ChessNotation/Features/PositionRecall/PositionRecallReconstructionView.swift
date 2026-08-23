@@ -250,6 +250,7 @@ final class PositionRecallReconstructionViewModel {
 }
 
 struct PositionRecallReconstructionView: View {
+    @Environment(\.dismiss) private var dismiss
     @State var viewModel: PositionRecallReconstructionViewModel
     @State private var selectedPiece: TrainingPiece = .king
     @State private var selectedSide: TrainingSide = .white
@@ -330,6 +331,10 @@ struct PositionRecallReconstructionView: View {
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.return, modifiers: [])
                 .accessibilityIdentifier("positionRecall.playAgain")
+
+            Button("Back to Games") { dismiss() }
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("positionRecall.backToGames")
 
             if let saveError = viewModel.saveError {
                 Text("History could not be saved: \(saveError)")

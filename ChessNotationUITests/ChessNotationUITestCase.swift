@@ -17,13 +17,19 @@ class ChessNotationUITestCase: XCTestCase {
         let tile = homeTile(identifier: "home.notationTrainingTile", title: "Notation Training", in: app)
         XCTAssertTrue(tile.waitForExistence(timeout: 5))
         tile.tap()
+        let quickStart = app.buttons["notationFamily.quickStart"]
+        XCTAssertTrue(quickStart.waitForExistence(timeout: 5))
+        quickStart.tap()
         XCTAssertTrue(app.collectionViews["library.screen"].waitForExistence(timeout: 5))
     }
 
     func openTimedLibrary(in app: XCUIApplication) {
-        let tile = homeTile(identifier: "home.timedNotationTile", title: "Timed Notation", in: app)
+        let tile = homeTile(identifier: "home.timedNotationTile", title: "Timed Training", in: app)
         XCTAssertTrue(tile.waitForExistence(timeout: 5))
         tile.tap()
+        let quickStart = app.buttons["timedFamily.quickStart"]
+        XCTAssertTrue(quickStart.waitForExistence(timeout: 5))
+        quickStart.tap()
         XCTAssertTrue(app.collectionViews["library.screen"].waitForExistence(timeout: 5))
     }
 
@@ -60,7 +66,9 @@ class ChessNotationUITestCase: XCTestCase {
         let fullIdentifier = "library.game.\(identifier)"
         for _ in 0..<10 {
             let candidate = app.buttons[fullIdentifier]
-            if candidate.waitForExistence(timeout: 1), candidate.isHittable {
+            if candidate.waitForExistence(timeout: 1),
+               candidate.isHittable,
+               candidate.frame.maxY < app.windows.element(boundBy: 0).frame.maxY - 20 {
                 return candidate
             }
             app.collectionViews["library.screen"].swipeUp()

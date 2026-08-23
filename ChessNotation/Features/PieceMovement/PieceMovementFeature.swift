@@ -281,6 +281,7 @@ final class PieceMovementViewModel {
 }
 
 struct PieceMovementGameView: View {
+    @Environment(\.dismiss) private var dismiss
     @State var viewModel: PieceMovementViewModel
 
     var body: some View {
@@ -360,6 +361,10 @@ struct PieceMovementGameView: View {
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.return, modifiers: [])
                 .accessibilityIdentifier("pieceMovement.playAgain")
+
+            Button("Back to Games") { dismiss() }
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("pieceMovement.backToGames")
 
             if let saveError = viewModel.saveError {
                 Text("History could not be saved: \(saveError)")

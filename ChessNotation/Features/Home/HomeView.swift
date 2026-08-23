@@ -801,7 +801,17 @@ struct TimedGameConfigurationView: View {
 
     let game: NotationGame
     let start: (TimedGameDuration) -> Void
-    @State private var selectedDuration: TimedGameDuration = .threeMinutes
+    @State private var selectedDuration: TimedGameDuration
+
+    init(
+        game: NotationGame,
+        initialDuration: TimedGameDuration = .threeMinutes,
+        start: @escaping (TimedGameDuration) -> Void
+    ) {
+        self.game = game
+        self.start = start
+        _selectedDuration = State(initialValue: initialDuration)
+    }
 
     var body: some View {
         NavigationStack {
@@ -848,6 +858,10 @@ enum TimedGameDuration: Int, CaseIterable, Identifiable {
 
     var id: Int { rawValue }
     var seconds: Int { rawValue }
+
+    init(seconds: Int?) {
+        self = Self(rawValue: seconds ?? Self.threeMinutes.seconds) ?? .threeMinutes
+    }
 
     var displayName: String {
         switch self {

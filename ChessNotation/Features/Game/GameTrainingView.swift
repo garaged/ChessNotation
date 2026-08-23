@@ -8,6 +8,7 @@ struct GameTrainingView: View {
     @State private var savedHistoryRecordID: UUID?
     @State private var historySaveError: String?
     @State private var focusedKeyboardRegion: TrainingKeyboardFocusRegion = .answer
+    @State private var timedSetupGame: NotationGame?
 
     let historyStore: NotationTrainingHistoryStoring
 
@@ -28,6 +29,8 @@ struct GameTrainingView: View {
                     historySaveError = nil
                 } startNewGame: {
                     dismiss()
+                } changeSetup: {
+                    timedSetupGame = viewModel.game
                 }
             } else {
                 trainingContent
@@ -44,6 +47,17 @@ struct GameTrainingView: View {
         .background {
             ExternalKeyboardCaptureView { command in
                 handleExternalKeyboardCommand(command)
+            }
+        }
+        .sheet(item: $timedSetupGame) { game in
+            TimedGameConfigurationView(
+                game: game,
+                initialDuration: TimedGameDuration(seconds: viewModel.mode.durationSeconds)
+            ) { duration in
+                timedSetupGame = nil
+                viewModel = GameViewModel(game: game, mode: .timed(durationSeconds: duration.seconds))
+                savedHistoryRecordID = nil
+                historySaveError = nil
             }
         }
     }

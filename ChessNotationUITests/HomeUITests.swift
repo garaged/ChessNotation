@@ -23,10 +23,42 @@ final class HomeUITests: ChessNotationUITestCase {
 
         let pieceMovementLink = app.buttons["home.pieceMovementLink"]
         XCTAssertTrue(pieceMovementLink.waitForExistence(timeout: 5))
+        if !pieceMovementLink.isHittable {
+            app.scrollViews.firstMatch.swipeUp()
+        }
         XCTAssertTrue(pieceMovementLink.isHittable)
 
         squareRecognitionLink.tap()
         XCTAssertTrue(app.buttons["squareRecognition.startButton"].waitForExistence(timeout: 5))
+    }
+
+    func testNotationAndTimedFamiliesExposeQuickStartAndHistory() throws {
+        let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
+
+        let notationTile = scrollToHomeTile(identifier: "home.notationTrainingTile", title: "Notation Training", in: app)
+        XCTAssertTrue(notationTile.waitForExistence(timeout: 5))
+        notationTile.tap()
+
+        XCTAssertTrue(app.navigationBars["Notation Training"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["notationFamily.quickStart"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["notationFamily.fullGame"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["notationFamily.history"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Random Positions"].exists)
+        app.buttons["notationFamily.quickStart"].tap()
+        XCTAssertTrue(app.navigationBars["Game Library"].waitForExistence(timeout: 5))
+
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        let timedTile = scrollToHomeTile(identifier: "home.timedNotationTile", title: "Timed Training", in: app)
+        XCTAssertTrue(timedTile.waitForExistence(timeout: 5))
+        timedTile.tap()
+
+        XCTAssertTrue(app.navigationBars["Timed Training"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["timedFamily.quickStart"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["timedFamily.classicTimed"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["timedFamily.history"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Sprint"].exists)
     }
 
     func testHomeFamilyCardsHaveEqualRenderedFramesAndPositiveGaps() throws {
@@ -167,6 +199,9 @@ final class HomeUITests: ChessNotationUITestCase {
 
         let pieceMovementTile = app.buttons["home.pieceMovementLink"]
         XCTAssertTrue(pieceMovementTile.waitForExistence(timeout: 5))
+        if !pieceMovementTile.isHittable {
+            app.scrollViews.firstMatch.swipeUp()
+        }
         XCTAssertTrue(pieceMovementTile.isHittable)
         pieceMovementTile.tap()
 
@@ -174,7 +209,7 @@ final class HomeUITests: ChessNotationUITestCase {
         XCTAssertTrue(app.staticTexts["pieceMovement.task"].waitForExistence(timeout: 5))
     }
 
-    func testPositionRecallTileOpensGame() throws {
+    func testPositionRecallTileOpensFamilyAndQuickStartOpensGame() throws {
         let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
 
         let positionRecallTile = scrollToHomeTile(identifier: "home.positionRecallLink", title: "Position Recall", in: app)
@@ -182,6 +217,13 @@ final class HomeUITests: ChessNotationUITestCase {
         XCTAssertTrue(positionRecallTile.isHittable)
         positionRecallTile.tap()
 
+        XCTAssertTrue(app.navigationBars["Position Recall"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["positionRecallFamily.quickStart"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["positionRecallFamily.reconstruction"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["positionRecallFamily.history"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Locate Piece"].exists)
+
+        app.buttons["positionRecallFamily.quickStart"].tap()
         XCTAssertTrue(app.navigationBars["Position Recall"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["positionRecall.task"].waitForExistence(timeout: 5))
     }

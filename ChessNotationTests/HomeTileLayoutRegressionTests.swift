@@ -9,11 +9,10 @@ struct HomeTileLayoutRegressionTests {
         let familyTileHelperStart = try #require(source.range(of: "private func familyTile"))
         let trainingSource = source[trainingStart.lowerBound..<familyTileHelperStart.lowerBound]
 
-        #expect(trainingSource.contains("title: \"Notation Training\""))
-        #expect(trainingSource.contains("title: \"Timed Training\""))
-        #expect(trainingSource.contains("title: \"Board Skills\""))
-        #expect(trainingSource.contains("title: \"Position Recall\""))
-        #expect(trainingSource.components(separatedBy: "familyTile(").count - 1 == 4)
+        #expect(trainingSource.contains("familyDestination(for: family)"))
+        #expect(trainingSource.contains("familyVisuals(for: family.id)"))
+        #expect(trainingSource.contains("ForEach(GameFamilyCatalog.productionFamilies"))
+        #expect(trainingSource.components(separatedBy: "familyTile(").count - 1 == 1)
         #expect(source.contains("count: familyColumnCount"))
         #expect(source.contains("dynamicTypeSize.isAccessibilitySize ? 1 : 2"))
         #expect(!source.contains("case horizontal"))
@@ -35,10 +34,8 @@ struct HomeTileLayoutRegressionTests {
         #expect(source.contains(".lineLimit(usesFlexibleHeight ? nil : 1)"))
         #expect(source.contains(".lineLimit(usesFlexibleHeight ? nil : 2)"))
         #expect(source.contains(".fixedSize(horizontal: false, vertical: true)"))
-        #expect(source.contains("Practice SAN from real games."))
-        #expect(source.contains("Build speed under a clock."))
-        #expect(source.contains("Learn squares and movement."))
-        #expect(source.contains("Rebuild positions from memory."))
+        #expect(source.contains("subtitle: family.purpose"))
+        #expect(source.contains("title: family.title"))
     }
 
     @Test
@@ -71,8 +68,8 @@ struct HomeTileLayoutRegressionTests {
     func boardSkillsUsesPremiumQuickStartAndCompactEqualRows() throws {
         let source = try homeSource()
         let boardSkillsStart = try #require(source.range(of: "private struct BoardSkillsFamilyView"))
-        let pieceMovementStart = try #require(source.range(of: "private struct PieceMovementLauncherView"))
-        let boardSkillsSource = source[boardSkillsStart.lowerBound..<pieceMovementStart.lowerBound]
+        let boardSkillsEnd = try #require(source.range(of: "private struct PositionRecallFamilyView"))
+        let boardSkillsSource = source[boardSkillsStart.lowerBound..<boardSkillsEnd.lowerBound]
 
         #expect(boardSkillsSource.contains("FamilyQuickStartCard("))
         #expect(boardSkillsSource.components(separatedBy: "FamilyGameRow(").count - 1 == 2)

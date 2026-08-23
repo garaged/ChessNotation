@@ -46,6 +46,9 @@ final class GameplayUITests: ChessNotationUITestCase {
         app.buttons["ChessNotationKeyboard.Submit"].tap()
 
         let restartButton = app.buttons["results.restartButton"]
+        for _ in 0..<4 where !restartButton.exists {
+            app.collectionViews.firstMatch.swipeUp()
+        }
         XCTAssertTrue(restartButton.waitForExistence(timeout: 5))
         restartButton.tap()
 

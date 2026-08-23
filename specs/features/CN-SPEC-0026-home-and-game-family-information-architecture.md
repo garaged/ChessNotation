@@ -1,8 +1,8 @@
 # CN-SPEC-0026: Home and Game-Family Information Architecture
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-07-15
+Last updated: 2026-08-23
 
 ## Intent
 
@@ -94,6 +94,8 @@ Settings, History/Insights, and Instructions are secondary destinations:
 
 A game must belong to exactly one primary family unless an explicit future spec defines a cross-family discovery surface. Internal engine reuse must not produce duplicate player-facing entries.
 
+Current-release interpretation: entries whose domain rules exist but whose player-facing game screen is not surfaced in `3.0.1` remain discoverable inside their owning family as unavailable rows with an accessible reason and recovery action. This preserves family membership and avoids adding incomplete gameplay routes.
+
 ## Family Screen Contract
 
 Every family screen must provide:
@@ -161,16 +163,20 @@ Quick Start must never silently choose an advanced or destructive configuration.
 - CN-SPEC-0026-AC016: Given the Home family grid at supported widths, when card frames are inspected, then each row and column preserves the configured positive spacing and no pair of cards intersects or touches.
 - CN-SPEC-0026-AC017: Given the production Home hierarchy, when gameplay and utility destinations are enumerated, then Square Recognition and Piece Movement appear only under Board Skills and Instructions appears only as a secondary Help action.
 
-## Planned Coverage
+## Coverage
 
-- `ChessNotationTests/GameFamilyCatalogTests.swift`: CN-SPEC-0026-AC001, AC002, AC003, AC004, AC013, AC014.
-- `ChessNotationTests/GameRouteResolverTests.swift`: CN-SPEC-0026-AC004, AC006, AC007, AC008, AC009, AC012.
-- `ChessNotationTests/GameFamilyViewModelTests.swift`: CN-SPEC-0026-AC005, AC006, AC007, AC008, AC009.
-- `ChessNotationUITests/HomeUITests.swift`: CN-SPEC-0026-AC001, AC004, AC010, AC011, AC012, AC017.
-- `ChessNotationUITests/GameFamilyNavigationUITests.swift`: CN-SPEC-0026-AC005, AC006, AC007, AC008, AC009, AC010, AC011.
-- `ChessNotationTests/PremiumAssetTests.swift`: CN-SPEC-0026-AC010.
-- `ChessNotationTests/HomeTileLayoutRegressionTests.swift`: CN-SPEC-0026-AC001, AC010, AC015, AC016, AC017 source-level geometry and hierarchy regression coverage.
-- Planned source owners: typed family metadata in Domain, family route resolution in App, and focused family screens under `ChessNotation/Features/Home` or a dedicated `Features/GameCatalog` area.
+- `ChessNotation/Domain/GameFamilyCatalog.swift`: typed family metadata, family ordering, quick-start presets, playable and unavailable entries; CN-SPEC-0026-AC001, CN-SPEC-0026-AC002, CN-SPEC-0026-AC003, CN-SPEC-0026-AC004, CN-SPEC-0026-AC005, CN-SPEC-0026-AC009, CN-SPEC-0026-AC013, CN-SPEC-0026-AC014, CN-SPEC-0026-AC017.
+- `ChessNotation/Features/Home/RestoredHomeView.swift`: production Home and family screens, Quick Start routes, unavailable rows, secondary history links, and compatibility identifiers; CN-SPEC-0026-AC001, CN-SPEC-0026-AC004, CN-SPEC-0026-AC005, CN-SPEC-0026-AC009, CN-SPEC-0026-AC010, CN-SPEC-0026-AC011, CN-SPEC-0026-AC012, CN-SPEC-0026-AC013, CN-SPEC-0026-AC017.
+- `ChessNotation/Features/Results/ResultsView.swift`: Play Again, Back to Games, Choose Another Game, and timed Change Setup controls; CN-SPEC-0026-AC006, CN-SPEC-0026-AC007, CN-SPEC-0026-AC008.
+- `ChessNotation/Features/Game/GameTrainingView.swift`: same-configuration replay and timed Change Setup sheet relaunch; CN-SPEC-0026-AC006, CN-SPEC-0026-AC007, CN-SPEC-0026-AC008.
+- `ChessNotation/Features/PieceMovement/PieceMovementFeature.swift`: mini-game Play Again and Back to Games result controls; CN-SPEC-0026-AC006, CN-SPEC-0026-AC008.
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionView.swift`: recall Play Again and Back to Games result controls; CN-SPEC-0026-AC006, CN-SPEC-0026-AC008.
+- `ChessNotationTests/GameFamilyCatalogTests.swift`: catalog order, one-family membership, quick-start presets, duplicate/orphan rejection; CN-SPEC-0026-AC001, CN-SPEC-0026-AC002, CN-SPEC-0026-AC003, CN-SPEC-0026-AC004, CN-SPEC-0026-AC014.
+- `ChessNotationTests/HomeTileLayoutRegressionTests.swift`: source-level Home/family hierarchy and layout guardrails; CN-SPEC-0026-AC001, CN-SPEC-0026-AC010, CN-SPEC-0026-AC015, CN-SPEC-0026-AC016, CN-SPEC-0026-AC017.
+- `ChessNotationUITests/HomeUITests.swift`: production family routing, Quick Start compatibility, unavailable entry visibility, Board Skills ownership, Position Recall family screen, and secondary history links; CN-SPEC-0026-AC001, CN-SPEC-0026-AC004, CN-SPEC-0026-AC005, CN-SPEC-0026-AC009, CN-SPEC-0026-AC010, CN-SPEC-0026-AC011, CN-SPEC-0026-AC012, CN-SPEC-0026-AC017.
+- `ChessNotationUITests/GameplayUITests.swift`: notation Play Again replay and library navigation compatibility; CN-SPEC-0026-AC006, CN-SPEC-0026-AC008, CN-SPEC-0026-AC012.
+- `ChessNotationUITests/TimedGameUITests.swift`: timed results, selected-duration evidence, and Change Setup returning to the completed configuration; CN-SPEC-0026-AC006, CN-SPEC-0026-AC007, CN-SPEC-0026-AC008.
+- `docs/manual-testing/home-board-skills-responsive-validation.md`: rendered Home and Board Skills responsive evidence; CN-SPEC-0026-AC010, CN-SPEC-0026-AC015, CN-SPEC-0026-AC016, CN-SPEC-0026-AC017.
 
 ## Implementation Constraints
 
@@ -198,11 +204,12 @@ Quick Start must never silently choose an advanced or destructive configuration.
 
 ## Open Questions
 
-- The exact secondary presentation of History/Insights may be a compact card, toolbar destination, or section below the gameplay grid. It must not become a fifth primary gameplay tile.
-- Instructions may live in Settings, a help toolbar action, or both. It must remain discoverable and must not occupy primary gameplay weight.
+- Future specs may replace unavailable family rows with fully playable standalone screens for SAN Builder, timed variants, and non-reconstruction recall drills.
+- Future specs may add richer family-level recent-result summaries beyond the current history links.
 
 ## Revision Notes
 
 - 2026-07-10: Initial proposed information-architecture contract defining four stable home families and complete family-level navigation.
 - 2026-07-15: Normalized current home tiles to a stable two-column compact-width grid with equal title, subtitle, artwork, and card regions while preserving unrestricted vertical expansion at accessibility Dynamic Type sizes.
 - 2026-07-15: Replaced the rejected mixed horizontal-card layout with an explicit symmetric four-family 2x2 Home grid, moved Square Recognition and Piece Movement under Board Skills, retained Instructions as a secondary Help action, bounded iPad content width, and added measurable equal-geometry and collision-prevention requirements.
+- 2026-08-23: Accepted after adding typed family catalog validation, family screens for all four Home families, Quick Start compatibility routes, unavailable-entry recovery rows for non-surfaced current-release variants, family history links, explicit result Back to Games actions, timed Change Setup, and automated/unit/UI coverage.

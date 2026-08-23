@@ -7,6 +7,7 @@ struct ResultsView: View {
     var historySaveError: String?
     let restart: () -> Void
     var startNewGame: (() -> Void)?
+    var changeSetup: (() -> Void)?
 
     var body: some View {
         List {
@@ -53,7 +54,27 @@ struct ResultsView: View {
                     .tint(PremiumDesign.Accent.practice.color)
                     .accessibilityIdentifier("results.restartButton")
 
+                Button("Back to Games") {
+                    if let startNewGame {
+                        startNewGame()
+                    } else {
+                        dismiss()
+                    }
+                }
+                .accessibilityIdentifier("results.backToGamesButton")
+
                 if summary.mode.isTimed {
+                    Button("Change Setup") {
+                        if let changeSetup {
+                            changeSetup()
+                        } else if let startNewGame {
+                            startNewGame()
+                        } else {
+                            dismiss()
+                        }
+                    }
+                    .accessibilityIdentifier("results.changeSetupButton")
+
                     Button("Choose another game") {
                         if let startNewGame {
                             startNewGame()
