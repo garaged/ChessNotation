@@ -76,23 +76,26 @@ class HomeTileAssetValidatorTests(unittest.TestCase):
             self.assertIn("unexpected alpha channel or transparency", failures)
 
     def test_incompatible_embedded_profile_fails(self):
-        metadata = validator.AssetMetadata(
-            path=Path("Tile.png"),
-            width=validator.EXPECTED_WIDTH,
-            height=validator.EXPECTED_HEIGHT,
-            image_format="PNG",
-            mode="RGB",
-            color_profile="embedded ICC",
-            has_alpha=False,
-        )
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "Tile.png"
+            path.touch()
+            metadata = validator.AssetMetadata(
+                path=path,
+                width=validator.EXPECTED_WIDTH,
+                height=validator.EXPECTED_HEIGHT,
+                image_format="PNG",
+                mode="RGB",
+                color_profile="embedded ICC",
+                has_alpha=False,
+            )
 
-        with patch.object(validator, "read_metadata", return_value=metadata):
-            _, failures = validator.validate_asset(Path("Tile.png"))
+            with patch.object(validator, "read_metadata", return_value=metadata):
+                _, failures = validator.validate_asset(path)
 
-        self.assertIn(
-            "expected sRGB-compatible embedded profile or unmanaged RGB, found embedded ICC",
-            failures,
-        )
+            self.assertIn(
+                "expected sRGB-compatible embedded profile or unmanaged RGB, found embedded ICC",
+                failures,
+            )
 
     def test_missing_file_fails(self):
         metadata, failures = validator.validate_asset(Path("missing.png"))
