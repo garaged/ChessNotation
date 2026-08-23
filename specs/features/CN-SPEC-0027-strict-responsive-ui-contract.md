@@ -2,7 +2,7 @@
 
 Status: Proposed
 Owner: Project
-Last updated: 2026-07-15
+Last updated: 2026-08-23
 
 ## Intent
 
@@ -42,7 +42,7 @@ Out of scope:
 - CN-SPEC-0027-FR011: Square Recognition and Piece Movement must be presented under Board Skills rather than as direct Home cards.
 - CN-SPEC-0027-FR012: A family screen must present a family summary, one prominent Quick Start action, a labeled game-choice section, compact aligned game rows or cards, and secondary actions below.
 - CN-SPEC-0027-FR013: Board Skills Quick Start must launch the recommended Square Recognition setup.
-- CN-SPEC-0027-FR014: Board Skills must present Square Recognition and Piece Movement as two compact rows with equal width, aligned leading edges, positive spacing, and no intersection.
+- CN-SPEC-0027-FR014: Board Skills must present Square Recognition and Piece Movement as two compact rows with equal width and height, aligned leading edges, positive spacing, and no intersection.
 - CN-SPEC-0027-FR015: Board Skills must not reuse the Home family-card grid for its drill choices.
 - CN-SPEC-0027-FR016: Home and family-screen typography must use shared semantic fonts without per-card scaling exceptions.
 - CN-SPEC-0027-FR017: Every Home or family-screen layout change must be validated on the required device matrix before being described as complete.
@@ -51,11 +51,11 @@ Out of scope:
 - CN-SPEC-0027-FR020: Home family cards must preserve a visible outer gutter on all sides so borders and shadows do not visually merge between rows or columns.
 - CN-SPEC-0027-FR021: Board Skills Quick Start must use a visually prominent premium artwork treatment, while its two drill choices use compact equal-height rows with matching artwork dimensions.
 - CN-SPEC-0027-FR022: When an asset's composition makes its subject appear materially larger than peer artwork, source artwork must be normalized first; any remaining adjustment must use a documented shared focal-point or inset mechanism rather than an unexplained per-card scale modifier.
-- CN-SPEC-0027-FR023: Home tile source artwork must be normalized to 1600 x 1000 px PNG files with an 8:5 aspect ratio, sRGB-compatible color metadata, no unexpected alpha, no baked-in text, no baked-in borders, no rounded corners, no arrows, no shadows, no UI chrome, and a background extending to every canvas edge.
-- CN-SPEC-0027-FR024: Home tile subjects must stay inside the 1120 x 760 safe composition region with 240 px left/right margins, 120 px top/bottom margins, and optical center reference x = 800, y = 480.
-- CN-SPEC-0027-FR025: Home tile artwork must render through one shared 8:5 viewport without stretching, without per-card aspect-ratio exceptions, and without unexplained one-off scale modifiers.
+- CN-SPEC-0027-FR023: Home tile source artwork must use 1422 x 1106 px PNG files with a 9:7 aspect ratio, RGB color, no unexpected alpha, no baked-in text, no baked-in borders, no rounded corners, no arrows, no shadows, no UI chrome, and a background extending to every canvas edge. Embedded sRGB metadata is accepted but not required; unmanaged RGB is valid, while explicitly incompatible embedded ICC profiles are prohibited.
+- CN-SPEC-0027-FR024: For future source normalization, important Home tile content should remain inside the 994 x 840 safe composition region with approximately 214 px left/right margins, 133 px top/bottom margins, and optical center reference x = 711, y = 531 unless a documented composition needs a small optical offset.
+- CN-SPEC-0027-FR025: Home tile artwork must render through one shared 9:7 viewport without stretching, without per-card aspect-ratio exceptions, and without unexplained one-off scale modifiers.
 - CN-SPEC-0027-FR026: Position Recall artwork must be normalized at the source so its perceived subject scale matches peer tiles despite its higher visual mass.
-- CN-SPEC-0027-FR027: Instructions artwork must use the same 1600 x 1000 source normalization and the same 8:5 rendered viewport as the gameplay family cards while remaining a centered same-shape single-column card outside the primary grid.
+- CN-SPEC-0027-FR027: Instructions artwork must use the same 1422 x 1106 source normalization and the same 9:7 rendered viewport as the gameplay family cards while remaining a centered same-shape single-column card outside the primary grid.
 
 ## Required Device Matrix
 
@@ -156,21 +156,23 @@ For Board Skills specifically:
 - CN-SPEC-0027-AC010: Given the required device matrix, when validation is reported complete, then every listed device and Dynamic Type case has either passed or is explicitly recorded as unrun.
 - CN-SPEC-0027-AC011: Given normal-size Home family cards, when titles and subtitles render, then all copy is fully visible within the defined line budgets without ellipses or minimum-scale reduction.
 - CN-SPEC-0027-AC012: Given the Home Help section at normal Dynamic Type, when Instructions renders, then it is centered, has the same measured width and height as one family card, and occupies its own single-card row.
-- CN-SPEC-0027-AC013: Given the Position Recall artwork and the other family artwork, when displayed in equal artwork frames, then Position Recall uses the documented scale normalization so its subject does not appear materially larger.
-- CN-SPEC-0027-AC014: Given the Home tile asset validator, when production tile assets are inspected, then every required tile asset is present, PNG formatted, exactly 1600 x 1000 px, sRGB-compatible, RGB-only, and has no unexpected alpha channel.
-- CN-SPEC-0027-AC015: Given Home tile rendering, when source is audited and screenshots are inspected across compact iPhone, standard iPhone, Pro Max, iPad portrait, and iPad landscape, then all tile artwork uses the common 8:5 viewport with stable crop and no stretching.
-- CN-SPEC-0027-AC016: Given normalized replacement artwork, when Position Recall is compared with the other tile images in equal 8:5 frames, then its perceived subject scale matches the family set and no per-card SwiftUI scale override is required.
-- CN-SPEC-0027-AC017: Given the Help section at normal Dynamic Type, when Instructions renders, then it remains outside the primary 2x2 grid as a centered same-shape card using the same 8:5 artwork viewport and not a wide banner treatment.
+- CN-SPEC-0027-AC013: Given Position Recall and the other family artwork in equal frames, when Home renders, then Position Recall's source composition does not appear materially larger than peer artwork and no per-card SwiftUI scale override is required.
+- CN-SPEC-0027-AC014: Given the Home tile asset validator, when production tile assets are inspected, then every required tile asset is present, PNG formatted, exactly 1422 x 1106 px, 9:7, RGB-only, has no unexpected alpha channel, and uses either unmanaged RGB or an sRGB-compatible profile rather than an incompatible embedded ICC profile.
+- CN-SPEC-0027-AC015: Given Home tile rendering, when source is audited and screenshots are inspected across compact iPhone, standard iPhone, Pro Max, iPad portrait, and iPad landscape, then all tile artwork uses the common 9:7 viewport with stable crop and no stretching.
+- CN-SPEC-0027-AC016: Given normalized replacement artwork, when Position Recall is compared with the other tile images in equal 9:7 frames, then its perceived subject scale matches the family set and no per-card SwiftUI scale override is required.
+- CN-SPEC-0027-AC017: Given the Help section at normal Dynamic Type, when Instructions renders, then it remains outside the primary 2x2 grid as a centered same-shape card using the same 9:7 artwork viewport and not a wide banner treatment.
 
 ## Coverage
 
-- `ChessNotationUITests/HomeUITests.swift`: CN-SPEC-0027-AC001, AC002, AC005, AC006, AC007, AC008, AC012.
+- `ChessNotationUITests/HomeUITests.swift`: CN-SPEC-0027-AC001, AC002, AC005, AC007, AC008, AC012.
 - `ChessNotationTests/HomeTileLayoutRegressionTests.swift`: CN-SPEC-0027-AC001, AC004, AC005, AC009, AC011, AC012, AC013, AC015, AC017 structural guardrails.
 - `scripts/validate_home_tile_assets.py`: CN-SPEC-0027-AC014.
 - `scripts/tests/test_validate_home_tile_assets.py`: CN-SPEC-0027-AC014.
-- `docs/home-tile-asset-normalization.md`: CN-SPEC-0027-AC014, AC015, AC016 replacement and audit instructions.
+- `scripts/normalize_home_tile_assets.py`: canonical 1422 x 1106 normalization path for future inconsistent source artwork.
+- `scripts/tests/test_normalize_home_tile_assets.py`: canonical canvas, RGB, deterministic output, aspect-preserving resize, and fallback normalization coverage.
+- `docs/home-tile-asset-normalization.md`: CN-SPEC-0027-AC014, AC015, AC016 source-artwork contract and replacement instructions.
 - Manual simulator screenshots for iPhone SE-class, iPhone 16-class, Pro Max-class, iPad portrait, iPad landscape, and accessibility Dynamic Type: CN-SPEC-0027-AC003, AC004, AC006, AC010, AC011, AC012, AC013, AC015, AC016, AC017.
-- `ChessNotation/Features/Home/RestoredHomeView.swift`: production owner for the Home and Board Skills layouts covered by this contract, including shared 8:5 Home artwork viewport rendering.
+- `ChessNotation/Features/Home/RestoredHomeView.swift`: production owner for the Home and Board Skills layouts covered by this contract, including shared 9:7 Home artwork viewport rendering.
 
 ## Review Gate
 
@@ -184,7 +186,7 @@ A Home or family-screen UI change must not be described as complete until:
 6. any unrun device or Dynamic Type case is explicitly listed;
 7. CN-SPEC-0026 and this contract remain synchronized with implementation.
 
-The current Home tile assets are not yet normalized to 1600 x 1000 sRGB PNGs. Until replacement assets pass `make validate-home-assets` and the full screenshot matrix is reviewed, AC014, AC015, and AC016 remain incomplete.
+The production Home tile contract is now 1422 x 1106, 9:7, RGB with no alpha. Source metadata is aligned to that geometry, but AC014 still requires a passing `make validate-home-assets` run after this contract update, and AC015/AC016 remain pending the required rendered screenshot matrix.
 
 ## Open Questions
 
@@ -198,4 +200,5 @@ The current Home tile assets are not yet normalized to 1600 x 1000 sRGB PNGs. Un
 - 2026-07-15: Converted the companion document into a complete CN-SPEC-0027 schema so repository spec validation can enforce title, scope, functional requirements, acceptance criteria, coverage, and open questions.
 - 2026-07-15: Applied the approved premium composition: shorter family cards with compact copy, larger visible gutters, stronger hero contrast, premium Board Skills Quick Start, and equal compact drill rows.
 - 2026-07-15: Replaced the rejected wide Instructions banner with one centered card using family-card geometry, added accessibility-width behavior, normalized Position Recall perceived artwork scale to 0.9, and required an opaque navigation toolbar.
-- 2026-07-16: Audited current Home tile PNG metadata, added a Pillow-backed asset validator and replacement plan, replaced the Position Recall one-off scale modifier with a shared 8:5 artwork viewport, and kept the spec Proposed because normalized replacement assets and screenshot matrix validation are still pending.
+- 2026-07-16: Audited Home tile PNG metadata, added a Pillow-backed asset validator and replacement plan, replaced the Position Recall one-off scale modifier with a shared artwork viewport, and kept the spec Proposed because normalized replacement assets and screenshot matrix validation were still pending.
+- 2026-08-23: Adopted the manually normalized production artwork as the canonical 1422 x 1106, 9:7 RGB source contract; changed the shared Home viewport to 9:7; allowed unmanaged RGB while rejecting incompatible embedded ICC profiles; aligned normalizer, tests, documentation, and rendered geometry coverage; retained Proposed status pending validation runs and the full screenshot matrix.
