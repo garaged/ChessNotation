@@ -26,8 +26,8 @@ except ImportError:  # pragma: no cover - exercised by local setup, not tests.
     raise SystemExit(2)
 
 
-EXPECTED_WIDTH = 1600
-EXPECTED_HEIGHT = 1000
+EXPECTED_WIDTH = 1422
+EXPECTED_HEIGHT = 1106
 EXPECTED_FORMAT = "PNG"
 EXPECTED_PROFILE_KEYWORD = "srgb"
 ALLOWED_MODES = {"RGB"}

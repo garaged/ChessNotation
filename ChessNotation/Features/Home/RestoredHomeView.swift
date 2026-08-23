@@ -266,7 +266,7 @@ private enum HomeLayout {
     static let regularHeroHeight: CGFloat = 204
     static let heroPadding: CGFloat = 18
     static let artworkHeight: CGFloat = 100
-    static let artworkAspectRatio: CGFloat = 8.0 / 5.0
+    static let artworkAspectRatio: CGFloat = 9.0 / 7.0
     static let titleRegionHeight: CGFloat = 22
     static let subtitleRegionHeight: CGFloat = 36
     static let cardHeight: CGFloat = 188
