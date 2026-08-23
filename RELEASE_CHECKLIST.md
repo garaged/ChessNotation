@@ -27,6 +27,7 @@
 - Verify app privacy answers in App Store Connect match `PRIVACY.md`
 - Test on a physical device before submission
 - Validate archive and upload through Xcode Organizer
+- Re-run Release generic build or archive in an unsandboxed Xcode environment; the 2026-08-23 sandboxed shell attempt reached Swift compilation but failed asset catalog compilation because CoreSimulator services reported no available simulator runtimes.
 
 ## Product quality
 
@@ -40,6 +41,7 @@
 - Verify board style previews stay square in Settings
 - Verify the bundled game library loads without errors
 - Confirm accessibility labels still cover the main UI flow
+- Confirm game-training answer backspace and submit controls retain 44 x 44 touch targets
 
 ## CN-SPEC-0022 Validation Notes
 
@@ -56,5 +58,6 @@ Validated behavior includes local-only privacy surface, bounded FEN/history poli
 Known release limitations:
 
 - Physical-device validation and App Store archive/upload remain manual release steps.
+- Sandboxed shell Release generic build remains blocked by CoreSimulator service access; use Xcode Organizer or an unsandboxed local shell for final archive validation.
 - The app uses bundled move data and stored evaluations; it does not perform runtime chess-engine analysis.
 - External keyboard support covers supported training answer/navigation commands and does not turn every screen into a full hardware-keyboard editing surface.

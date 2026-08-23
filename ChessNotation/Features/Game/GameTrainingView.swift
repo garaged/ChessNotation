@@ -128,6 +128,8 @@ struct GameTrainingView: View {
                     .font(.body.weight(.semibold))
                     .frame(width: 28, height: 28)
             }
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
             .buttonStyle(.plain)
             .disabled(viewModel.answerText.isEmpty)
             .accessibilityIdentifier("game.answerBackspaceButton")
@@ -141,6 +143,8 @@ struct GameTrainingView: View {
                     .symbolRenderingMode(.hierarchical)
                     .frame(width: 28, height: 28)
             }
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
             .buttonStyle(.plain)
             .disabled(viewModel.answerText.isEmpty)
             .foregroundStyle(PremiumDesign.Accent.practice.color)
