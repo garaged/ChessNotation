@@ -42,10 +42,10 @@ struct HomeTileLayoutRegressionTests {
     }
 
     @Test
-    func familyArtworkUsesSharedEightByFiveViewportWithoutPerCardScale() throws {
+    func familyArtworkUsesSharedNineBySevenViewportWithoutPerCardScale() throws {
         let source = try homeSource()
 
-        #expect(source.contains("static let artworkAspectRatio: CGFloat = 8.0 / 5.0"))
+        #expect(source.contains("static let artworkAspectRatio: CGFloat = 9.0 / 7.0"))
         #expect(source.contains("HomeLayout.artworkHeight * HomeLayout.artworkAspectRatio"))
         #expect(source.contains("let artworkHeight = artworkWidth / HomeLayout.artworkAspectRatio"))
         #expect(!source.contains("positionRecallArtworkScale"))
