@@ -56,7 +56,7 @@ struct HomeView: View {
                 BoardTexture(tint: PremiumDesign.Accent.brand.color)
                     .overlay {
                         LinearGradient(
-                            colors: [.clear, PremiumDesign.backgroundBottom.opacity(0.78)],
+                            colors: [.clear, PremiumDesign.backgroundBottom.opacity(1.0)],
                             startPoint: .top,
                             endPoint: .bottom
                         )
