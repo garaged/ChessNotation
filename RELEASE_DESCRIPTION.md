@@ -1,10 +1,10 @@
-# ChessNotation 2.1.0 Release Description
+# ChessNotation 3.0.1 Release Description
 
 Learn chess notation by playing through real games, racing the clock, recognizing board squares faster, practicing piece movement, and rebuilding positions from memory.
 
 ChessNotation is built for players who want to read, write, and recognize standard algebraic notation more confidently. Each notation training session presents a real position and asks you to enter the correct move in SAN using a dedicated chess notation keyboard. You get immediate feedback, can reveal answers when needed, and can review your results as you improve.
 
-Version 2.1.0 expands ChessNotation into a broader board-vision trainer. Home is organized into four focused families: Notation Training, Timed Training, Board Skills, and Position Recall. Board Skills now groups Square Recognition and Piece Movement, while Position Recall adds reconstruction practice after a timed study phase. The release also strengthens responsive layouts, accessibility, bundled-game validation, local history resilience, and external-keyboard support while keeping all training data local to the device.
+Version 3.0.1 expands ChessNotation into a broader board-vision trainer. Home is organized into four focused families: Notation Training, Timed Training, Board Skills, and Position Recall. Board Skills now groups Square Recognition and Piece Movement, while Position Recall adds reconstruction practice after a timed study phase. The release also strengthens responsive layouts, accessibility, bundled-game validation, local history resilience, and external-keyboard support while keeping all training data local to the device.
 
 Features:
 - Practice standard algebraic notation move by move

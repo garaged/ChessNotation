@@ -2,26 +2,26 @@
 
 ## Current Release
 
-- Version: `2.0.2`
+- Version: `3.0.1`
 - Build: `1`
-- Date: 2026-06-28
-- Scope: current-position evaluation for evaluated games, all-mode local history, interactive history trend charts, timed notation, square recognition, game thumbnails, and rendered chess-piece assets.
+- Date: 2026-08-23
+- Scope: recovered training families, Board Skills, Position Recall reconstruction, Piece Movement, responsive Home/Board Skills layout, external keyboard hardening, local-only history resilience, and App Store version correction above the closed `3.0.0` train.
 
 ## GitHub
 
 - Confirm `README.md` reflects current features and setup
-- Review `CHANGELOG.md` for the `2.0.2` entry
-- Confirm Xcode app target uses marketing version `2.0.2` and build `1`
+- Review `CHANGELOG.md` for the `3.0.1` entry
+- Confirm Xcode app target uses marketing version `3.0.1` and build `1`
 - Confirm `LICENSE` is present and referenced in docs
 - Verify screenshots or demo media are ready for the repository page
-- Tag the release as `v2.0.2` after merging the release commit
+- Tag the release as `v3.0.1` after merging the release commit
 
 ## App Store
 
 - Replace placeholder app metadata in Xcode
 - Verify app name, subtitle, keywords, and description
 - Use `RELEASE_DESCRIPTION.md` as the baseline App Store description for this release
-- Confirm App Store copy mentions current-position evaluation, training history, timed notation, square recognition, and visual board themes
+- Confirm App Store copy mentions recovered training families, Board Skills, Position Recall reconstruction, Piece Movement, current-position evaluation, training history, timed notation, square recognition, and visual board themes
 - Prepare App Store screenshots for supported device sizes
 - Confirm the privacy policy is published and linked in App Store Connect
 - Verify app privacy answers in App Store Connect match `PRIVACY.md`

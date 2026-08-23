@@ -4,9 +4,9 @@ ChessNotation is an iOS SwiftUI app for practicing standard algebraic chess nota
 
 ## Current release
 
-- Version: `2.0.2`
+- Version: `3.0.1`
 - Build: `1`
-- Release focus: current-position evaluation, all-mode training history, interactive trend charts, premium visual redesign, timed training, square recognition, recovered mini-games, and performance/security/accessibility hardening.
+- Release focus: recovered training families, Board Skills, Position Recall reconstruction, Piece Movement, responsive Home/Board Skills layout, current-position evaluation, all-mode training history, interactive trend charts, timed training, square recognition, and performance/security/accessibility hardening.
 
 ## Current scope
 

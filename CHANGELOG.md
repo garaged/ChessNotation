@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.1.0] - 2026-08-23
+## [3.0.1] - 2026-08-23
 
 ### Added
 - Board Skills family with Square Recognition and Piece Movement drills under one focused training destination.
@@ -21,7 +21,7 @@ All notable changes to this project will be documented in this file.
 - Updated mini-game boards to honor the selected board theme and coordinate setting while using rendered chess-piece assets.
 - Bundled game loading now validates each payload, omits later duplicate stable game IDs across overlapping catalogs, and keeps valid sibling records playable.
 - Documentation now states local-only privacy behavior, persistence schema and corruption recovery behavior, bounded cache/history policies, accessibility behavior, keyboard support, known limits, and exact validation results.
-- Prepared the app target for App Store release as version `2.1.0` build `1`.
+- Prepared the app target for App Store release as version `3.0.1` build `1`, above the previously approved `3.0.0` App Store version.
 
 ### Fixed
 - Prevented duplicate game IDs across configured catalogs from breaking library loading or SwiftUI list identity.
