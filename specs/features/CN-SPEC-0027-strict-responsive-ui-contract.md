@@ -1,6 +1,6 @@
 # CN-SPEC-0027: Strict Responsive UI Contract
 
-Status: Proposed
+Status: Accepted
 Owner: Project
 Last updated: 2026-08-23
 
@@ -164,14 +164,15 @@ For Board Skills specifically:
 
 ## Coverage
 
-- `ChessNotationUITests/HomeUITests.swift`: CN-SPEC-0027-AC001, AC002, AC005, AC007, AC008, AC012.
-- `ChessNotationTests/HomeTileLayoutRegressionTests.swift`: CN-SPEC-0027-AC001, AC004, AC005, AC009, AC011, AC012, AC013, AC015, AC017 structural guardrails.
+- `ChessNotationUITests/HomeUITests.swift`: CN-SPEC-0027-AC001, CN-SPEC-0027-AC002, CN-SPEC-0027-AC005, CN-SPEC-0027-AC007, CN-SPEC-0027-AC008, CN-SPEC-0027-AC012.
+- `ChessNotationTests/HomeTileLayoutRegressionTests.swift`: CN-SPEC-0027-AC001, CN-SPEC-0027-AC004, CN-SPEC-0027-AC005, CN-SPEC-0027-AC009, CN-SPEC-0027-AC011, CN-SPEC-0027-AC012, CN-SPEC-0027-AC013, CN-SPEC-0027-AC015, CN-SPEC-0027-AC017 structural guardrails.
 - `scripts/validate_home_tile_assets.py`: CN-SPEC-0027-AC014.
 - `scripts/tests/test_validate_home_tile_assets.py`: CN-SPEC-0027-AC014.
 - `scripts/normalize_home_tile_assets.py`: canonical 1422 x 1106 normalization path for future inconsistent source artwork.
 - `scripts/tests/test_normalize_home_tile_assets.py`: canonical canvas, RGB, deterministic output, aspect-preserving resize, and fallback normalization coverage.
 - `docs/home-tile-asset-normalization.md`: CN-SPEC-0027-AC014, AC015, AC016 source-artwork contract and replacement instructions.
-- Manual simulator screenshots for iPhone SE-class, iPhone 16-class, Pro Max-class, iPad portrait, iPad landscape, and accessibility Dynamic Type: CN-SPEC-0027-AC003, AC004, AC006, AC010, AC011, AC012, AC013, AC015, AC016, AC017.
+- `docs/manual-testing/home-board-skills-responsive-validation.md`: inspected rendered screenshot matrix for iPhone SE-class, iPhone 16-class, Pro Max-class, iPad portrait, iPad landscape, and accessibility Dynamic Type; CN-SPEC-0027-AC003, CN-SPEC-0027-AC004, CN-SPEC-0027-AC006, CN-SPEC-0027-AC010, CN-SPEC-0027-AC011, CN-SPEC-0027-AC012, CN-SPEC-0027-AC013, CN-SPEC-0027-AC015, CN-SPEC-0027-AC016, CN-SPEC-0027-AC017.
+- `docs/manual-testing/screenshots/home-board-skills/2026-08-23/`: accepted rendered evidence for Home and Board Skills, including scrolled accessibility capture for Board Skills drill rows.
 - `ChessNotation/Features/Home/RestoredHomeView.swift`: production owner for the Home and Board Skills layouts covered by this contract, including shared 9:7 Home artwork viewport rendering.
 
 ## Review Gate
@@ -186,7 +187,7 @@ A Home or family-screen UI change must not be described as complete until:
 6. any unrun device or Dynamic Type case is explicitly listed;
 7. CN-SPEC-0026 and this contract remain synchronized with implementation.
 
-The production Home tile contract is now 1422 x 1106, 9:7, RGB with no alpha. Source metadata is aligned to that geometry, but AC014 still requires a passing `make validate-home-assets` run after this contract update, and AC015/AC016 remain pending the required rendered screenshot matrix.
+The production Home tile contract is 1422 x 1106, 9:7, RGB with no alpha. Source metadata, automated tests, asset validation, and the inspected rendered screenshot matrix satisfy the accepted contract.
 
 ## Open Questions
 
@@ -202,3 +203,4 @@ The production Home tile contract is now 1422 x 1106, 9:7, RGB with no alpha. So
 - 2026-07-15: Replaced the rejected wide Instructions banner with one centered card using family-card geometry, added accessibility-width behavior, normalized Position Recall perceived artwork scale to 0.9, and required an opaque navigation toolbar.
 - 2026-07-16: Audited Home tile PNG metadata, added a Pillow-backed asset validator and replacement plan, replaced the Position Recall one-off scale modifier with a shared artwork viewport, and kept the spec Proposed because normalized replacement assets and screenshot matrix validation were still pending.
 - 2026-08-23: Adopted the manually normalized production artwork as the canonical 1422 x 1106, 9:7 RGB source contract; changed the shared Home viewport to 9:7; allowed unmanaged RGB while rejecting incompatible embedded ICC profiles; aligned normalizer, tests, documentation, and rendered geometry coverage; retained Proposed status pending validation runs and the full screenshot matrix.
+- 2026-08-23: Accepted the strict responsive UI contract after `make validate-home-assets`, asset normalizer/validator tests, spec check, Xcode build, Home layout tests, Home UI tests, and inspected manual screenshots passed for the required Home and Board Skills matrix, including refreshed accessibility Dynamic Type captures.

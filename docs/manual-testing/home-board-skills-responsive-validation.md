@@ -11,7 +11,7 @@ This record tracks CN-SPEC-0026 and CN-SPEC-0027 rendered validation for Home an
 
 Automated source, asset, build, and Xcode-runner checks passed on 2026-08-23. Manually captured screenshots were inspected from `docs/manual-testing/screenshots/home-board-skills/2026-08-23/`.
 
-Default Dynamic Type screenshots pass the Home and Board Skills rendered acceptance checks. The refreshed Home accessibility Dynamic Type screenshot passes. The refreshed Board Skills accessibility screenshot confirms the Quick Start clipping fix, but the drill rows are partly below the bottom of the viewport and need a scrolled accessibility capture before the row-specific criteria can be accepted.
+Default Dynamic Type screenshots pass the Home and Board Skills rendered acceptance checks. The refreshed Home accessibility Dynamic Type screenshot passes. The refreshed Board Skills accessibility screenshots confirm the Quick Start and drill-row clipping fixes.
 
 ## Baseline Commands
 
@@ -48,7 +48,7 @@ Default Dynamic Type screenshots pass the Home and Board Skills rendered accepta
 | HBV-003 | Pro Max-class | Portrait | Default | Manual simulator screenshot | PASS | `docs/manual-testing/screenshots/home-board-skills/2026-08-23/home-iphone-pro-max-portrait-default.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-iphone-pro-max-portrait-default.png` | None found. | N/A | N/A |
 | HBV-004 | iPad | Portrait | Default | Manual simulator screenshot | PASS | `docs/manual-testing/screenshots/home-board-skills/2026-08-23/home-ipad-portrait-default.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-ipad-portrait-default.png` | None found. | N/A | N/A |
 | HBV-005 | iPad | Landscape | Default | Manual simulator screenshot | PASS | `docs/manual-testing/screenshots/home-board-skills/2026-08-23/home-ipad-landscape-default.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-ipad-landscape-default.png` | None found. | N/A | N/A |
-| HBV-006 | iPhone 16-class | Portrait | Accessibility size | Manual simulator screenshot | PARTIAL | `docs/manual-testing/screenshots/home-board-skills/2026-08-23/home-iphone-16-portrait-accessibility.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-iphone-16-portrait-accessibility.png` | Home hero text passes. Board Skills Quick Start text passes. Board Skills drill rows require a scrolled screenshot because the first row is partly below the bottom of the viewport. | Medium | `5bdc29c` |
+| HBV-006 | iPhone 16-class | Portrait | Accessibility size | Manual simulator screenshot | PASS | `docs/manual-testing/screenshots/home-board-skills/2026-08-23/home-iphone-16-portrait-accessibility.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-iphone-16-portrait-accessibility.png`; `docs/manual-testing/screenshots/home-board-skills/2026-08-23/board-skills-iphone-16-portrait-2-drills-accessibility.png` | None found after refreshed captures. | N/A | `5bdc29c` |
 
 ## Home Acceptance Checklist
 
@@ -80,13 +80,15 @@ Default Dynamic Type screenshots pass the Home and Board Skills rendered accepta
 | Square Recognition and Piece Movement rows share width/height | PASS | PASS | Home UI frame assertions; inspected default screenshots. |
 | Rows align leading edges and preserve positive spacing | PASS | PASS | Home UI frame assertions; inspected screenshots. |
 | Rows have matching artwork dimensions | PASS | PASS | Source shared `FamilyGameRow`; inspected screenshots. |
-| Rows have no clipping or intersection | PASS | PARTIAL | Refreshed accessibility screenshot confirms Quick Start text is no longer clipped. Drill rows need a scrolled screenshot because they are partly below the viewport. |
+| Rows have no clipping or intersection | PASS | PASS | Refreshed accessibility screenshots confirm Quick Start and drill-row text are no longer clipped. |
 | No duplicate Home-style grid | PASS | PASS | Source regression guardrails; inspected screenshots. |
 | Bounded width on iPad | PARTIAL | PASS | Source max-width guardrail; inspected iPad screenshots. |
-| Dynamic Type remains usable | PARTIAL | PARTIAL | Refreshed accessibility screenshot confirms the header and Quick Start remain usable; drill rows need a scrolled screenshot. |
+| Dynamic Type remains usable | PARTIAL | PASS | Refreshed accessibility screenshots confirm the header, Quick Start, and drill rows remain usable by vertical scrolling. |
 
 ## Decision
 
-CN-SPEC-0026 and CN-SPEC-0027 remain `Proposed`.
+CN-SPEC-0027 has enough Home and Board Skills rendered-layout evidence to move to `Accepted`.
 
-Reason: automated evidence is strong, default-size rendered screenshots passed, and the refreshed Home accessibility screenshot passed. Board Skills still needs a scrolled accessibility screenshot that shows the full Square Recognition and Piece Movement rows before the row-specific acceptance criteria can be closed.
+CN-SPEC-0026 remains `Proposed`.
+
+Reason: the responsive Home and Board Skills layout contract is covered by automated checks and inspected screenshots across the required device matrix. CN-SPEC-0026 still owns broader family-screen navigation and results-return behavior that remains open in `docs/ui-consistency-audit.md`.
