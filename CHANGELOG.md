@@ -2,19 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - 2026-07-15
+## [2.1.0] - 2026-08-23
 
 ### Added
+- Board Skills family with Square Recognition and Piece Movement drills under one focused training destination.
+- Position Recall reconstruction training with study, concealment, answer, scoring, history, and accessible board-state handling.
+- Piece Movement training with themed board rendering, blockers/captures, geometric destination selection, completion summaries, and replay support.
+- Recovered game catalog, routing, family-information architecture, and regression contracts through CN-SPEC-0023 to CN-SPEC-0027.
 - External keyboard command routing for notation answer entry/edit/submit/reveal and primary mini-game submit/next/finish flows.
-- Regression coverage for external keyboard notation, Piece Movement, and Position Recall command behavior.
+- Regression coverage for external keyboard notation, Piece Movement, Position Recall, responsive Home geometry, Instructions-card geometry, and Board Skills row alignment.
+- Home artwork validation and normalization tooling for the canonical 1422 x 1106, 9:7 RGB tile contract.
 - CN-SPEC-0022 release validation traceability covering performance, security, accessibility, bundled-data, and UI smoke coverage.
 
 ### Changed
+- Reworked Home into four stable training families: Notation Training, Timed Training, Board Skills, and Position Recall.
+- Moved Instructions outside the gameplay grid into a centered secondary card that shares family-card geometry.
+- Standardized Home artwork rendering to one shared 9:7 viewport without per-card scaling exceptions.
+- Updated mini-game boards to honor the selected board theme and coordinate setting while using rendered chess-piece assets.
 - Bundled game loading now validates each payload, omits later duplicate stable game IDs across overlapping catalogs, and keeps valid sibling records playable.
 - Documentation now states local-only privacy behavior, persistence schema and corruption recovery behavior, bounded cache/history policies, accessibility behavior, keyboard support, known limits, and exact validation results.
+- Prepared the app target for App Store release as version `2.1.0` build `1`.
 
 ### Fixed
 - Prevented duplicate game IDs across configured catalogs from breaking library loading or SwiftUI list identity.
+- Fixed Position Recall study-to-answer transitions, visible-piece handling, and reconstruction rendering.
+- Fixed Piece Movement prompt advancement, final completion state, and play-again behavior.
+- Removed the temporary Position Recall artwork scale override after normalizing the production source artwork.
 
 ## [2.0.2] - 2026-06-28
 
