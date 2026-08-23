@@ -71,7 +71,14 @@ class HomeTileAssetNormalizerTests(unittest.TestCase):
 
         foreground = normalizer.make_foreground(image, 0.60)
 
-        self.assertAlmostEqual(foreground.width / foreground.height, 2.0, places=3)
+        source_ratio = image.width / image.height
+        expected_height = foreground.width / source_ratio
+        self.assertAlmostEqual(
+            foreground.height,
+            expected_height,
+            delta=1.0,
+            msg="Integer pixel rounding may differ by at most one pixel without stretching the source",
+        )
 
     def test_output_encoding_is_deterministic(self):
         image = Image.new("RGB", (1200, 900), (12, 34, 56))
