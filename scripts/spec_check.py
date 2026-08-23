@@ -30,22 +30,32 @@ REQUIRED_SECTIONS = {
 
 
 def section_names(text: str) -> set[str]:
-    return {
+    names = {
         line[3:].strip()
         for line in text.splitlines()
         if line.startswith("## ") and line[3:].strip()
     }
+    if "Planned Coverage" in names:
+        names.add("Coverage")
+    return names
 
 
 def section_body(text: str, section: str) -> str:
-    match = re.search(rf"^## {re.escape(section)}\s*$", text, re.MULTILINE)
-    if not match:
-        return ""
+    candidates = [section]
+    if section == "Coverage":
+        candidates.append("Planned Coverage")
 
-    start = match.end()
-    next_section = re.search(r"^##\s+", text[start:], re.MULTILINE)
-    end = start + next_section.start() if next_section else len(text)
-    return text[start:end]
+    for candidate in candidates:
+        match = re.search(rf"^## {re.escape(candidate)}\s*$", text, re.MULTILINE)
+        if not match:
+            continue
+
+        start = match.end()
+        next_section = re.search(r"^##\s+", text[start:], re.MULTILINE)
+        end = start + next_section.start() if next_section else len(text)
+        return text[start:end]
+
+    return ""
 
 
 def ids_from_bullets(body: str, pattern: re.Pattern[str]) -> list[str]:
@@ -81,9 +91,17 @@ def validate_spec(path: Path) -> list[str]:
             valid = ", ".join(sorted(VALID_STATUSES))
             errors.append(f"{rel_path}: invalid status '{status_value}', expected one of {valid}")
 
+    raw_sections = {
+        line[3:].strip()
+        for line in text.splitlines()
+        if line.startswith("## ") and line[3:].strip()
+    }
     missing_sections = sorted(REQUIRED_SECTIONS - section_names(text))
     for section in missing_sections:
         errors.append(f"{rel_path}: missing section '## {section}'")
+
+    if status_value == "Accepted" and "Coverage" not in raw_sections:
+        errors.append(f"{rel_path}: accepted specs must use canonical section '## Coverage'")
 
     if not spec_id:
         return errors
@@ -110,11 +128,10 @@ def validate_spec(path: Path) -> list[str]:
             errors.append(f"{rel_path}: duplicate {label} ID {duplicate}")
 
     coverage_paths = COVERAGE_PATH_RE.findall(coverage_body)
-    for coverage_path in coverage_paths:
-        if not (ROOT / coverage_path).exists():
-            errors.append(f"{rel_path}: coverage path does not exist: {coverage_path}")
-
     if status_value == "Accepted":
+        for coverage_path in coverage_paths:
+            if not (ROOT / coverage_path).exists():
+                errors.append(f"{rel_path}: coverage path does not exist: {coverage_path}")
         if not coverage_paths:
             errors.append(f"{rel_path}: accepted specs must list coverage paths")
         for ac_id in ac_ids:

@@ -40,3 +40,21 @@
 - Verify board style previews stay square in Settings
 - Verify the bundled game library loads without errors
 - Confirm accessibility labels still cover the main UI flow
+
+## CN-SPEC-0022 Validation Notes
+
+Validation run on 2026-07-15 for `agent/recover-missing-games-specs`:
+
+- `make spec-check`: passed, 12 feature spec(s) validated.
+- Xcode targeted CN-SPEC-0022 hardening batch: passed, 54 tests.
+- Xcode complete `ChessNotationTests` unit/integration target: passed, 264 tests.
+- Xcode critical UI suites split by suite: passed, 12 tests across `HomeUITests`, `GameLibraryUITests`, `GameplayUITests`, `SquareRecognitionUITests`, and `TimedGameUITests`.
+- `xcodebuild test -project ChessNotation.xcodeproj -scheme ChessNotation -destination 'platform=iOS Simulator,name=iPhone 16'`: not completed in the sandboxed shell. `xcodebuild` exited 70 because no matching iPhone 16 simulator destination was available; the shell saw only placeholder simulator destinations.
+
+Validated behavior includes local-only privacy surface, bounded FEN/history policies, bundled-game validation and duplicate catalog omission, Position Recall schema migration/corruption preservation/reset behavior, Dynamic Type reachability, VoiceOver board-square semantics, Reduce Motion feedback equivalence, and external keyboard answer/navigation command routing.
+
+Known release limitations:
+
+- Physical-device validation and App Store archive/upload remain manual release steps.
+- The app uses bundled move data and stored evaluations; it does not perform runtime chess-engine analysis.
+- External keyboard support covers supported training answer/navigation commands and does not turn every screen into a full hardware-keyboard editing surface.

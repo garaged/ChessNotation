@@ -1,0 +1,204 @@
+# CN-SPEC-0027: Strict Responsive UI Contract
+
+Status: Proposed
+Owner: Project
+Last updated: 2026-08-23
+
+## Intent
+
+Turn Home and game-family layout requirements into measurable rendering rules. A layout is not accepted because source constants look reasonable; it is accepted only when rendered frames, safe-area placement, hierarchy, typography, and visual composition satisfy this contract on representative devices.
+
+## Scope
+
+In scope:
+
+- Home family-card geometry, spacing, safe-area placement, typography, hierarchy, and premium composition.
+- A single centered Instructions card outside the primary gameplay grid using the same card geometry as the family cards.
+- Per-asset artwork normalization when source composition creates visibly inconsistent perceived scale.
+- Board Skills family-screen hierarchy, Quick Start placement, and drill-row geometry.
+- Rendered-frame validation on representative iPhone and iPad sizes.
+- Accessibility Dynamic Type fallback behavior.
+- Structural regression checks that prevent rejected layout patterns from returning.
+
+Out of scope:
+
+- Game rules, scoring, persistence, timing, and answer validation.
+- New artwork production or replacement.
+- Navigation semantics owned by CN-SPEC-0026 beyond the layout constraints referenced here.
+- Full visual redesign of unrelated setup, gameplay, results, history, settings, or instruction screens.
+
+## Functional Requirements
+
+- CN-SPEC-0027-FR001: Home must contain exactly four primary family cards in a complete 2x2 grid at normal Dynamic Type sizes.
+- CN-SPEC-0027-FR002: All four Home family cards must use one shared vertical component and identical explicit normal-size geometry.
+- CN-SPEC-0027-FR003: Home card widths and heights must match within one rendered point, with strictly positive row and column spacing and no intersections or touching frames.
+- CN-SPEC-0027-FR004: Home family cards must use matching artwork, title, subtitle, padding, corner radius, border, typography, and action-indicator regions.
+- CN-SPEC-0027-FR005: Long horizontal family cards and partial gameplay rows are prohibited.
+- CN-SPEC-0027-FR006: Home content must use a bounded centered width on iPad so cards remain proportionate.
+- CN-SPEC-0027-FR007: At accessibility Dynamic Type sizes, the Home family grid must change to one column and allow unrestricted vertical text growth.
+- CN-SPEC-0027-FR008: Hero content must begin below the navigation and status safe area, and Settings must use an opaque navigation toolbar item rather than a floating overlay.
+- CN-SPEC-0027-FR009: The only primary Home families are Notation Training, Timed Training, Board Skills, and Position Recall.
+- CN-SPEC-0027-FR010: Instructions, Settings, History, and other utilities must not appear inside the primary gameplay grid.
+- CN-SPEC-0027-FR011: Square Recognition and Piece Movement must be presented under Board Skills rather than as direct Home cards.
+- CN-SPEC-0027-FR012: A family screen must present a family summary, one prominent Quick Start action, a labeled game-choice section, compact aligned game rows or cards, and secondary actions below.
+- CN-SPEC-0027-FR013: Board Skills Quick Start must launch the recommended Square Recognition setup.
+- CN-SPEC-0027-FR014: Board Skills must present Square Recognition and Piece Movement as two compact rows with equal width and height, aligned leading edges, positive spacing, and no intersection.
+- CN-SPEC-0027-FR015: Board Skills must not reuse the Home family-card grid for its drill choices.
+- CN-SPEC-0027-FR016: Home and family-screen typography must use shared semantic fonts without per-card scaling exceptions.
+- CN-SPEC-0027-FR017: Every Home or family-screen layout change must be validated on the required device matrix before being described as complete.
+- CN-SPEC-0027-FR018: Normal-size Home family copy must fit its defined one-line title and two-line subtitle budgets without ellipses; copy must be shortened rather than clipped or scaled independently.
+- CN-SPEC-0027-FR019: Instructions must use the same component, height, artwork region, typography, and action placement as a family card, but render as one centered card in its own row outside the 2x2 gameplay grid.
+- CN-SPEC-0027-FR020: Home family cards must preserve a visible outer gutter on all sides so borders and shadows do not visually merge between rows or columns.
+- CN-SPEC-0027-FR021: Board Skills Quick Start must use a visually prominent premium artwork treatment, while its two drill choices use compact equal-height rows with matching artwork dimensions.
+- CN-SPEC-0027-FR022: When an asset's composition makes its subject appear materially larger than peer artwork, source artwork must be normalized first; any remaining adjustment must use a documented shared focal-point or inset mechanism rather than an unexplained per-card scale modifier.
+- CN-SPEC-0027-FR023: Home tile source artwork must use 1422 x 1106 px PNG files with a 9:7 aspect ratio, RGB color, no unexpected alpha, no baked-in text, no baked-in borders, no rounded corners, no arrows, no shadows, no UI chrome, and a background extending to every canvas edge. Embedded sRGB metadata is accepted but not required; unmanaged RGB is valid, while explicitly incompatible embedded ICC profiles are prohibited.
+- CN-SPEC-0027-FR024: For future source normalization, important Home tile content should remain inside the 994 x 840 safe composition region with approximately 214 px left/right margins, 133 px top/bottom margins, and optical center reference x = 711, y = 531 unless a documented composition needs a small optical offset.
+- CN-SPEC-0027-FR025: Home tile artwork must render through one shared 9:7 viewport without stretching, without per-card aspect-ratio exceptions, and without unexplained one-off scale modifiers.
+- CN-SPEC-0027-FR026: Position Recall artwork must be normalized at the source so its perceived subject scale matches peer tiles despite its higher visual mass.
+- CN-SPEC-0027-FR027: Instructions artwork must use the same 1422 x 1106 source normalization and the same 9:7 rendered viewport as the gameplay family cards while remaining a centered same-shape single-column card outside the primary grid.
+
+## Required Device Matrix
+
+Every Home or family-screen layout change must be visually and automatically validated on:
+
+- compact iPhone width, represented by iPhone SE-class devices;
+- standard iPhone width, represented by iPhone 16-class devices;
+- large iPhone width, represented by Pro Max-class devices;
+- regular-width iPad portrait;
+- regular-width iPad landscape;
+- at least one accessibility Dynamic Type size.
+
+A source-only test does not satisfy the device matrix.
+
+## Home Geometry Contract
+
+At normal Dynamic Type sizes:
+
+- Home contains exactly four primary family cards in a complete 2x2 grid.
+- All four cards use the same component and the same explicit rendered height.
+- Cards in the same rendered layout have equal width within one point and equal height within one point.
+- Horizontal and vertical gaps are strictly positive and visually preserved by borders and shadows.
+- No card frames may intersect, touch, or appear visually merged.
+- Artwork regions, title regions, subtitle regions, typography, internal padding, corner radius, border treatment, and action-indicator placement are identical.
+- Source artwork normalization, and any future shared focal-point or inset mechanism, may change perceived subject size but must not change the artwork frame.
+- Long horizontal family cards are prohibited.
+- Partial gameplay rows are prohibited.
+- The primary grid is centered in a bounded content width on iPad.
+- Normal-size titles use one line and subtitles use at most two lines without ellipses.
+
+At accessibility Dynamic Type sizes:
+
+- The grid changes to one column.
+- Text may grow vertically without fixed-height clipping.
+- All primary actions remain reachable through vertical scrolling.
+- The Instructions card expands to the available single-column width.
+
+## Home Safe-Area Contract
+
+- Hero content must begin below the navigation and status safe area.
+- Settings must use an opaque navigation toolbar rather than an independently overlaid floating control.
+- Hero text must remain fully visible and may not be clipped by the Dynamic Island, status bar, navigation bar, or simulator chrome.
+- The hero uses an explicit bounded height, strong contrast gradient, and consistent horizontal alignment with the sections below it.
+
+## Home Hierarchy Contract
+
+The only primary family cards are:
+
+1. Notation Training
+2. Timed Training
+3. Board Skills
+4. Position Recall
+
+Instructions, Settings, History, and other utilities must not appear inside the 2x2 gameplay grid.
+
+Instructions remains one centered, single-column card below the gameplay grid and uses the same visual geometry as a family card. Square Recognition and Piece Movement belong to Board Skills and are not direct Home cards.
+
+## Family-Screen Contract
+
+A family screen must not repeat the Home family-card grid by default.
+
+Each family screen must use this hierarchy:
+
+1. concise family purpose;
+2. one visually prominent premium Quick Start action;
+3. a labeled game-choice section;
+4. compact, consistently aligned game rows or cards;
+5. secondary history, setup, or help actions below the primary choices.
+
+For Board Skills specifically:
+
+- Quick Start launches the recommended Square Recognition setup.
+- Quick Start uses premium artwork with an overlaid label and action indicator.
+- Square Recognition and Piece Movement appear as two compact equal-height rows of equal width and aligned leading edges.
+- The two rows use matching artwork dimensions, have a positive vertical gap, and may not intersect.
+- Board Skills must not use `HomeMenuTile` or `LazyVGrid` for its two drill choices.
+
+## Typography Contract
+
+- Home family titles use the same semantic font and weight.
+- Home family subtitles use the same semantic font, line limit, and text region.
+- Normal-size family copy must not truncate with ellipses.
+- The centered Instructions card uses the same title and subtitle typography as family cards.
+- Family-screen Quick Start and game rows use semantic fonts and do not shrink text with `minimumScaleFactor`.
+- Copy changes are preferred over per-card typography exceptions.
+
+## Acceptance Criteria
+
+- CN-SPEC-0027-AC001: Given normal Dynamic Type on a compact iPhone, when Home renders, then exactly four family cards form a complete 2x2 grid with equal width and height within one point.
+- CN-SPEC-0027-AC002: Given Home on supported widths, when card frames are inspected, then horizontal and vertical gaps are positive and no card pair intersects, touches, or appears visually merged.
+- CN-SPEC-0027-AC003: Given Home on iPad portrait and landscape, when the family grid renders, then it remains centered within a bounded width and cards do not become disproportionately wide.
+- CN-SPEC-0027-AC004: Given Home at accessibility Dynamic Type, when the grid renders, then it uses one column, text is not clipped, and all actions remain reachable by vertical scrolling.
+- CN-SPEC-0027-AC005: Given the production Home hierarchy, when primary and utility destinations are enumerated, then only the four documented families appear in the gameplay grid and Instructions remains secondary.
+- CN-SPEC-0027-AC006: Given Home below the navigation bar, when the hero renders, then its text and artwork remain fully below the opaque navigation area with sufficient contrast and without clipping or overlap.
+- CN-SPEC-0027-AC007: Given Board Skills, when the screen renders, then the premium Quick Start action appears above Square Recognition and Piece Movement.
+- CN-SPEC-0027-AC008: Given Board Skills, when drill-row frames are inspected, then the rows have equal width and height, matching artwork dimensions, aligned leading edges, positive spacing, and no intersection.
+- CN-SPEC-0027-AC009: Given Board Skills source structure, when audited, then drill choices do not reuse the Home family-card grid.
+- CN-SPEC-0027-AC010: Given the required device matrix, when validation is reported complete, then every listed device and Dynamic Type case has either passed or is explicitly recorded as unrun.
+- CN-SPEC-0027-AC011: Given normal-size Home family cards, when titles and subtitles render, then all copy is fully visible within the defined line budgets without ellipses or minimum-scale reduction.
+- CN-SPEC-0027-AC012: Given the Home Help section at normal Dynamic Type, when Instructions renders, then it is centered, has the same measured width and height as one family card, and occupies its own single-card row.
+- CN-SPEC-0027-AC013: Given Position Recall and the other family artwork in equal frames, when Home renders, then Position Recall's source composition does not appear materially larger than peer artwork and no per-card SwiftUI scale override is required.
+- CN-SPEC-0027-AC014: Given the Home tile asset validator, when production tile assets are inspected, then every required tile asset is present, PNG formatted, exactly 1422 x 1106 px, 9:7, RGB-only, has no unexpected alpha channel, and uses either unmanaged RGB or an sRGB-compatible profile rather than an incompatible embedded ICC profile.
+- CN-SPEC-0027-AC015: Given Home tile rendering, when source is audited and screenshots are inspected across compact iPhone, standard iPhone, Pro Max, iPad portrait, and iPad landscape, then all tile artwork uses the common 9:7 viewport with stable crop and no stretching.
+- CN-SPEC-0027-AC016: Given normalized replacement artwork, when Position Recall is compared with the other tile images in equal 9:7 frames, then its perceived subject scale matches the family set and no per-card SwiftUI scale override is required.
+- CN-SPEC-0027-AC017: Given the Help section at normal Dynamic Type, when Instructions renders, then it remains outside the primary 2x2 grid as a centered same-shape card using the same 9:7 artwork viewport and not a wide banner treatment.
+
+## Coverage
+
+- `ChessNotationUITests/HomeUITests.swift`: CN-SPEC-0027-AC001, AC002, AC005, AC007, AC008, AC012.
+- `ChessNotationTests/HomeTileLayoutRegressionTests.swift`: CN-SPEC-0027-AC001, AC004, AC005, AC009, AC011, AC012, AC013, AC015, AC017 structural guardrails.
+- `scripts/validate_home_tile_assets.py`: CN-SPEC-0027-AC014.
+- `scripts/tests/test_validate_home_tile_assets.py`: CN-SPEC-0027-AC014.
+- `scripts/normalize_home_tile_assets.py`: canonical 1422 x 1106 normalization path for future inconsistent source artwork.
+- `scripts/tests/test_normalize_home_tile_assets.py`: canonical canvas, RGB, deterministic output, aspect-preserving resize, and fallback normalization coverage.
+- `docs/home-tile-asset-normalization.md`: CN-SPEC-0027-AC014, AC015, AC016 source-artwork contract and replacement instructions.
+- Manual simulator screenshots for iPhone SE-class, iPhone 16-class, Pro Max-class, iPad portrait, iPad landscape, and accessibility Dynamic Type: CN-SPEC-0027-AC003, AC004, AC006, AC010, AC011, AC012, AC013, AC015, AC016, AC017.
+- `ChessNotation/Features/Home/RestoredHomeView.swift`: production owner for the Home and Board Skills layouts covered by this contract, including shared 9:7 Home artwork viewport rendering.
+
+## Review Gate
+
+A Home or family-screen UI change must not be described as complete until:
+
+1. source-level regression tests pass;
+2. rendered-frame UI tests pass on a standard iPhone;
+3. visual screenshots are reviewed for the full required device matrix;
+4. copy is confirmed free of visible truncation at normal Dynamic Type;
+5. centered Help-card geometry and artwork normalization are visually confirmed;
+6. any unrun device or Dynamic Type case is explicitly listed;
+7. CN-SPEC-0026 and this contract remain synchronized with implementation.
+
+The production Home tile contract is now 1422 x 1106, 9:7, RGB with no alpha. Source metadata is aligned to that geometry, but AC014 still requires a passing `make validate-home-assets` run after this contract update, and AC015/AC016 remain pending the required rendered screenshot matrix.
+
+## Open Questions
+
+- Whether future family screens should share a reusable compact row component or use family-specific row content while preserving the same geometry contract.
+- Whether screenshot regression tooling should be added to CI after the current device-matrix process is stable.
+- Whether CN-SPEC-0027 should remain a separate layout contract or be merged into CN-SPEC-0026 after CN-SPEC-0026 is accepted.
+
+## Revision Notes
+
+- 2026-07-15: Added after repeated Home revisions passed source-level checks while still producing clipped hero content, unbalanced card composition, and inappropriate tile-grid reuse on Board Skills. Established rendered-frame assertions, a required device matrix, safe-area rules, and family-screen hierarchy requirements.
+- 2026-07-15: Converted the companion document into a complete CN-SPEC-0027 schema so repository spec validation can enforce title, scope, functional requirements, acceptance criteria, coverage, and open questions.
+- 2026-07-15: Applied the approved premium composition: shorter family cards with compact copy, larger visible gutters, stronger hero contrast, premium Board Skills Quick Start, and equal compact drill rows.
+- 2026-07-15: Replaced the rejected wide Instructions banner with one centered card using family-card geometry, added accessibility-width behavior, normalized Position Recall perceived artwork scale to 0.9, and required an opaque navigation toolbar.
+- 2026-07-16: Audited Home tile PNG metadata, added a Pillow-backed asset validator and replacement plan, replaced the Position Recall one-off scale modifier with a shared artwork viewport, and kept the spec Proposed because normalized replacement assets and screenshot matrix validation were still pending.
+- 2026-08-23: Adopted the manually normalized production artwork as the canonical 1422 x 1106, 9:7 RGB source contract; changed the shared Home viewport to 9:7; allowed unmanaged RGB while rejecting incompatible embedded ICC profiles; aligned normalizer, tests, documentation, and rendered geometry coverage; retained Proposed status pending validation runs and the full screenshot matrix.

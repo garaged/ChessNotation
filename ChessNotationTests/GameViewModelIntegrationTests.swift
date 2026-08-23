@@ -60,6 +60,52 @@ struct GameViewModelIntegrationTests {
     }
 
     @Test
+    func externalKeyboardInputBuildsEditsAndSubmitsAnswer() {
+        let viewModel = GameViewModel(game: TestFixtures.operaGame)
+
+        #expect(viewModel.handleExternalKeyboardCommand(.insertText("e")))
+        #expect(viewModel.handleExternalKeyboardCommand(.insertText("4")))
+        #expect(viewModel.answerText == "e4")
+
+        #expect(viewModel.handleExternalKeyboardCommand(.deleteBackward))
+        #expect(viewModel.answerText == "e")
+
+        #expect(viewModel.handleExternalKeyboardCommand(.insertText("4")))
+        #expect(viewModel.handleExternalKeyboardCommand(.moveFocusForward))
+        #expect(viewModel.handleExternalKeyboardCommand(.submitPrimaryAction))
+
+        #expect(viewModel.currentMoveIndex == 1)
+        #expect(viewModel.records.count == 1)
+        #expect(viewModel.records[0].wasCorrect)
+        #expect(viewModel.answerText.isEmpty)
+    }
+
+    @Test
+    func externalKeyboardRevealMarksCurrentMoveIncorrect() {
+        let viewModel = GameViewModel(game: TestFixtures.operaGame)
+
+        #expect(viewModel.handleExternalKeyboardCommand(.secondaryAction))
+
+        #expect(viewModel.currentMoveIndex == 1)
+        #expect(viewModel.records.count == 1)
+        #expect(!viewModel.records[0].wasCorrect)
+    }
+
+    @Test
+    func externalKeyboardInputRejectsUnsupportedCharactersWithoutBreakingCustomKeyboardPath() {
+        let viewModel = GameViewModel(game: TestFixtures.operaGame)
+
+        #expect(!viewModel.handleExternalKeyboardCommand(.insertText(" ")))
+        #expect(!viewModel.handleExternalKeyboardCommand(.insertText("/")))
+        #expect(viewModel.answerText.isEmpty)
+
+        viewModel.appendToAnswer("e")
+        viewModel.appendToAnswer("4")
+
+        #expect(viewModel.answerText == "e4")
+    }
+
+    @Test
     func exhaustingAttemptsRevealsAnswerAndContinues() {
         let viewModel = GameViewModel(game: TestFixtures.operaGame)
 

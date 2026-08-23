@@ -6,21 +6,34 @@ ChessNotation is an iOS SwiftUI app for practicing standard algebraic chess nota
 
 - Version: `2.0.2`
 - Build: `1`
-- Release focus: current-position evaluation, all-mode training history, interactive trend charts, premium visual redesign, timed training, square recognition, and richer game-library previews.
+- Release focus: current-position evaluation, all-mode training history, interactive trend charts, premium visual redesign, timed training, square recognition, recovered mini-games, and performance/security/accessibility hardening.
 
 ## Current scope
 
-- Launch notation practice, timed notation, square recognition, and instructions from a premium visual home screen.
+- Launch notation practice, timed notation, square recognition, piece movement, position recall, and instructions from a premium visual home screen.
 - Browse the game library with thumbnail board previews for each game.
 - Filter by level and opening, or search by title, players, opening, or difficulty.
 - Start a random game from the filtered library.
 - Train move-by-move with SAN input, hints, reveal, current-position evaluation context, and results.
 - Play timed notation sessions with selectable duration, remaining-time display, timeout handling, and timed results.
 - Practice square recognition by tapping prompted coordinates with bonus or strict timing variants.
+- Practice piece movement by selecting geometric destination squares.
+- Practice position recall by reconstructing hidden pieces after a study interval.
 - Review notation, timed notation, and square-recognition history stored on device.
 - Filter history by today, last week, last month, or last year with trend charts and tap-to-read values.
 - Customize board coordinates, per-difficulty evaluation visibility, and board style.
 - Render boards with bundled transparent chess-piece artwork and selectable visual themes: Current, Marble, Wood, and Metal.
+- Use external keyboard commands for notation entry, submit/reveal actions, and primary mini-game submit/next/finish flows while preserving the on-screen notation keyboard.
+- Use VoiceOver-friendly board-square labels, non-color-only feedback states, Dynamic Type-compatible layouts, and Reduce Motion-aware feedback.
+
+## Privacy and local data
+
+- ChessNotation is local-only: no accounts, analytics, advertising, tracking, telemetry, cloud sync, or remote networking are added by the current roadmap.
+- Bundled games ship in the app package. Evaluated game files contain stored engine evaluations; the app does not run engine analysis at runtime.
+- Training history is stored on device. Position Recall reconstruction history uses a schema-versioned envelope, migrates legacy array payloads on the next successful save, and rejects unsupported future schemas.
+- Corrupt Position Recall reconstruction history is preserved once as a sibling `.corrupt` evidence file. Reset removes the primary history payload and keeps preserved evidence for diagnosis.
+- Hardening limits include a 256-entry FEN cache, bounded long-session generator state, a 2 MiB Position Recall reconstruction history file limit, and a 5,000-record Position Recall reconstruction history limit.
+- Overlapping bundled catalogs are validated per payload and duplicate stable game IDs across catalogs are omitted after the first occurrence so the library stays usable.
 
 ## Project structure
 
@@ -54,6 +67,14 @@ The repository includes three layers of coverage:
 
 Run tests from Xcode or with `Product > Test`.
 
+Recent CN-SPEC-0022 release validation on 2026-07-15:
+
+- `make spec-check`: passed, 12 feature specs validated.
+- Xcode targeted hardening tests, including FEN cache, bundled-game validation, Position Recall history hardening/schema, timer refresh efficiency, long-session bounds, performance budgets, privacy surface, board accessibility, Dynamic Type, Reduce Motion, and external-keyboard regressions: 54 passed.
+- Xcode `ChessNotationTests` unit/integration target: 264 passed.
+- Critical UI suites split by suite: 12 passed (`HomeUITests`, `GameLibraryUITests`, `GameplayUITests`, `SquareRecognitionUITests`, `TimedGameUITests`).
+- Requested shell command `xcodebuild test -project ChessNotation.xcodeproj -scheme ChessNotation -destination 'platform=iOS Simulator,name=iPhone 16'` could not run in the sandbox because `xcodebuild` reported no matching iPhone 16 simulator destination; only placeholder simulator destinations were visible.
+
 ## Spec-driven development
 
 Feature behavior is documented under [specs/features](specs/features). Accepted
@@ -86,6 +107,12 @@ Each game contains:
 - a move list with SAN, `fenBefore`, source and destination squares, and move tags
 
 The app currently trusts bundled chess data rather than deriving SAN from a rules engine.
+
+Known limitations:
+
+- Chess rules are data-driven from bundled move records; malformed bundled data is rejected or omitted rather than corrected at runtime.
+- External keyboard support covers supported answer/navigation commands, not arbitrary text-field editing across every screen.
+- Release validation records simulator/Xcode runner results; physical-device App Store validation remains a release checklist item.
 
 ## Visual assets
 

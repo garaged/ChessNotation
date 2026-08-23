@@ -44,6 +44,28 @@ struct NotationServicesTests {
     }
 
     @Test
+    func displayLibraryOmitsDuplicateGameIDsBeforeListRendering() throws {
+        let games = try GameLibraryDisplayValidation.validatedGames([
+            TestFixtures.operaGame,
+            TestFixtures.operaGame,
+            TestFixtures.advancedGame
+        ])
+
+        #expect(games.map(\.id) == ["opera-game-1858", "evergreen-game-1852"])
+    }
+
+    @Test
+    func bundledLibraryLoadsUniqueGamesFromOverlappingCatalogs() throws {
+        BundledGameLibraryService.resetCacheForTesting()
+        let games = try BundledGameLibraryService().loadGames()
+        let uniqueIDs = Set(games.map(\.id))
+
+        #expect(!games.isEmpty)
+        #expect(uniqueIDs.count == games.count)
+        #expect(games.contains { $0.id == "opera-game-1858" })
+    }
+
+    @Test
     func bundledGameLibraryDecodesSingleGamePayload() throws {
         let data = try #require(
             """

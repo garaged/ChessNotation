@@ -11,8 +11,8 @@ This stage focuses on real app behavior that automated tests cannot fully prove:
 
 ## Preflight
 
-- [ ] Pull latest `main` after PR #24.
-- [ ] Run `make spec-check`.
+- [x] Pull latest `main` after PR #24.
+- [x] Run `make spec-check`.
 - [ ] Run the focused simulator suite below.
 - [ ] Build and launch on the target iOS Simulator.
 - [ ] Build and launch on at least one compact iPhone simulator.
@@ -47,9 +47,9 @@ xcodebuild test \
 
 ### App launch and navigation
 
-- [ ] App launches without migration or startup errors.
-- [ ] Home screen loads quickly.
-- [ ] Existing notation training entry points still open.
+- [x] App launches without migration or startup errors.
+- [x] Home screen loads quickly.
+- [x] Existing notation training entry points still open.
 - [ ] New or expanded training screens do not create duplicate navigation stacks.
 - [ ] Back navigation works from every new game screen.
 - [ ] App returns from background without losing current game state unexpectedly.

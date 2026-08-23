@@ -36,6 +36,14 @@ struct GameLibraryFilters: Equatable {
     }
 }
 
+enum GameLibraryDisplayValidation {
+    static func validatedGames(_ games: [NotationGame]) throws -> [NotationGame] {
+        let uniqueGames = BundledGameLibraryService.uniquedByStableID(games)
+        try BundledGameLibraryService.validate(uniqueGames)
+        return uniqueGames
+    }
+}
+
 enum DifficultyFilter: String, CaseIterable, Identifiable {
     case all
     case beginner

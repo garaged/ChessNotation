@@ -1,6 +1,16 @@
 import Foundation
 import Observation
 
+enum ExternalKeyboardTrainingCommand: Equatable {
+    case insertText(String)
+    case deleteBackward
+    case clearAnswer
+    case submitPrimaryAction
+    case secondaryAction
+    case moveFocusForward
+    case moveFocusBackward
+}
+
 @Observable
 final class GameViewModel {
     let game: NotationGame
@@ -110,6 +120,35 @@ final class GameViewModel {
 
     func clearAnswer() {
         answerText.removeAll(keepingCapacity: true)
+    }
+
+    @discardableResult
+    func handleExternalKeyboardCommand(_ command: ExternalKeyboardTrainingCommand) -> Bool {
+        guard !isFinished else { return false }
+
+        switch command {
+        case let .insertText(text):
+            let sanitized = Self.sanitizedExternalAnswerText(text)
+            guard !sanitized.isEmpty else { return false }
+            appendToAnswer(sanitized)
+            return true
+        case .deleteBackward:
+            guard !answerText.isEmpty else { return false }
+            removeLastAnswerCharacter()
+            return true
+        case .clearAnswer:
+            guard !answerText.isEmpty else { return false }
+            clearAnswer()
+            return true
+        case .submitPrimaryAction:
+            submitAnswer()
+            return true
+        case .secondaryAction:
+            skipMove()
+            return true
+        case .moveFocusForward, .moveFocusBackward:
+            return true
+        }
     }
 
     func submitAnswer() {
@@ -253,5 +292,10 @@ final class GameViewModel {
     private static func formattedDuration(seconds: Int) -> String {
         let minutes = seconds / 60
         return minutes == 1 ? "1 minute" : "\(minutes) minutes"
+    }
+
+    private static func sanitizedExternalAnswerText(_ text: String) -> String {
+        let allowedScalars = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "xXOo-+=#"))
+        return String(text.unicodeScalars.filter { allowedScalars.contains($0) })
     }
 }

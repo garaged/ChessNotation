@@ -69,13 +69,11 @@ struct PieceMovementBoardCellPresentation: Identifiable, Hashable, Sendable {
         case selected
         case friendly
         case enemy
-        case light
-        case dark
+        case empty
     }
 
     let id: String
     let square: ChessSquare
-    let label: String
     let role: Role
     let accessibilityLabel: String
 
@@ -85,19 +83,10 @@ struct PieceMovementBoardCellPresentation: Identifiable, Hashable, Sendable {
             return PieceMovementBoardCellPresentation(
                 id: square.description,
                 square: square,
-                label: label(for: square, prompt: prompt, selected: selected),
                 role: role(for: square, prompt: prompt, selected: selected),
                 accessibilityLabel: accessibilityLabel(for: square, prompt: prompt, selected: selected)
             )
         }
-    }
-
-    private static func label(for square: ChessSquare, prompt: PieceMovementPrompt, selected: Set<ChessSquare>) -> String {
-        if square == prompt.source { return prompt.piece.rawValue.prefix(1).uppercased() }
-        if selected.contains(square) { return "✓" }
-        if prompt.occupancy.friendly.contains(square) { return "F" }
-        if prompt.occupancy.enemy.contains(square) { return "E" }
-        return square.description
     }
 
     private static func role(for square: ChessSquare, prompt: PieceMovementPrompt, selected: Set<ChessSquare>) -> Role {
@@ -105,7 +94,7 @@ struct PieceMovementBoardCellPresentation: Identifiable, Hashable, Sendable {
         if square == prompt.source { return .source }
         if prompt.occupancy.friendly.contains(square) { return .friendly }
         if prompt.occupancy.enemy.contains(square) { return .enemy }
-        return square.color == .light ? .light : .dark
+        return .empty
     }
 
     private static func accessibilityLabel(for square: ChessSquare, prompt: PieceMovementPrompt, selected: Set<ChessSquare>) -> String {
@@ -196,12 +185,30 @@ final class PieceMovementViewModel {
         }
     }
 
+    @discardableResult
+    func handleExternalKeyboardCommand(_ command: ExternalKeyboardTrainingCommand) -> Bool {
+        guard !isFinished else { return false }
+
+        switch command {
+        case .submitPrimaryAction:
+            if presentation.feedback == nil {
+                submit()
+            } else {
+                advanceOrFinish()
+            }
+            return true
+        case .secondaryAction:
+            finish(reason: .userExited)
+            return true
+        case .moveFocusForward, .moveFocusBackward:
+            return true
+        case .insertText, .deleteBackward, .clearAnswer:
+            return false
+        }
+    }
+
     func playAgain() {
-        guard let restartState = Self.makeInitialState(
-            configuration: configuration,
-            randomizer: randomizerFactory(),
-            clock: clock
-        ) else { return }
+        guard let restartState = Self.makeInitialState(configuration: configuration, randomizer: randomizerFactory(), clock: clock) else { return }
         session = restartState.session
         presentation = restartState.presentation
         prompt = restartState.prompt
@@ -246,24 +253,14 @@ final class PieceMovementViewModel {
         )
     }
 
-    private static func makeInitialState(
-        configuration: PieceMovementConfiguration,
-        randomizer: ChallengeRandomizing,
-        clock: MonotonicTimeProviding
-    ) -> InitialState? {
+    private static func makeInitialState(configuration: PieceMovementConfiguration, randomizer: ChallengeRandomizing, clock: MonotonicTimeProviding) -> InitialState? {
         let generator = PieceMovementPromptGenerator(configuration: configuration, randomizer: randomizer)
         guard let session = PieceMovementSession(configuration: configuration, generator: generator, clock: clock) else { return nil }
         let prompt = session.currentPrompt
         let selected = session.selected
         return InitialState(
             session: session,
-            presentation: PieceMovementPresentation.make(
-                prompt: prompt,
-                selected: selected,
-                completed: session.result().promptCount,
-                limit: configuration.promptLimit,
-                feedback: nil
-            ),
+            presentation: PieceMovementPresentation.make(prompt: prompt, selected: selected, completed: session.result().promptCount, limit: configuration.promptLimit, feedback: nil),
             prompt: prompt,
             selected: selected,
             boardCells: PieceMovementBoardCellPresentation.cells(prompt: prompt, selected: selected),
@@ -325,10 +322,12 @@ struct PieceMovementGameView: View {
                     .accessibilityIdentifier("pieceMovement.feedback")
                 Button(viewModel.canAdvanceToNextPrompt ? "Next" : "Finish") { viewModel.advanceOrFinish() }
                     .buttonStyle(.borderedProminent)
+                    .keyboardShortcut(.return, modifiers: [])
                     .accessibilityIdentifier(viewModel.canAdvanceToNextPrompt ? "pieceMovement.next" : "pieceMovement.finish")
             } else {
                 Button("Submit") { viewModel.submit() }
                     .buttonStyle(.borderedProminent)
+                    .keyboardShortcut(.return, modifiers: [])
                     .accessibilityIdentifier("pieceMovement.submit")
             }
         }
@@ -359,6 +358,7 @@ struct PieceMovementGameView: View {
 
             Button("Play Again") { viewModel.playAgain() }
                 .buttonStyle(.borderedProminent)
+                .keyboardShortcut(.return, modifiers: [])
                 .accessibilityIdentifier("pieceMovement.playAgain")
 
             if let saveError = viewModel.saveError {
@@ -391,39 +391,56 @@ struct PieceMovementGameView: View {
     }
 
     private var board: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 8), spacing: 0) {
-            ForEach(viewModel.boardCells) { cell in
+        ThemedMiniGameBoard(orientation: viewModel.prompt.orientation) { square, squareSize, palette in
+            if let cell = viewModel.boardCells.first(where: { $0.square == square }) {
                 Button {
-                    viewModel.toggle(cell.square)
+                    viewModel.toggle(square)
                 } label: {
-                    Text(cell.label)
-                        .frame(maxWidth: .infinity, minHeight: 42)
-                        .contentShape(Rectangle())
+                    ZStack {
+                        overlay(for: cell.role, palette: palette)
+                        content(for: cell, squareSize: squareSize, palette: palette)
+                    }
+                    .frame(width: squareSize, height: squareSize)
+                    .contentShape(Rectangle())
                 }
-                .background(backgroundOpacity(for: cell.role))
                 .buttonStyle(.plain)
                 .disabled(viewModel.inputLocked)
                 .accessibilityLabel(cell.accessibilityLabel)
                 .accessibilityIdentifier("pieceMovement.square.\(cell.square.description)")
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
-    private func backgroundOpacity(for role: PieceMovementBoardCellPresentation.Role) -> Color {
+    @ViewBuilder
+    private func overlay(for role: PieceMovementBoardCellPresentation.Role, palette: ChessVisualPalette) -> some View {
         switch role {
         case .selected:
-            return Color.accentColor.opacity(0.45)
+            Rectangle().fill(PremiumDesign.Accent.practice.color.opacity(0.38))
         case .source:
-            return Color.orange.opacity(0.45)
+            Rectangle().fill(PremiumDesign.Accent.timed.color.opacity(0.3))
         case .friendly:
-            return Color.gray.opacity(0.45)
+            Circle().fill(palette.boardBorder.opacity(0.55)).frame(width: 14, height: 14)
         case .enemy:
-            return Color.red.opacity(0.25)
-        case .light:
-            return Color.secondary.opacity(0.15)
-        case .dark:
-            return Color.secondary.opacity(0.35)
+            Circle().stroke(PremiumDesign.Accent.danger.color.opacity(0.75), lineWidth: 3).frame(width: 18, height: 18)
+        case .empty:
+            EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    private func content(for cell: PieceMovementBoardCellPresentation, squareSize: CGFloat, palette: ChessVisualPalette) -> some View {
+        switch cell.role {
+        case .source:
+            ChessPieceGraphic(piece: viewModel.prompt.sourceChessPiece)
+                .frame(width: squareSize * 0.82, height: squareSize * 0.82)
+                .shadow(color: palette.piecePalette(for: viewModel.prompt.sourceChessPiece.side).shadow, radius: 1.4, x: 0, y: 1)
+        case .selected:
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: max(16, squareSize * 0.42), weight: .bold))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(PremiumDesign.Accent.practice.color)
+        default:
+            EmptyView()
         }
     }
 }

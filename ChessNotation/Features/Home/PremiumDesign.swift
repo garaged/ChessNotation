@@ -10,6 +10,8 @@ enum PremiumAssetName {
     static let notationTrainingTile = "TileNotationTraining"
     static let timedNotationTile = "TileTimedNotation"
     static let squareRecognitionTile = "TileSquareRecognition"
+    static let pieceMovementTile = "TilePieceMovement"
+    static let positionRecallTile = "TilePositionRecall"
     static let instructionsTile = "TileInstructions"
     static let libraryRandomGame = "LibraryRandomGame"
     static let darkBoardTexture = "DarkBoardTexture"

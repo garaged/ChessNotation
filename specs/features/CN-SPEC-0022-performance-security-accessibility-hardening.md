@@ -1,8 +1,8 @@
 # CN-SPEC-0022: Performance, Security, and Accessibility Hardening
 
-Status: Proposed
+Status: Accepted
 Owner: Project
-Last updated: 2026-07-07
+Last updated: 2026-07-15
 
 ## Intent
 
@@ -74,28 +74,87 @@ Out of scope:
 - CN-SPEC-0022-AC019: Given a reproducible defect fixed during implementation, when its PR is reviewed, then a regression test fails before the fix and passes with the fix whenever the behavior is testable.
 - CN-SPEC-0022-AC020: Given release documentation review, when the roadmap ships, then README, privacy/release notes, change log, and relevant specs accurately describe local-only behavior, migrations, modes, validation, and known limitations.
 
+## Policy Constants
+
+- FEN board cache capacity: 256 distinct normalized FEN strings.
+- `startpos` and the full standard starting-position FEN share one cache identity.
+- Cache eviction policy: least recently used.
+- Cache instrumentation is internal and exists for deterministic regression testing; production UI does not depend on cache metrics.
+- Position Recall reconstruction history maximum file size: 2 MiB.
+- Position Recall reconstruction history maximum record count: 5,000.
+- Position Recall reconstruction history current schema version: 1.
+- Legacy schema 0 is the unwrapped JSON result array and is migrated to the version-1 envelope on the next successful save.
+- Future schema versions are rejected and preserved rather than decoded with guessed defaults.
+- Corrupt or rejected Position Recall history is copied once to a sibling `.corrupt` evidence file and is not silently replaced by a later save.
+- Position Recall history reset removes the primary payload only; preserved corrupt evidence remains available for diagnosis or manual recovery.
+- Bundled game validation occurs after decoding and before results enter the shared cache.
+- Duplicate game IDs inside one decoded payload are rejected as invalid content.
+- Duplicate game IDs across configured catalogs are omitted after the first occurrence, preserving valid sibling records and preventing duplicate SwiftUI list identities from crashing library display.
+- Chess coordinates must be lowercase algebraic squares from `a1` through `h8`; promotion coordinate suffixes remain valid when the coordinate begins with `from + to`.
+- FEN validation requires exactly eight placement ranks, each expanding to exactly eight files, using only legal piece symbols or empty-run digits.
+- Validation diagnostics expose issue category, game ID, move index, and field name only; they do not include full game records, SAN answers, titles, or file paths.
+- Timer refresh instrumentation counts refresh calls and timeout transitions only; gameplay score, prompt progress, FEN cache metrics, and library cache metrics must remain unchanged during non-terminal refreshes.
+- The timer refresh regression fixture uses 1,000 refreshes and avoids brittle wall-clock timing assertions.
+- Long-session generation fixtures use 10,000 accepted prompts and 1,000 rejected/cancelled calls.
+- A generator may retain only its immutable source plus the current shrinking shuffled cycle; retained-cycle count must remain below source count after generation begins.
+- Rejected generation is bounded by the configured maximum-attempt count, and cancellation must prevent the shuffled bag from advancing.
+- Performance regression budgets use deterministic operation counts, explicit tolerance, and actionable remediation instead of simulator wall-clock thresholds.
+- The application target has no Swift Package product dependencies, third-party framework build entries, code-signing entitlements, sensitive usage-description keys, networking API markers, tracking APIs, analytics SDKs, advertising APIs, or account/authentication surfaces.
+- The privacy audit scans production Swift sources and the Xcode project so future capability additions require an intentional policy update.
+- Each mini-game board exposes one VoiceOver element per chess square with identifier `board.square.<coordinate>` and a label beginning with the actual algebraic coordinate.
+- Board orientation changes display order only; it does not change square identity, accessibility identifier, spoken coordinate, or tap-to-coordinate mapping.
+- Piece Movement spoken square state distinguishes source piece, friendly blocker, enemy piece, selected destination, and empty square without requiring color perception.
+- Position Recall spoken square state distinguishes visible, masked, and reconstructed pieces across study, answer, and result phases.
+- Primary mini-game completion and feedback states include text and stable accessibility identifiers; symbols and colors are supplementary.
+- Dynamic Type reachability checks require primary flows to remain scrollable and prohibit explicit text-size caps, forced single-line critical content, minimum-scale shrinking, and fixed-height critical-action containers.
+- Reduce Motion coverage is enforced by a source audit that requires animation decisions to be gated by the system accessibility environment and requires visible or spoken feedback independent of haptics.
+- External keyboard notation entry is routed through a focused hardware-key capture that does not require the system software keyboard and preserves the custom `ChessNotationKeyboard` touch path.
+- External keyboard Return submits the current notation answer or the visible primary mini-game action; Delete removes the last notation character; Command-Delete clears notation input; Command-R reveals/skips the current notation move.
+- External keyboard command routing for Piece Movement and Position Recall uses the same view-model actions as touch controls for submit, next, finish, and user-exit cancellation.
+- Release validation on 2026-07-15 passed `make spec-check`, the targeted CN-SPEC-0022 hardening batch, the complete `ChessNotationTests` unit/integration target through Xcode, and critical UI suites split by suite through Xcode.
+- The requested shell `xcodebuild test -project ChessNotation.xcodeproj -scheme ChessNotation -destination 'platform=iOS Simulator,name=iPhone 16'` did not complete in the sandbox because `xcodebuild` exited 70 with no matching iPhone 16 simulator destination available.
+
 ## Coverage
 
-- Pending coverage: CN-SPEC-0022-AC001
-- Pending coverage: CN-SPEC-0022-AC002
-- Pending coverage: CN-SPEC-0022-AC003
-- Pending coverage: CN-SPEC-0022-AC004
-- Pending coverage: CN-SPEC-0022-AC005
-- Pending coverage: CN-SPEC-0022-AC006
-- Pending coverage: CN-SPEC-0022-AC007
-- Pending coverage: CN-SPEC-0022-AC008
-- Pending coverage: CN-SPEC-0022-AC009
-- Pending coverage: CN-SPEC-0022-AC010
-- Pending coverage: CN-SPEC-0022-AC011
-- Pending coverage: CN-SPEC-0022-AC012
-- Pending coverage: CN-SPEC-0022-AC013
-- Pending coverage: CN-SPEC-0022-AC014
-- Pending coverage: CN-SPEC-0022-AC015
-- Pending coverage: CN-SPEC-0022-AC016
-- Pending coverage: CN-SPEC-0022-AC017
-- Pending coverage: CN-SPEC-0022-AC018
-- Pending coverage: CN-SPEC-0022-AC019
-- Pending coverage: CN-SPEC-0022-AC020
+- `ChessNotation/Services/FENParser.swift`: CN-SPEC-0022-AC001, CN-SPEC-0022-AC003.
+- `ChessNotationTests/FENCacheTests.swift`: CN-SPEC-0022-AC001.
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionHistoryStore.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC007, CN-SPEC-0022-AC008.
+- `ChessNotationTests/PositionRecallHistoryStoreHardeningTests.swift`: CN-SPEC-0022-AC006, CN-SPEC-0022-AC008, CN-SPEC-0022-AC019.
+- `ChessNotationTests/PositionRecallHistorySchemaTests.swift`: CN-SPEC-0022-AC007, CN-SPEC-0022-AC008, CN-SPEC-0022-AC019.
+- `ChessNotation/Services/GameLibraryService.swift`: CN-SPEC-0022-AC002, CN-SPEC-0022-AC003, CN-SPEC-0022-AC009, CN-SPEC-0022-AC010.
+- `ChessNotationTests/BundledGameValidationTests.swift`: CN-SPEC-0022-AC009, CN-SPEC-0022-AC010, CN-SPEC-0022-AC019.
+- `ChessNotation/Features/Home/GameLibraryFiltering.swift`: CN-SPEC-0022-AC009.
+- `ChessNotation/Features/Home/HomeView.swift`: CN-SPEC-0022-AC009.
+- `ChessNotationTests/NotationServicesTests.swift`: CN-SPEC-0022-AC009, CN-SPEC-0022-AC019.
+- `ChessNotationUITests/GameplayUITests.swift`: CN-SPEC-0022-AC009, CN-SPEC-0022-AC019.
+- `ChessNotation/Domain/TimedNotationVariants.swift`: CN-SPEC-0022-AC003.
+- `ChessNotationTests/TimerRefreshEfficiencyTests.swift`: CN-SPEC-0022-AC003, CN-SPEC-0022-AC019.
+- `ChessNotation/Domain/TrainingChallenge.swift`: CN-SPEC-0022-AC004.
+- `ChessNotationTests/LongSessionResourceBoundTests.swift`: CN-SPEC-0022-AC004.
+- `ChessNotation/Domain/PerformanceRegressionBudget.swift`: CN-SPEC-0022-AC005.
+- `ChessNotationTests/PerformanceRegressionBudgetTests.swift`: CN-SPEC-0022-AC005, CN-SPEC-0022-AC019.
+- `ChessNotation.xcodeproj/project.pbxproj`: CN-SPEC-0022-AC011.
+- `ChessNotationTests/PrivacySurfaceAuditTests.swift`: CN-SPEC-0022-AC011, CN-SPEC-0022-AC019.
+- `ChessNotation/Features/Game/MiniGameBoardView.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013.
+- `ChessNotation/Features/PieceMovement/PieceMovementFeature.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC014.
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionView.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013, CN-SPEC-0022-AC014.
+- `ChessNotationTests/BoardSquareAccessibilitySemanticsTests.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013, CN-SPEC-0022-AC019.
+- `ChessNotationTests/MiniGameStateAccessibilityTests.swift`: CN-SPEC-0022-AC012, CN-SPEC-0022-AC013, CN-SPEC-0022-AC014, CN-SPEC-0022-AC019.
+- `ChessNotationTests/DynamicTypeReachabilityAuditTests.swift`: CN-SPEC-0022-AC015, CN-SPEC-0022-AC019.
+- `ChessNotationTests/ReducedMotionFeedbackAuditTests.swift`: CN-SPEC-0022-AC016, CN-SPEC-0022-AC019.
+- `ChessNotation/Features/Game/GameViewModel.swift`: CN-SPEC-0022-AC017.
+- `ChessNotation/Features/Game/GameTrainingView.swift`: CN-SPEC-0022-AC017.
+- `ChessNotation/Features/PieceMovement/PieceMovementFeature.swift`: CN-SPEC-0022-AC017.
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionView.swift`: CN-SPEC-0022-AC017.
+- `ChessNotationTests/GameViewModelIntegrationTests.swift`: CN-SPEC-0022-AC017, CN-SPEC-0022-AC019.
+- `ChessNotationTests/PieceMovementFeatureTests.swift`: CN-SPEC-0022-AC017, CN-SPEC-0022-AC019.
+- `ChessNotationTests/PositionRecallReconstructionViewModelTests.swift`: CN-SPEC-0022-AC017, CN-SPEC-0022-AC019.
+- `README.md`: CN-SPEC-0022-AC018, CN-SPEC-0022-AC020.
+- `PRIVACY.md`: CN-SPEC-0022-AC020.
+- `CHANGELOG.md`: CN-SPEC-0022-AC020.
+- `RELEASE_DESCRIPTION.md`: CN-SPEC-0022-AC020.
+- `RELEASE_CHECKLIST.md`: CN-SPEC-0022-AC018, CN-SPEC-0022-AC020.
+- Xcode validation artifacts recorded in this revision note: CN-SPEC-0022-AC018.
 
 ## Open Questions
 
@@ -104,3 +163,20 @@ Out of scope:
 ## Revision Notes
 
 - 2026-07-07: Initial proposed spec for PR8.
+- 2026-07-10: Began implementation with a bounded thread-safe LRU FEN board cache, deterministic cache metrics, and regression coverage for reuse, capacity, and recency.
+- 2026-07-10: Hardened Position Recall reconstruction history with atomic bounded writes, corrupt-payload preservation, explicit reset, and regression coverage preventing silent data loss.
+- 2026-07-15: Added semantic validation for bundled game IDs, required strings, move numbers, coordinates, coordinate consistency, and FEN placement, with redacted diagnostics and regression fixtures.
+- 2026-07-15: Added version-1 Position Recall history envelopes, legacy array migration on save, and safe rejection/preservation of unsupported future schemas.
+- 2026-07-15: Added timer-refresh and library-cache instrumentation with a 1,000-refresh regression proving timer ticks do not trigger FEN parsing, library decoding, score changes, prompt progress, or duplicate completion.
+- 2026-07-15: Added bounded long-session generation and cancellation regression coverage using operation-count budgets instead of wall-clock assumptions.
+- 2026-07-15: Added reusable deterministic performance budgets with tolerance and actionable diagnostics.
+- 2026-07-15: Added a local-only privacy surface audit covering production source markers, package dependencies, linked frameworks, entitlements, and sensitive permission declarations.
+- 2026-07-15: Added shared VoiceOver board-square semantics with stable `board.square.<coordinate>` identifiers and orientation-invariant coordinate mapping.
+- 2026-07-15: Added mini-game state accessibility regression coverage for Piece Movement source/blocker/enemy/selected states and Position Recall visible/masked/reconstructed states.
+- 2026-07-15: Added Dynamic Type reachability auditing for the primary Piece Movement and Position Recall flows, requiring scrollable containers and rejecting fixed-height or text-shrinking critical-action layouts.
+- 2026-07-15: Added reduced-motion and feedback-equivalence source auditing, requiring system Reduce Motion gating and non-haptic visible or spoken feedback.
+- 2026-07-15: Added external-keyboard command routing and regression coverage for notation answer entry/edit/submit/reveal, Piece Movement submit/next/finish/cancel, and Position Recall hide/submit/next/finish/cancel while preserving the custom on-screen notation keyboard path.
+- 2026-07-15: Hardened overlapping bundled catalog loading by validating each payload, omitting later duplicate stable IDs before cache/display, and adding regression coverage that full-library gameplay UI still loads with duplicate Starter/Master catalog overlap.
+- 2026-07-15: Completed release documentation updates across README, Privacy, Changelog, Release Description, and Release Checklist for local-only behavior, persistence migration/corruption handling, bounded cache/history policies, supported modes, accessibility, keyboard support, known limitations, and exact validation results.
+- 2026-07-15: Recorded AC018 validation results: `make spec-check` passed; Xcode targeted CN-SPEC-0022 hardening batch passed 54 tests; Xcode `ChessNotationTests` passed 264 tests; critical UI suites split by suite passed 12 tests; shell `xcodebuild test -project ChessNotation.xcodeproj -scheme ChessNotation -destination 'platform=iOS Simulator,name=iPhone 16'` was unrun because the sandboxed shell reported no matching iPhone 16 simulator destination and exited 70.
+- 2026-07-15: Marked CN-SPEC-0022 Accepted after AC017, AC018, and AC020 coverage and validation were completed or explicitly explained.

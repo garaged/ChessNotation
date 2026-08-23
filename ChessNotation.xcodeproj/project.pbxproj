@@ -100,7 +100,7 @@
 			buildConfigurationList = 3536BE992F9CF2B000F413D1 /* Build configuration list for PBXNativeTarget "ChessNotation" */;
 			buildPhases = (
 				3536BE722F9CF2AF00F413D1 /* Sources */,
-				3536BE732F9CF2AF00F413D1 /* Frameworks */,
+				3536BE732F9CF2B000F413D1 /* Frameworks */,
 				3536BE742F9CF2AF00F413D1 /* Resources */,
 			);
 			buildRules = (
@@ -410,7 +410,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.2;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.garaged.chessnotation.ChessNotation;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -442,7 +442,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.2;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.garaged.chessnotation.ChessNotation;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
