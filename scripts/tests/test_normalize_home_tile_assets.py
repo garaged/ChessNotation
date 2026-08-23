@@ -13,6 +13,14 @@ import normalize_home_tile_assets as normalizer
 
 
 class HomeTileAssetNormalizerTests(unittest.TestCase):
+    def test_canonical_canvas_is_1422_by_1106_nine_by_seven(self):
+        self.assertEqual(normalizer.CANVAS_SIZE, (1422, 1106))
+        self.assertAlmostEqual(
+            normalizer.CANVAS_SIZE[0] / normalizer.CANVAS_SIZE[1],
+            9 / 7,
+            places=6,
+        )
+
     def test_landscape_input_normalizes_to_target_canvas(self):
         image = Image.new("RGB", (2000, 900), (80, 90, 100))
 
@@ -45,6 +53,11 @@ class HomeTileAssetNormalizerTests(unittest.TestCase):
 
         self.assertEqual(output.size, normalizer.CANVAS_SIZE)
         self.assertEqual(output.tobytes(), image.tobytes())
+
+    def test_unmanaged_rgb_at_target_size_is_production_normalized(self):
+        image = Image.new("RGB", normalizer.CANVAS_SIZE, (12, 34, 56))
+
+        self.assertTrue(normalizer.is_production_normalized(image))
 
     def test_alpha_input_is_flattened_to_rgb(self):
         image = Image.new("RGBA", (1000, 600), (12, 34, 56, 128))
