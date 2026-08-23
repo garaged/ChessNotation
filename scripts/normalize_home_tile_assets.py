@@ -23,10 +23,10 @@ except ImportError:  # pragma: no cover - local setup failure.
     raise SystemExit(2)
 
 
-CANVAS_SIZE = (1600, 1000)
-SAFE_MARGIN_X = 240
-SAFE_MARGIN_Y = 120
-OPTICAL_CENTER = (800, 480)
+CANVAS_SIZE = (1422, 1106)
+SAFE_MARGIN_X = 214
+SAFE_MARGIN_Y = 133
+OPTICAL_CENTER = (711, 531)
 ASSETS_ROOT = Path("ChessNotation/Assets.xcassets")
 CONTACT_SHEET_DIR = Path(tempfile.gettempdir()) / "ChessNotation-home-tile-normalization"
 SRGB_PROFILE_BYTES = ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
@@ -49,13 +49,15 @@ PROFILES: tuple[TileProfile, ...] = (
     TileProfile("Notation Training", "TileNotationTraining", 0.60),
     TileProfile("Timed Training", "TileTimedNotation", 0.58),
     TileProfile("Board Skills / Square Recognition", "TileSquareRecognition", 0.52),
-    TileProfile("Position Recall", "TilePositionRecall", 0.47, optical_center=(845, 480), background_fill_scale=1.12),
+    TileProfile("Position Recall", "TilePositionRecall", 0.47, optical_center=(751, 531), background_fill_scale=1.12),
     TileProfile("Instructions", "TileInstructions", 0.60),
 )
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Normalize Home tile assets to 1600x1000 PNGs.")
+    parser = argparse.ArgumentParser(
+        description=f"Normalize Home tile assets to {CANVAS_SIZE[0]}x{CANVAS_SIZE[1]} PNGs."
+    )
     parser.add_argument("--dry-run", action="store_true", help="Print work without writing production assets.")
     parser.add_argument("--output-dir", type=Path, help="Write review copies to this directory instead of production.")
     parser.add_argument(
@@ -265,8 +267,26 @@ def write_contact_sheet(images: list[Image.Image], labels: list[str], path: Path
                 y + label_h + tile_h - SAFE_MARGIN_Y,
             )
             draw.rectangle(safe_box, outline=(255, 220, 70), width=3)
-            draw.line((x + 800, y + label_h, x + 800, y + label_h + tile_h), fill=(255, 220, 70), width=1)
-            draw.line((x, y + label_h + 480, x + tile_w, y + label_h + 480), fill=(255, 220, 70), width=1)
+            draw.line(
+                (
+                    x + OPTICAL_CENTER[0],
+                    y + label_h,
+                    x + OPTICAL_CENTER[0],
+                    y + label_h + tile_h,
+                ),
+                fill=(255, 220, 70),
+                width=1,
+            )
+            draw.line(
+                (
+                    x,
+                    y + label_h + OPTICAL_CENTER[1],
+                    x + tile_w,
+                    y + label_h + OPTICAL_CENTER[1],
+                ),
+                fill=(255, 220, 70),
+                width=1,
+            )
     sheet.save(path, format="PNG", optimize=True, compress_level=9)
 
 
@@ -285,10 +305,10 @@ def is_rgb_without_alpha(image: Image.Image) -> bool:
 
 
 def is_production_normalized(image: Image.Image) -> bool:
-    return is_rgb_without_alpha(image) and has_srgb_profile(image)
+    return is_rgb_without_alpha(image) and has_compatible_color_profile(image)
 
 
-def has_srgb_profile(image: Image.Image) -> bool:
+def has_compatible_color_profile(image: Image.Image) -> bool:
     profile = image.info.get("icc_profile")
     if isinstance(profile, bytes):
         try:
@@ -296,7 +316,9 @@ def has_srgb_profile(image: Image.Image) -> bool:
             return "srgb" in name.lower()
         except ImageCms.PyCMSError:
             return False
-    return bool(image.info.get("srgb"))
+    if image.info.get("srgb"):
+        return True
+    return image.mode == "RGB" and profile is None
 
 
 class NormalizationError(Exception):
