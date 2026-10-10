@@ -6,7 +6,7 @@ final class BoardLegibilityUITests: ChessNotationUITestCase {
 
         openPracticeLibrary(in: app)
 
-        let operaGameButton = libraryGame(identifier: "opera-game-1858", in: app)
+        let operaGameButton = libraryGame(identifier: "mini-opera", in: app)
         XCTAssertTrue(operaGameButton.waitForExistence(timeout: 5))
         operaGameButton.tap()
 
