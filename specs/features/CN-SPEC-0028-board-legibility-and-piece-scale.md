@@ -56,7 +56,15 @@ Out of scope:
 ## Coverage
 
 - `docs/board-legibility-redesign-plan.md`: CN-SPEC-0028-AC001, CN-SPEC-0028-AC002, CN-SPEC-0028-AC003, CN-SPEC-0028-AC004, CN-SPEC-0028-AC005, CN-SPEC-0028-AC006, CN-SPEC-0028-AC007, CN-SPEC-0028-AC008, CN-SPEC-0028-AC009
-- Pending implementation coverage: `ChessNotationTests/ChessBoardLegibilityTests.swift`, `ChessNotationTests/ChessPieceAssetAuditTests.swift`, `ChessNotationTests/ChessBoardSizingTests.swift`, `ChessNotationUITests/BoardLegibilityUITests.swift`, `ChessNotation/Features/Game/ChessTheme.swift`, `ChessNotation/Features/Game/ChessBoardView.swift`, `ChessNotation/Features/Game/MiniGameBoardView.swift`, `ChessNotation/Features/Home/AppearanceSettingsView.swift`, and `ChessNotation/Assets.xcassets`.
+- `ChessNotationTests/ChessBoardLegibilityTests.swift`: CN-SPEC-0028-AC001, CN-SPEC-0028-AC005, CN-SPEC-0028-AC006
+- `ChessNotation/Features/Game/ChessBoardLegibility.swift`: CN-SPEC-0028-AC001, CN-SPEC-0028-AC003, CN-SPEC-0028-AC005, CN-SPEC-0028-AC006, CN-SPEC-0028-AC007
+- `ChessNotation/Features/Game/ChessTheme.swift`: CN-SPEC-0028-AC001, CN-SPEC-0028-AC003, CN-SPEC-0028-AC007
+- `ChessNotation/Features/Game/ChessBoardView.swift`: CN-SPEC-0028-AC003, CN-SPEC-0028-AC004, CN-SPEC-0028-AC007
+- `ChessNotation/Features/PieceMovement/PieceMovementFeature.swift`: CN-SPEC-0028-AC005, CN-SPEC-0028-AC008
+- `ChessNotation/Features/PositionRecall/PositionRecallReconstructionView.swift`: CN-SPEC-0028-AC005, CN-SPEC-0028-AC008
+- `ChessNotation/Features/Home/AppearanceSettingsView.swift`: CN-SPEC-0028-AC006, CN-SPEC-0028-AC008
+- `ChessNotation/Features/Home/GameThumbnailPreview.swift`: CN-SPEC-0028-AC006, CN-SPEC-0028-AC008
+- Pending rendered-device coverage: `ChessNotationUITests/BoardLegibilityUITests.swift` for CN-SPEC-0028-AC004, CN-SPEC-0028-AC008, CN-SPEC-0028-AC009.
 
 ## Open Questions
 
