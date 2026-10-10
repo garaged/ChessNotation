@@ -65,7 +65,8 @@ Out of scope:
 - `ChessNotation/Features/PositionRecall/PositionRecallReconstructionView.swift`: CN-SPEC-0028-AC005, CN-SPEC-0028-AC008
 - `ChessNotation/Features/Home/AppearanceSettingsView.swift`: CN-SPEC-0028-AC006, CN-SPEC-0028-AC008
 - `ChessNotation/Features/Home/GameThumbnailPreview.swift`: CN-SPEC-0028-AC006, CN-SPEC-0028-AC008
-- Pending rendered-device coverage: `ChessNotationUITests/BoardLegibilityUITests.swift` for CN-SPEC-0028-AC004, CN-SPEC-0028-AC008, CN-SPEC-0028-AC009.
+- `ChessNotationUITests/BoardLegibilityUITests.swift`: CN-SPEC-0028-AC004, CN-SPEC-0028-AC008
+- `docs/manual-testing/board-legibility.md`: CN-SPEC-0028-AC003, CN-SPEC-0028-AC004, CN-SPEC-0028-AC005, CN-SPEC-0028-AC007, CN-SPEC-0028-AC008, CN-SPEC-0028-AC009.
 
 ## Open Questions
 
