@@ -1,0 +1,26 @@
+name: iOS
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - feature/**
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Build and test iOS app
+        run: >
+          xcodebuild test
+          -project ChessNotation.xcodeproj
+          -scheme ChessNotation
+          -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest'
+          CODE_SIGNING_ALLOWED=NO
