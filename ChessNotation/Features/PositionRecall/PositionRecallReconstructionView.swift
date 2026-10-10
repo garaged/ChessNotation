@@ -405,9 +405,12 @@ struct PositionRecallReconstructionView: View {
     @ViewBuilder
     private func squareContent(for square: ChessSquare, squareSize: CGFloat, palette: ChessVisualPalette) -> some View {
         if let piece = viewModel.displayedPiece(at: square) {
-            ChessPieceGraphic(piece: piece.chessPiece)
-                .frame(width: squareSize * 0.82, height: squareSize * 0.82)
-                .shadow(color: palette.piecePalette(for: piece.chessPiece.side).shadow, radius: 1.4, x: 0, y: 1)
+            ChessPieceGraphic(
+                piece: piece.chessPiece,
+                palette: palette,
+                squareSize: squareSize
+            )
+            .frame(width: squareSize, height: squareSize)
         } else if viewModel.isMaskedPlaceholder(at: square) {
             Image(systemName: "questionmark.circle.fill")
                 .font(.system(size: max(16, squareSize * 0.42), weight: .bold))

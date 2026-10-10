@@ -196,16 +196,6 @@ struct ChessPiece: Equatable {
         }
     }
 
-    var scale: Double {
-        switch kind {
-        case .king: return 0.94
-        case .queen: return 0.92
-        case .rook: return 0.9
-        case .bishop: return 0.9
-        case .knight: return 0.88
-        case .pawn: return 0.74
-        }
-    }
 
     init?(fenCharacter: Character) {
         let lower = Character(String(fenCharacter).lowercased())

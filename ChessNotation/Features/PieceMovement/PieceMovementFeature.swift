@@ -431,9 +431,12 @@ struct PieceMovementGameView: View {
     private func content(for cell: PieceMovementBoardCellPresentation, squareSize: CGFloat, palette: ChessVisualPalette) -> some View {
         switch cell.role {
         case .source:
-            ChessPieceGraphic(piece: viewModel.prompt.sourceChessPiece)
-                .frame(width: squareSize * 0.82, height: squareSize * 0.82)
-                .shadow(color: palette.piecePalette(for: viewModel.prompt.sourceChessPiece.side).shadow, radius: 1.4, x: 0, y: 1)
+            ChessPieceGraphic(
+                piece: viewModel.prompt.sourceChessPiece,
+                palette: palette,
+                squareSize: squareSize
+            )
+            .frame(width: squareSize, height: squareSize)
         case .selected:
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: max(16, squareSize * 0.42), weight: .bold))

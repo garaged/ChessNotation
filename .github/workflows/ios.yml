@@ -1,0 +1,35 @@
+name: iOS
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - feature/**
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Select an available iPhone simulator
+        id: simulator
+        shell: bash
+        run: |
+          device_id="$(xcrun simctl list devices available -j | jq -r '[.devices[][] | select(.isAvailable and (.name | startswith("iPhone")))][0].udid')"
+          test -n "$device_id"
+          test "$device_id" != "null"
+          echo "id=$device_id" >> "$GITHUB_OUTPUT"
+
+      - name: Build and test iOS app
+        run: >
+          xcodebuild test
+          -project ChessNotation.xcodeproj
+          -scheme ChessNotation
+          -destination 'platform=iOS Simulator,id=${{ steps.simulator.outputs.id }}'
+          CODE_SIGNING_ALLOWED=NO
