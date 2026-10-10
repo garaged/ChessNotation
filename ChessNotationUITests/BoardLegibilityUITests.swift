@@ -2,7 +2,7 @@ import XCTest
 
 final class BoardLegibilityUITests: ChessNotationUITestCase {
     func testNotationBoardIsCenteredReadableAndAddressable() throws {
-        let app = makeApp()
+        let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
 
         openPracticeLibrary(in: app)
 
