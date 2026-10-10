@@ -294,21 +294,36 @@ private struct PieceView: View {
     let palette: ChessVisualPalette
 
     var body: some View {
-        ChessPieceGraphic(piece: piece)
-        .frame(width: squareSize * piece.scale, height: squareSize * piece.scale)
-        .shadow(color: palette.piecePalette(for: piece.side).shadow, radius: 1.4, x: 0, y: 1)
-        .padding(squareSize * 0.03)
+        ChessPieceGraphic(piece: piece, palette: palette, squareSize: squareSize)
+            .frame(width: squareSize, height: squareSize)
     }
 }
 
 struct ChessPieceGraphic: View {
     let piece: ChessPiece
+    let palette: ChessVisualPalette
+    let squareSize: CGFloat
 
     var body: some View {
+        let piecePalette = palette.piecePalette(for: piece.side)
+
         Image(piece.imageName)
             .resizable()
             .scaledToFit()
-        .aspectRatio(1, contentMode: .fit)
+            .scaleEffect(ChessPiecePresentationMetrics.imageScale(for: piece.kind))
+            .shadow(
+                color: piecePalette.stroke.opacity(0.92),
+                radius: ChessPiecePresentationMetrics.contourRadius(for: squareSize),
+                x: 0,
+                y: 0
+            )
+            .shadow(
+                color: piecePalette.shadow,
+                radius: ChessPiecePresentationMetrics.shadowRadius(for: squareSize),
+                x: 0,
+                y: max(0.8, squareSize * 0.025)
+            )
+            .accessibilityHidden(true)
     }
 }
 
