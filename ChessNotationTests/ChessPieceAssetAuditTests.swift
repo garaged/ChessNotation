@@ -33,6 +33,7 @@ struct ChessPieceAssetAuditTests {
         let width = image.width
         let height = image.height
         let bytesPerRow = width * 4
+        let bitmapInfo = CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue
 
         guard let context = CGContext(
             data: nil,
@@ -41,7 +42,7 @@ struct ChessPieceAssetAuditTests {
             bitsPerComponent: 8,
             bytesPerRow: bytesPerRow,
             space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            bitmapInfo: bitmapInfo
         ) else {
             return nil
         }
