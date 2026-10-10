@@ -1,18 +1,26 @@
 import CoreGraphics
+import Foundation
+import ImageIO
 import Testing
-import UIKit
 @testable import ChessNotation
 
 struct ChessPieceAssetAuditTests {
     @Test
     func productionPiecesHaveTransparentCanvasesAndNormalizedVisibleHeights() throws {
+        let root = try repositoryRoot()
         let kinds: [ChessPiece.Kind] = [.king, .queen, .rook, .bishop, .knight, .pawn]
 
         for side in ChessSide.allCases {
             for kind in kinds {
                 let piece = ChessPiece(kind: kind, side: side)
-                let image = try #require(UIImage(named: piece.imageName)?.cgImage, "Missing piece artwork: \(piece.imageName)")
-                let bounds = try #require(alphaBounds(in: image), "Piece artwork has no visible pixels: \(piece.imageName)")
+                let image = try #require(
+                    sourceImage(for: piece, from: root),
+                    "Missing piece artwork: \(piece.imageName)"
+                )
+                let bounds = try #require(
+                    alphaBounds(in: image),
+                    "Piece artwork has no visible pixels: \(piece.imageName)"
+                )
 
                 let visibleHeight = bounds.height / CGFloat(image.height)
                 let expected = kind == .pawn ? 0.83 : 0.88
@@ -27,6 +35,18 @@ struct ChessPieceAssetAuditTests {
                 #expect(bottomClearance / CGFloat(image.height) >= 0.04)
             }
         }
+    }
+
+    private func sourceImage(for piece: ChessPiece, from root: URL) -> CGImage? {
+        let assetURL = root
+            .appendingPathComponent("ChessNotation/Assets.xcassets")
+            .appendingPathComponent("\(piece.imageName).imageset")
+            .appendingPathComponent("\(piece.imageName).png")
+
+        guard let source = CGImageSourceCreateWithURL(assetURL as CFURL, nil) else {
+            return nil
+        }
+        return CGImageSourceCreateImageAtIndex(source, 0, nil)
     }
 
     private func alphaBounds(in image: CGImage) -> CGRect? {
@@ -72,4 +92,22 @@ struct ChessPieceAssetAuditTests {
         guard maxX >= minX, maxY >= minY else { return nil }
         return CGRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)
     }
+
+    private func repositoryRoot() throws -> URL {
+        var candidate = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+
+        while candidate.path != "/" {
+            let project = candidate.appendingPathComponent("ChessNotation.xcodeproj/project.pbxproj")
+            if FileManager.default.fileExists(atPath: project.path) {
+                return candidate
+            }
+            candidate.deleteLastPathComponent()
+        }
+
+        throw ChessPieceAssetAuditError.repositoryRootNotFound
+    }
+}
+
+private enum ChessPieceAssetAuditError: Error {
+    case repositoryRootNotFound
 }
