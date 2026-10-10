@@ -68,6 +68,9 @@ struct ChessBoardView: View {
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(palette.boardBorder, lineWidth: 1.2)
                 )
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel("Chess board")
+                .accessibilityIdentifier("game.chessBoard")
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
