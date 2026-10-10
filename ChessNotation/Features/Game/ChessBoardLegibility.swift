@@ -75,16 +75,7 @@ struct ChessBoardLegibilityContract: Equatable, Sendable {
 
 enum ChessPiecePresentationMetrics {
     static func imageScale(for kind: ChessPiece.Kind) -> CGFloat {
-        switch kind {
-        case .pawn:
-            return 1.18
-        case .knight, .bishop, .rook:
-            return 1.08
-        case .queen:
-            return 1.06
-        case .king:
-            return 1.04
-        }
+        1
     }
 
     static func contourRadius(for squareSize: CGFloat) -> CGFloat {
