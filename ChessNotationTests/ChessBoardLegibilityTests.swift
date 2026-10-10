@@ -25,14 +25,9 @@ struct ChessBoardLegibilityTests {
     }
 
     @Test
-    func sharedPieceScalePrioritizesSmallMobilePiecesWithoutOversizingMajorPieces() {
-        #expect(ChessPiecePresentationMetrics.imageScale(for: .pawn) >= 1.15)
-        #expect(ChessPiecePresentationMetrics.imageScale(for: .pawn) <= 1.20)
-
-        for kind in [ChessPiece.Kind.knight, .bishop, .rook, .queen, .king] {
-            let scale = ChessPiecePresentationMetrics.imageScale(for: kind)
-            #expect(scale >= 1.04)
-            #expect(scale <= 1.10)
+    func normalizedArtworkUsesOneSharedMobilePresentationScale() {
+        for kind in [ChessPiece.Kind.pawn, .knight, .bishop, .rook, .queen, .king] {
+            #expect(ChessPiecePresentationMetrics.imageScale(for: kind) == 1)
         }
     }
 
