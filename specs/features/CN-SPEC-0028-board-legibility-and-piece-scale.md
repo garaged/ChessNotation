@@ -59,6 +59,7 @@ Out of scope:
 
 - `docs/board-legibility-redesign-plan.md`: CN-SPEC-0028-AC001, CN-SPEC-0028-AC002, CN-SPEC-0028-AC003, CN-SPEC-0028-AC004, CN-SPEC-0028-AC005, CN-SPEC-0028-AC006, CN-SPEC-0028-AC007, CN-SPEC-0028-AC008, CN-SPEC-0028-AC009
 - `ChessNotationTests/ChessBoardLegibilityTests.swift`: CN-SPEC-0028-AC001, CN-SPEC-0028-AC005, CN-SPEC-0028-AC006
+- `ChessNotationTests/ChessPieceRenderedMatrixTests.swift`: rendered contact sheets for manual inspection of all piece/theme/square combinations; these do not establish FR003's numerical contrast.
 - `ChessNotationTests/ChessPieceAssetAuditTests.swift`: CN-SPEC-0028-AC002, CN-SPEC-0028-AC003, CN-SPEC-0028-AC006
 - `ChessNotation/Features/Game/ChessBoardLegibility.swift`: CN-SPEC-0028-AC001, CN-SPEC-0028-AC003, CN-SPEC-0028-AC005, CN-SPEC-0028-AC006, CN-SPEC-0028-AC007
 - `ChessNotation/Features/Game/ChessTheme.swift`: CN-SPEC-0028-AC001, CN-SPEC-0028-AC003, CN-SPEC-0028-AC007
