@@ -307,26 +307,38 @@ struct ChessPieceGraphic: View {
     let palette: ChessVisualPalette
     let squareSize: CGFloat
 
+    private let offsets: [(CGFloat, CGFloat)] = [
+        (-1, 0), (1, 0), (0, -1), (0, 1),
+        (-0.707, -0.707), (0.707, -0.707),
+        (-0.707, 0.707), (0.707, 0.707)
+    ]
+
     var body: some View {
         let piecePalette = palette.piecePalette(for: piece.side)
+        let radius = ChessPiecePresentationMetrics.contourRadius(for: squareSize)
 
-        Image(piece.imageName)
-            .resizable()
-            .scaledToFit()
-            .scaleEffect(ChessPiecePresentationMetrics.imageScale(for: piece.kind))
-            .shadow(
-                color: piecePalette.stroke.opacity(0.92),
-                radius: ChessPiecePresentationMetrics.contourRadius(for: squareSize),
-                x: 0,
-                y: 0
-            )
-            .shadow(
-                color: piecePalette.shadow,
-                radius: ChessPiecePresentationMetrics.shadowRadius(for: squareSize),
-                x: 0,
-                y: max(0.8, squareSize * 0.025)
-            )
-            .accessibilityHidden(true)
+        ZStack {
+            ForEach(offsets.indices, id: \.self) { index in
+                Image(piece.imageName)
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(piecePalette.stroke)
+                    .scaleEffect(ChessPiecePresentationMetrics.imageScale(for: piece.kind))
+                    .offset(x: offsets[index].0 * radius, y: offsets[index].1 * radius)
+            }
+            Image(piece.imageName)
+                .resizable()
+                .scaledToFit()
+                .scaleEffect(ChessPiecePresentationMetrics.imageScale(for: piece.kind))
+        }
+        .shadow(
+            color: piecePalette.shadow,
+            radius: ChessPiecePresentationMetrics.shadowRadius(for: squareSize),
+            x: 0,
+            y: max(0.8, squareSize * 0.025)
+        )
+        .accessibilityHidden(true)
     }
 }
 
