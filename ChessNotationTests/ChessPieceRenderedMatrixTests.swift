@@ -81,6 +81,11 @@ private struct PieceMatrix: View {
     private let sides: [ChessSide] = [.white, .black]
     private let squareSize: CGFloat = 36
 
+    init(palette: ChessVisualPalette, showsPieces: Bool) {
+        self.palette = palette
+        self.showsPieces = showsPieces
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             ForEach(0..<2, id: \.self) { sideIndex in
@@ -91,10 +96,10 @@ private struct PieceMatrix: View {
                                 Rectangle().fill(palette.squareStyle(isLight: squareIndex == 0))
                                 if showsPieces {
                                     ChessPieceGraphic(
-                                    piece: ChessPiece(kind: kinds[kindIndex], side: sides[sideIndex]),
-                                    palette: palette,
-                                    squareSize: squareSize
-                                )
+                                        piece: ChessPiece(kind: kinds[kindIndex], side: sides[sideIndex]),
+                                        palette: palette,
+                                        squareSize: squareSize
+                                    )
                                     .frame(width: squareSize, height: squareSize)
                                 }
                             }
