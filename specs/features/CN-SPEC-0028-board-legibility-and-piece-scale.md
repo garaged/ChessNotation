@@ -55,6 +55,8 @@ Out of scope:
 
 ## Coverage
 
+**Evidence status:** The token tests establish contrast for idealized color values only. They do not measure the actual PNG edge, translucent shadow, compositing, overlays, or rendered pixels. FR003 and the rendered portions of AC001 remain unverified until boundary contrast is measured on representative rendered pieces against both square colors in all themes. The alpha-footprint audit and device matrix must also pass on the final commit; references below identify coverage locations, not proof of a passing result.
+
 - `docs/board-legibility-redesign-plan.md`: CN-SPEC-0028-AC001, CN-SPEC-0028-AC002, CN-SPEC-0028-AC003, CN-SPEC-0028-AC004, CN-SPEC-0028-AC005, CN-SPEC-0028-AC006, CN-SPEC-0028-AC007, CN-SPEC-0028-AC008, CN-SPEC-0028-AC009
 - `ChessNotationTests/ChessBoardLegibilityTests.swift`: CN-SPEC-0028-AC001, CN-SPEC-0028-AC005, CN-SPEC-0028-AC006
 - `ChessNotationTests/ChessPieceAssetAuditTests.swift`: CN-SPEC-0028-AC002, CN-SPEC-0028-AC003, CN-SPEC-0028-AC006
