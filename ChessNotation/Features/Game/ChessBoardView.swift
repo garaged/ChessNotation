@@ -307,7 +307,7 @@ struct ChessPieceGraphic: View {
     let palette: ChessVisualPalette
     let squareSize: CGFloat
 
-    private let offsets: [(CGFloat, CGFloat)] = [
+    private static let offsets: [(CGFloat, CGFloat)] = [
         (-1, 0), (1, 0), (0, -1), (0, 1),
         (-0.707, -0.707), (0.707, -0.707),
         (-0.707, 0.707), (0.707, 0.707)
@@ -318,14 +318,14 @@ struct ChessPieceGraphic: View {
         let radius = ChessPiecePresentationMetrics.contourRadius(for: squareSize)
 
         ZStack {
-            ForEach(offsets.indices, id: \.self) { index in
+            ForEach(Self.offsets.indices, id: \.self) { index in
                 Image(piece.imageName)
                     .renderingMode(.template)
                     .resizable()
                     .scaledToFit()
                     .foregroundStyle(piecePalette.stroke)
                     .scaleEffect(ChessPiecePresentationMetrics.imageScale(for: piece.kind))
-                    .offset(x: offsets[index].0 * radius, y: offsets[index].1 * radius)
+                    .offset(x: Self.offsets[index].0 * radius, y: Self.offsets[index].1 * radius)
             }
             Image(piece.imageName)
                 .resizable()
