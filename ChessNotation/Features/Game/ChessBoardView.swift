@@ -68,6 +68,9 @@ struct ChessBoardView: View {
                     RoundedRectangle(cornerRadius: 14)
                         .stroke(palette.boardBorder, lineWidth: 1.2)
                 )
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel("Chess board")
+                .accessibilityIdentifier("game.chessBoard")
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
@@ -294,21 +297,48 @@ private struct PieceView: View {
     let palette: ChessVisualPalette
 
     var body: some View {
-        ChessPieceGraphic(piece: piece)
-        .frame(width: squareSize * piece.scale, height: squareSize * piece.scale)
-        .shadow(color: palette.piecePalette(for: piece.side).shadow, radius: 1.4, x: 0, y: 1)
-        .padding(squareSize * 0.03)
+        ChessPieceGraphic(piece: piece, palette: palette, squareSize: squareSize)
+            .frame(width: squareSize, height: squareSize)
     }
 }
 
 struct ChessPieceGraphic: View {
     let piece: ChessPiece
+    let palette: ChessVisualPalette
+    let squareSize: CGFloat
+
+    private static let offsets: [(CGFloat, CGFloat)] = [
+        (-1, 0), (1, 0), (0, -1), (0, 1),
+        (-0.707, -0.707), (0.707, -0.707),
+        (-0.707, 0.707), (0.707, 0.707)
+    ]
 
     var body: some View {
-        Image(piece.imageName)
-            .resizable()
-            .scaledToFit()
-        .aspectRatio(1, contentMode: .fit)
+        let piecePalette = palette.piecePalette(for: piece.side)
+        let radius = ChessPiecePresentationMetrics.contourRadius(for: squareSize)
+
+        ZStack {
+            ForEach(Self.offsets.indices, id: \.self) { index in
+                Image(piece.imageName)
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(piecePalette.stroke)
+                    .scaleEffect(ChessPiecePresentationMetrics.imageScale(for: piece.kind))
+                    .offset(x: Self.offsets[index].0 * radius, y: Self.offsets[index].1 * radius)
+            }
+            Image(piece.imageName)
+                .resizable()
+                .scaledToFit()
+                .scaleEffect(ChessPiecePresentationMetrics.imageScale(for: piece.kind))
+        }
+        .shadow(
+            color: piecePalette.shadow,
+            radius: ChessPiecePresentationMetrics.shadowRadius(for: squareSize),
+            x: 0,
+            y: max(0.8, squareSize * 0.025)
+        )
+        .accessibilityHidden(true)
     }
 }
 

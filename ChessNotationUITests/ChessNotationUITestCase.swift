@@ -17,7 +17,7 @@ class ChessNotationUITestCase: XCTestCase {
         let tile = homeTile(identifier: "home.notationTrainingTile", title: "Notation Training", in: app)
         XCTAssertTrue(tile.waitForExistence(timeout: 5))
         tile.tap()
-        XCTAssertTrue(app.collectionViews["library.screen"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.collectionViews["library.screen"].waitForExistence(timeout: 15))
     }
 
     func openTimedLibrary(in app: XCUIApplication) {

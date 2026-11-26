@@ -87,6 +87,7 @@ enum GameThumbnailGenerator {
 }
 
 struct GameThumbnailView: View {
+    @Environment(AppSettings.self) private var appSettings
     let game: NotationGame
     let preview: GameThumbnailPreview
 
@@ -104,11 +105,14 @@ struct GameThumbnailView: View {
                     ForEach(preview.squares) { square in
                         ZStack {
                             Rectangle()
-                                .fill(square.isLight ? lightSquare : darkSquare)
+                                .fill(appSettings.visualTheme.palette.squareStyle(isLight: square.isLight))
                             if let piece = square.piece {
-                                ChessPieceGraphic(piece: piece)
-                                    .frame(width: squareSize * piece.scale, height: squareSize * piece.scale)
-                                    .shadow(color: .black.opacity(0.22), radius: 0.6, x: 0, y: 0.5)
+                                ChessPieceGraphic(
+                                    piece: piece,
+                                    palette: appSettings.visualTheme.palette,
+                                    squareSize: squareSize
+                                )
+                                .frame(width: squareSize, height: squareSize)
                             }
                         }
                         .frame(width: squareSize, height: squareSize)
@@ -129,6 +133,4 @@ struct GameThumbnailView: View {
         .accessibilityIdentifier("library.thumbnail.\(game.id)")
     }
 
-    private var lightSquare: Color { Color(red: 0.78, green: 0.64, blue: 0.43) }
-    private var darkSquare: Color { Color(red: 0.34, green: 0.22, blue: 0.13) }
 }

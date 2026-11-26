@@ -222,12 +222,11 @@ private struct ThemePreview: View {
                                 .overlay {
                                     if let piece = pieces.first(where: { $0.2 == file && $0.3 == rank }) {
                                         ChessPieceGraphic(
-                                            piece: ChessPiece(kind: piece.0, side: piece.1)
+                                            piece: ChessPiece(kind: piece.0, side: piece.1),
+                                            palette: theme.palette,
+                                            squareSize: squareSize
                                         )
-                                        .frame(
-                                            width: squareSize * previewScale(for: piece.0),
-                                            height: squareSize * previewScale(for: piece.0)
-                                        )
+                                        .frame(width: squareSize, height: squareSize)
                                     }
                                 }
                                 .frame(width: squareSize, height: squareSize)
@@ -255,16 +254,6 @@ private struct ThemePreview: View {
         }
     }
 
-    private func previewScale(for kind: ChessPiece.Kind) -> CGFloat {
-        switch kind {
-        case .king: return 0.86
-        case .queen: return 0.84
-        case .rook: return 0.86
-        case .bishop: return 0.86
-        case .knight: return 0.84
-        case .pawn: return 0.7
-        }
-    }
 }
 
 private struct ThemePreviewTexture: View {

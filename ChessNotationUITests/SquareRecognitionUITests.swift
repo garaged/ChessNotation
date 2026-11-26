@@ -4,7 +4,11 @@ final class SquareRecognitionUITests: ChessNotationUITestCase {
     func testSquareRecognitionSetupAndCorrectTapFlow() throws {
         let app = makeApp(arguments: ["UITEST_SAMPLE_LIBRARY"])
 
-        let squareRecognitionLink = scrollToHomeTile(identifier: "home.squareRecognitionLink", title: "Square Recognition", in: app)
+        let boardSkills = scrollToHomeTile(identifier: "home.boardSkillsLink", title: "Board Skills", in: app)
+        XCTAssertTrue(boardSkills.waitForExistence(timeout: 5))
+        boardSkills.tap()
+
+        let squareRecognitionLink = app.buttons["home.squareRecognitionLink"]
         XCTAssertTrue(squareRecognitionLink.waitForExistence(timeout: 5))
         XCTAssertTrue(squareRecognitionLink.isHittable)
         squareRecognitionLink.tap()
